@@ -53,6 +53,34 @@ class Runtime:
         self.update = {}
         self.manifest = None
         self.on_exit = lambda: None
+        self.browser_sessions = {}
+        self.browser_seen = False
+        self.browser_required = False
+        self.browser_started = time.monotonic()
+
+    def browser_open(self, now=None):
+        token = uuid.uuid4().hex
+        with self.lock:
+            self.browser_sessions[token] = dict(last=time.monotonic() if now is None else now, leaving=False)
+            self.browser_seen = True
+        return token
+
+    def browser_ping(self, token, leaving=False, now=None):
+        with self.lock:
+            if token not in self.browser_sessions:
+                raise ValueError('Unknown browser session')
+            self.browser_sessions[token] = dict(last=time.monotonic() if now is None else now, leaving=leaving)
+
+    def browser_exit_due(self, now=None):
+        now = time.monotonic() if now is None else now
+        with self.lock:
+            for token, session in list(self.browser_sessions.items()):
+                if now-session['last'] >= (8 if session['leaving'] else 120):
+                    del self.browser_sessions[token]
+            if self.busy and self.job_kind in ('firmware', 'program'):
+                return False
+            return (self.browser_seen and not self.browser_sessions) or (
+                self.browser_required and not self.browser_seen and now-self.browser_started >= 90)
 
     def safe_event(self, cap, kind, **values):
         try:
@@ -397,7 +425,11 @@ class Handler(BaseHTTPRequestHandler):
             self.answer(dict(ok=False, error=str(exc)), 400)
 
     def do_POST(self):
-        if not self.trusted_host() or self.headers.get('X-Reader-UI') != '1':
+        route = urlparse(self.path).path
+        leave = route == '/api/session/leave'
+        origins = (f'http://127.0.0.1:{self.server.server_port}', f'http://localhost:{self.server.server_port}')
+        if not self.trusted_host() or (self.headers.get('X-Reader-UI') != '1' and not (
+                leave and self.headers.get('Origin') in origins)):
             return self.answer(dict(ok=False, error='Invalid request origin'), 403)
         try:
             size = int(self.headers.get('Content-Length', '0'))
@@ -406,7 +438,12 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(size))
             if not isinstance(body, dict):
                 raise ValueError('Expected JSON object')
-            route, r = urlparse(self.path).path, self.runtime
+            r = self.runtime
+            if route == '/api/session/open':
+                return self.answer(dict(ok=True, session=r.browser_open()))
+            if route in ('/api/session/ping', '/api/session/leave'):
+                r.browser_ping(body.get('session'), leaving=leave)
+                return self.answer(dict(ok=True))
             if r.busy and r.job_kind != 'check' and route in ('/api/connect', '/api/disconnect', '/api/command', '/api/exit'):
                 raise ValueError('Дождитесь завершения обновления')
             if route == '/api/connect':
@@ -469,6 +506,17 @@ def main():
     Handler.runtime = runtime
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     runtime.on_exit = server.shutdown
+    runtime.browser_required = not args.no_browser
+    lifecycle_stop = threading.Event()
+    def watch_browser():
+        while not lifecycle_stop.wait(0.5):
+            if runtime.browser_exit_due():
+                try:
+                    runtime.disconnect()
+                finally:
+                    server.shutdown()
+                return
+    threading.Thread(target=watch_browser, name='Browser lifetime', daemon=True).start()
     url = f'http://127.0.0.1:{server.server_port}/'
     instances = DATA / 'instances'
     instances.mkdir(exist_ok=True)
@@ -485,6 +533,7 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        lifecycle_stop.set()
         runtime.disconnect()
         server.server_close()
         instance_file.unlink(missing_ok=True)

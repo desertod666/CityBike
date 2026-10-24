@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <ctype.h>
+#include <stdarg.h>
+#include <stdatomic.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -12,11 +14,12 @@
 #include "esp_timer.h"
 #include "esp_system.h"
 #include "esp_random.h"
+#include "esp_log.h"
 #include "freertos/semphr.h"
 #include "reader.h"
 #include "web_server.h"
 
-#define VERSION "0.2.1"
+#define VERSION "0.2.2"
 #define FRAME_QUEUE_LEN 256
 #define LINE_SIZE 1400
 #ifndef READER_LED_ACTIVE_LEVEL
@@ -25,6 +28,7 @@
 
 typedef struct { char text[80]; uint32_t token; } command_t;
 typedef struct { char text[LINE_SIZE]; } reply_t;
+typedef struct { char text[192]; bool truncated; } log_line_t;
 typedef struct { uint32_t token; char error[120]; } rpc_reply_t;
 typedef struct {
     bool running;
@@ -36,6 +40,8 @@ typedef struct {
     int led_override;
 } stats_t;
 static QueueHandle_t frames, commands, replies;
+static QueueHandle_t sdk_logs;
+static atomic_uint sdk_log_drops, sdk_log_truncated;
 static QueueHandle_t rpc_replies;
 static SemaphoreHandle_t rpc_mutex;
 static frame_t preview[FRAME_QUEUE_LEN];
@@ -51,6 +57,28 @@ static uint64_t base_missed, base_overruns, base_bus, base_arb, base_failed;
 #define UNLOCK() portEXIT_CRITICAL(&lock)
 
 static void fault(void) { stats.error_until = esp_timer_get_time() + 3000000; }
+
+// ESP-IDF must never write directly to USB alongside the framed data writer.
+static int serial_sdk_log(const char *format, va_list arguments) {
+    log_line_t line;
+    int length = vsnprintf(line.text, sizeof(line.text), format, arguments);
+    line.truncated = length >= (int)sizeof(line.text);
+    if (line.truncated) atomic_fetch_add(&sdk_log_truncated, 1);
+    if (xQueueSend(sdk_logs, &line, 0) != pdTRUE) atomic_fetch_add(&sdk_log_drops, 1);
+    return length;
+}
+
+static void sdk_log_json(const log_line_t *line, char *output, size_t capacity) {
+    const char *prefix = "{\"type\":\"log\",\"message\":\"";
+    size_t used = strlen(prefix);
+    memcpy(output, prefix, used);
+    for (const unsigned char *p = (const unsigned char *)line->text; *p && used + 48 < capacity; p++) {
+        if (*p == '"' || *p == '\\') { output[used++] = '\\'; output[used++] = *p; }
+        else if (*p < 32) { used += snprintf(output + used, capacity - used, "\\u%04x", *p); }
+        else output[used++] = *p;
+    }
+    snprintf(output + used, capacity - used, "\",\"truncated\":%s}\n", line->truncated ? "true" : "false");
+}
 
 static void queue_reply(const reply_t *r) {
     if (xQueueSend(replies, r, 0) != pdTRUE) {
@@ -95,7 +123,8 @@ void reader_status_json(char *buffer, size_t capacity) {
         "\"usb_connected\":%s,\"tx_gpio\":4,\"rx_gpio\":5,\"led_gpio\":8,\"led_active_level\":%d,\"led_override\":%d,"
         "\"can_stack_free\":%u,\"usb_stack_free\":%u,\"heap_free\":%u,"
         "\"ssid\":\"%s\",\"ip\":\"192.168.4.1\",\"wifi_channel\":%d,\"wifi_clients\":%d,\"wifi_ready\":%s,"
-        "\"ap_mac\":\"%s\",\"saved_ssid\":\"%s\",\"saved_wifi_channel\":%d}\n",
+        "\"ap_mac\":\"%s\",\"saved_ssid\":\"%s\",\"saved_wifi_channel\":%d,"
+        "\"sdk_log_drops\":%u,\"sdk_log_truncated\":%u}\n",
         VERSION, boot_id, reset_reason, esp_timer_get_time(), s.running ? "running" : "stopped", s.bitrate, s.epoch,
         s.received, s.queue_drops, s.usb_drops, s.control_drops, s.command_drops, s.stop_drops,
         s.missed, s.overruns, s.bus_errors, s.arb_lost, s.tx_failed, s.rec, s.tec, s.state, s.rx_pending,
@@ -104,7 +133,8 @@ void reader_status_json(char *buffer, size_t capacity) {
         can_handle ? (unsigned)uxTaskGetStackHighWaterMark(can_handle) : 0,
         usb_handle ? (unsigned)uxTaskGetStackHighWaterMark(usb_handle) : 0,
         (unsigned)esp_get_free_heap_size(), net.ssid, net.channel, net.clients, net.ready ? "true" : "false",
-        net.mac, net.saved_ssid, net.saved_channel);
+        net.mac, net.saved_ssid, net.saved_channel,
+        (unsigned)atomic_load(&sdk_log_drops), (unsigned)atomic_load(&sdk_log_truncated));
 }
 
 static void status_reply(void) {
@@ -310,6 +340,11 @@ static void usb_task(void *arg) {
             while (!(ok = write_line(r.text)) && esp_timer_get_time() < deadline) vTaskDelay(1);
             if (!ok) { LOCK(); stats.control_drops++; fault(); UNLOCK(); }
         }
+        log_line_t log;
+        if (xQueueReceive(sdk_logs, &log, 0) == pdTRUE) {
+            sdk_log_json(&log, r.text, sizeof(r.text));
+            if (!write_line(r.text)) atomic_fetch_add(&sdk_log_drops, 1);
+        }
         for (int i = 0; i < 32; i++) {
             frame_t f;
             if (xQueueReceive(frames, &f, 0) != pdTRUE) break;
@@ -343,10 +378,13 @@ void app_main(void) {
     gpio_reset_pin(GPIO_NUM_4); gpio_set_level(GPIO_NUM_4, 1); gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
     frames = xQueueCreate(FRAME_QUEUE_LEN, sizeof(frame_t));
     commands = xQueueCreate(8, sizeof(command_t)); replies = xQueueCreate(8, sizeof(reply_t));
+    sdk_logs = xQueueCreate(8, sizeof(log_line_t));
     rpc_replies = xQueueCreate(1, sizeof(rpc_reply_t)); rpc_mutex = xSemaphoreCreateMutex();
-    assert(frames && commands && replies && rpc_replies && rpc_mutex);
+    assert(frames && commands && replies && rpc_replies && rpc_mutex && sdk_logs);
     usb_serial_jtag_driver_config_t usb = {.tx_buffer_size = 8192, .rx_buffer_size = 512};
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&usb));
+    usb_serial_jtag_write_bytes("\n", 1, 0); // Terminate any partial ROM boot line.
+    esp_log_set_vprintf(serial_sdk_log);
     ESP_ERROR_CHECK(web_config_init());
     esp_err_t network_result = web_start();
     if (network_result != ESP_OK) reply("{\"type\":\"error\",\"message\":\"Wi-Fi unavailable; USB remains available\"}\n");

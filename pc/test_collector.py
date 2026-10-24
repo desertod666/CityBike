@@ -9,6 +9,18 @@ from collector import Capture
 
 
 class StreamTests(unittest.TestCase):
+    def test_old_sdk_prefix_recovers_status_and_preserves_wire(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'capture'
+            c=Capture(folder)
+            wire=b'W synthetic truncated SDK log{"type":"status","product":"BafangReader","protocol":1,"boot":"synthetic","can":"stopped"}\n'
+            messages=c.feed(wire)
+            self.assertEqual(messages[0]['product'],'BafangReader')
+            self.assertEqual(c.resyncs,1)
+            c.close()
+            self.assertEqual((folder/'wire.bin').read_bytes(),wire)
+            events=[json.loads(x) for x in (folder/'capture.jsonl').read_text(encoding='utf-8').splitlines()]
+            self.assertTrue(any(x['type']=='transport_resync' for x in events))
     def test_disk_full_still_closes_all_capture_files(self):
         class FullDisk(io.StringIO):
             def write(self, value):

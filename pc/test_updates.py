@@ -17,6 +17,26 @@ def manifest():
 
 
 class UpdateTests(unittest.TestCase):
+    def test_last_browser_close_reload_and_firmware_deferral(self):
+        r=Runtime('unused')
+        self.assertFalse(r.browser_exit_due(now=1000))
+        first=r.browser_open(now=1000)
+        r.browser_ping(first,leaving=True,now=1001)
+        second=r.browser_open(now=1004) # Reload registers before old grace ends.
+        self.assertFalse(r.browser_exit_due(now=1010))
+        r.browser_ping(second,leaving=True,now=1011)
+        self.assertFalse(r.browser_exit_due(now=1018))
+        r.busy=True;r.job_kind='firmware'
+        self.assertFalse(r.browser_exit_due(now=1020))
+        r.busy=False
+        self.assertTrue(r.browser_exit_due(now=1020))
+
+    def test_browser_crash_has_heartbeat_timeout(self):
+        r=Runtime('unused')
+        token=r.browser_open(now=50)
+        r.browser_ping(token,now=100)
+        self.assertFalse(r.browser_exit_due(now=219))
+        self.assertTrue(r.browser_exit_due(now=220))
     def test_versions_and_release_boundaries(self):
         self.assertGreater(version_tuple('0.10.0'), version_tuple('0.2.0'))
         self.assertEqual(validate_manifest(manifest())['version'], '0.2.0')

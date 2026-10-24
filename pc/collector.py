@@ -58,6 +58,7 @@ class Capture:
         self.session = ''
         self.buf = bytearray()
         self.frames = self.invalid = self.gaps = self.resets = 0
+        self.resyncs = 0
         self.last_boot = self.last_us = self.last_seq = None
         self.last_status = None
         self.event('metadata', sym_sha256=self.decoder.sha256,
@@ -98,8 +99,20 @@ class Capture:
             if not isinstance(msg, dict):
                 raise ValueError('JSON is not an object')
         except (ValueError, TypeError):
-            self.event('service_log', raw=raw, raw_hex=line.hex())
-            return None
+            # Older firmware may prepend a truncated SDK log to a complete JSON
+            # record. Keep original bytes/text and recover only a valid suffix.
+            start = raw.find('{"type":')
+            try:
+                if start <= 0:
+                    raise ValueError('No framed suffix')
+                msg = json.loads(raw[start:])
+                if not isinstance(msg, dict) or msg.get('type') not in ('status','hello','help','error','frame','log'):
+                    raise ValueError('Not a protocol record')
+                self.resyncs += 1
+                self.event('transport_resync', raw_prefix=raw[:start], recovered_type=msg['type'])
+            except (ValueError, TypeError):
+                self.event('service_log', raw=raw, raw_hex=line.hex())
+                return None
         boot = msg.get('boot')
         us = msg.get('t_us', msg.get('uptime_us'))
         if boot and self.last_boot and boot != self.last_boot:
@@ -149,7 +162,8 @@ class Capture:
         try:
             if self.buf:
                 self.event('partial_line', raw_hex=self.buf.hex())
-            self.event('summary', frames=self.frames, invalid=self.invalid, sequence_gaps=self.gaps, resets=self.resets)
+            self.event('summary', frames=self.frames, invalid=self.invalid, sequence_gaps=self.gaps, resets=self.resets,
+                       transport_resyncs=getattr(self,'resyncs',0))
             self.flush()
         except OSError as exc:
             error = exc

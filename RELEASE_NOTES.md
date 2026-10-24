@@ -1,5 +1,8 @@
-BafangReader 0.2.1 improves the first Wi-Fi and Windows release.
+BafangReader 0.2.2 improves the first Wi-Fi and Windows release.
 
+- Closing the last desktop dashboard tab stops CAN, closes logs and exits the process after a reload grace period. A heartbeat timeout handles browser crashes; firmware writes finish before exit.
+- ESP-IDF service logs use bounded typed JSON messages through the single USB writer; they cannot interleave with CAN/STATUS records.
+- Capture recovers a valid framed JSON suffix after a truncated legacy service-log prefix while preserving original wire bytes and a resync event.
 - Scan lists every COM port without opening devices. One native ESP32 USB candidate is selected automatically; multiple ESP32 devices require a manual choice. Other ports remain informational.
 - Capture files and the serial port are closed even if writing a log fails (for example, a full disk).
 - Includes the verified DHCP fix for the open ESP32 Wi-Fi access point.
