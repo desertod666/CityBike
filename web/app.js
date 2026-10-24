@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id), number=new Intl.NumberFormat('ru-RU');
-let state=null,schema=null,cursor=0,boot=null,frames=[],marks=[],previewMissed=0,paused=false,lastRate=null,rates=Array(30).fill(0),stateBusy=false,framesBusy=false,sessionToken=null,sessionPending=false;
+let state=null,schema=null,cursor=0,boot=null,frames=[],marks=[],previewMissed=0,paused=false,lastRate=null,rates=Array(30).fill(0),stateBusy=false,framesBusy=false,sessionToken=null,sessionPending=false,lastScanSelection=null;
 const text=(id,value)=>{const e=$(id);if(e)e.textContent=value;};
 function toast(message,error=false){const e=$('toast');e.textContent=message;e.classList.toggle('error',error);e.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>e.classList.remove('show'),5000);}
 async function api(path,data){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);try{const r=await fetch(path,{method:data===undefined?'GET':'POST',headers:data===undefined?{}:{'Content-Type':'application/json','X-Reader-UI':'1'},body:data===undefined?undefined:JSON.stringify(data),cache:'no-store',signal:controller.signal});if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();if(j.ok===false)throw Error(j.error||'Операция не выполнена');return j;}finally{clearTimeout(timer);}}
@@ -22,8 +22,9 @@ const now=performance.now();if(lastRate&&lastRate.boot===d.boot&&d.received>=las
 text('ssid',n.ssid||d.ssid||'—');text('mac',n.mac||'—');text('wifiClients',`${n.channel||d.wifi_channel||'—'} / ${n.clients??d.wifi_clients??0}`);text('ledLevel',d.led_active_level===1?'HIGH':'LOW');
 if(document.activeElement!==$('ssidInput')&&!$('ssidInput').dataset.edited)$('ssidInput').value=n.saved_ssid||n.ssid||d.ssid||'';if(document.activeElement!==$('channelSelect')&&!$('channelSelect').dataset.edited)$('channelSelect').value=n.saved_channel||n.channel||d.wifi_channel||6;if(!$('ledPolarity').dataset.edited)$('ledPolarity').value=d.led_active_level||0;
 if(running&&d.bitrate)$('bitrate').value=String(d.bitrate);$('bitrate').disabled=!connected||running;$('startButton').disabled=!connected||running||!$('bitrate').value||!!c.updating;$('stopButton').disabled=!connected||!running;$('saveWifi').disabled=!connected||running;$('saveLed').disabled=!connected||running;text('connectButton',connected?'Отключить':'Подключить');$('connectButton').disabled=!!c.updating;
-if(a.download_url)$('downloadLink').href=a.download_url;if(a.release_url)$('releaseLink').href=a.release_url;text('appVersion','v'+(a.version||'0.2.2'));text('footerVersion',a.version||'0.2.2');text('sideVersion','v'+(a.version||'0.2.2'));text('fwUpdateVersion',d.version?'v'+d.version:'Не подключён');
+if(a.download_url)$('downloadLink').href=a.download_url;if(a.release_url)$('releaseLink').href=a.release_url;text('appVersion','v'+(a.version||'0.3.0'));text('footerVersion',a.version||'0.3.0');text('sideVersion','v'+(a.version||'0.3.0'));text('fwUpdateVersion',d.version?'v'+d.version:'Не подключён');
 if(desktop){text('storageText','Программа записывает каждый прочитанный USB-байт в wire.bin, события в capture.jsonl и все кадры в frames.csv. Фильтр таблицы меняет только экран.');text('logPath',c.log_path||'Подключите устройство для начала записи');text('logHint',connected?'Запись на диск активна':'Запись начнётся при подключении');const u=a.update||{};text('appUpdateText',u.error|| (u.available?'Доступна версия '+u.version:u.checked?'Установлена актуальная версия':'Проверка ещё не выполнена'));text('fwUpdateText',u.error||(!connected?'Подключите ридер по USB':u.firmware_available?'Доступна прошивка '+u.version:u.checked?'Установлена актуальная версия':'Нажмите «Проверить версии»'));$('updateApp').disabled=!u.available||!!a.busy;$('updateFirmware').disabled=!connected||!u.firmware_available||!!a.busy;text('updateProgress',a.progress||'Скачивание через HTTPS, проверка SHA-256. CAN останавливается перед прошивкой ESP32.');}
+renderRecording(s);
 const alert=$('connectionAlert');alert.classList.toggle('hidden',!c.error);alert.textContent=c.error||'';
 }
 async function refreshState(){if(stateBusy)return;stateBusy=true;try{renderState(await api('/api/state'));}catch(e){text('transportBadge','Нет связи');$('transportBadge').className='chip error';$('startButton').disabled=true;$('stopButton').disabled=true;text('heroText','Соединение с панелью потеряно. Проверьте USB или Wi-Fi и адрес страницы.');}finally{stateBusy=false;}}
@@ -35,7 +36,7 @@ document.querySelectorAll('.led-command').forEach(b=>b.addEventListener('click',
 for(const id of ['ssidInput','channelSelect','ledPolarity'])$(id).addEventListener('input',()=>$(id).dataset.edited='1');
 $('saveLed').addEventListener('click',async()=>{if(await command('LED ACTIVE '+($('ledPolarity').value==='1'?'HIGH':'LOW'))){delete $('ledPolarity').dataset.edited;toast('Полярность LED сохранена');}});
 $('saveWifi').addEventListener('click',async()=>{const ssid=$('ssidInput').value.trim();if(!/^[A-Za-z0-9 _-]{1,32}$/.test(ssid)){toast('SSID: 1–32 символа, латиница, цифры, пробел, - или _',true);return;}if(await command(`WIFI ${$('channelSelect').value} ${ssid}`))toast('Wi-Fi сохранён. Новая сеть появится после перезапуска питания.');});
-async function addMark(){const action=$('markInput').value.trim();if(!action)return;try{const r=await api('/api/mark',{action});marks.push({action,host_utc:new Date().toISOString(),t_us:r.t_us,boot});marks=marks.slice(-200);$('markInput').value='';$('marksList').replaceChildren();for(const m of marks.slice(-8).reverse()){const item=document.createElement('span'),time=document.createElement('time');item.className='mark-item';time.textContent=new Date(m.host_utc).toLocaleTimeString('ru-RU');item.append(time,document.createTextNode(m.action));$('marksList').append(item);}toast('Отметка добавлена');}catch(e){toast(e.message,true);}}
+async function addMark(){const action=$('markInput').value.trim();if(!action){toast('Опишите действие, например «включаю свет»',true);return;}try{const r=await api('/api/mark',{action,bitrate:Number($('bitrate').value)});marks.push({action,host_utc:new Date().toISOString(),t_us:r.t_us,boot});marks=marks.slice(-200);$('markInput').value='';$('marksList').replaceChildren();for(const m of marks.slice(-8).reverse()){const item=document.createElement('span'),time=document.createElement('time');item.className='mark-item';time.textContent=new Date(m.host_utc).toLocaleTimeString('ru-RU');item.append(time,document.createTextNode(m.action));$('marksList').append(item);}toast('Отметка добавлена');}catch(e){toast(e.message,true);}}
 $('markButton').addEventListener('click',addMark);$('markInput').addEventListener('keydown',e=>{if(e.key==='Enter')addMark();});$('frameFilter').addEventListener('input',renderFrames);$('pauseView').addEventListener('click',()=>{paused=!paused;text('pauseView',paused?'Продолжить экран':'Пауза экрана');if(!paused)renderFrames();});
 $('exportPreview').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({notice:'Bounded browser preview, not a complete CAN log. SYM compatibility unconfirmed.',exported_utc:new Date().toISOString(),state,preview_missed:previewMissed,frames,marks},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BafangReader-preview-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
 async function refreshPorts(silent=false){try{const result=await api('/api/ports'),select=$('portSelect'),previous=select.value,candidates=result.ports.filter(p=>p.compatible);select.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=candidates.length===0?'ESP32 USB не найдена':candidates.length>1?'Несколько ESP32 — выберите ридер':'Выберите ридер';select.append(placeholder);for(const p of result.ports){const o=document.createElement('option');o.value=p.port;o.disabled=!p.compatible;o.textContent=`${p.port} · ${p.description}${p.compatible?' · ESP32 USB':' · другое устройство'}`;select.append(o);}if(candidates.some(p=>p.port===previous))select.value=previous;else if(candidates.length===1)select.value=candidates[0].port;if(!silent)toast(`Найдено портов: ${result.ports.length}; ESP32 USB: ${candidates.length}`);}catch(e){toast(e.message,true);}}
@@ -48,3 +49,35 @@ $('openLogs').addEventListener('click',async()=>{try{await api('/api/open-logs',
 setInterval(refreshState,1000);setInterval(refreshFrames,600);
 
 setInterval(()=>{if(state?.app?.desktop&&!state.connection?.connected&&!state.connection?.updating)refreshPorts(true);},4000);
+
+function renderRecording(s){
+ const a=s.app||{},d=s.device||{},c=s.connection||{},sharing=a.sharing||{},scan=a.scan||{};
+ if(!a.desktop)return;
+ const marked=sharing.mode==='marked',recording=!!a.recording;
+ if(document.activeElement!==$('captureMode'))$('captureMode').value=sharing.mode||'marked';
+ if(document.activeElement!==$('captureDuration'))$('captureDuration').value=String(sharing.duration||60);
+ $('captureMode').disabled=recording||d.can==='running'||!!a.busy;
+ $('captureDuration').disabled=recording||d.can==='running'||!!a.busy||!marked;
+ $('shareEnabled').checked=!!sharing.enabled;
+ $('startButton').classList.toggle('hidden',marked);
+ $('scanBitrate').disabled=!c.connected||recording||!!a.busy||d.can==='running';
+ $('cancelScan').classList.toggle('hidden',!scan.active);
+ $('markButton').disabled=!c.connected||!!a.busy||(marked&&!$('bitrate').value)||(!marked&&!recording);
+ text('recordingBadge',recording?(marked?'Запись · '+a.remaining+' с':'Непрерывная запись'):scan.active?'Поиск скорости…':'Ожидание записи');
+ $('recordingBadge').className='chip '+(recording?'running good':'muted');
+ text('recordMode',recording?'USB → диск ПК':'Ожидание записи');
+ text('heroText',scan.active?'Проверяются скорости по принятым кадрам. Поиск ничего не передаёт в CAN.':recording?'Записываются все прочитанные USB-байты и все CAN-кадры, включая неизвестные.':marked?'Запись начинается по кнопке «Добавить отметку». До её нажатия CAN остановлен.':'Выберите скорость и нажмите «Начать приём» для непрерывной записи.');
+ text('logHint',recording?'Запись на диск активна':'Сейчас запись не идёт');
+ text('recordingHelp',marked?'Выберите скорость, опишите действие и нажмите «Добавить отметку». Запись всех кадров завершится через '+(sharing.duration||60)+' секунд или кнопкой «Остановить». Новая отметка начинает отсчёт заново.':'«Начать приём» запускает запись всех кадров до остановки. Отметки добавляют время и описание действия в текущий лог.');
+ text('storageText','Каждая запись сохраняет все прочитанные USB-байты в wire.bin, события и отметки в capture.jsonl, все кадры в frames.csv. Фильтры экрана не изменяют лог. При включённой галочке завершённые записи автоматически отправляются; локальные файлы остаются.');
+ text('shareStatus',(!sharing.enabled?'Отправка выключена. Настройка запоминается на этом ПК.':!sharing.configured?'Отправка включена, но сервер для этого ПК ещё не настроен. Записи остаются в очереди.':sharing.active?'Отправка записи на сервер…':'Отправка включена. В очереди: '+sharing.pending+' · отправлено: '+sharing.sent+' · '+Number((sharing.sent_bytes||0)/1048576).toFixed(1)+' МиБ.')+(sharing.enabled&&sharing.error?' '+sharing.error:''));
+ if(scan.selected&&scan.selected!==lastScanSelection){$('bitrate').value=String(scan.selected);lastScanSelection=scan.selected;}
+ $('bitrate').disabled=!c.connected||d.can==='running'||!!scan.active;
+ text('scanResults',(scan.active?'Проверяется '+Number(scan.bitrate||0).toLocaleString('ru-RU')+' бит/с. Только listen-only.\n':scan.message?scan.message+'\n':'')+(scan.results||[]).map(x=>Number(x.bitrate).toLocaleString('ru-RU')+' бит/с: '+x.frames+' кадров · '+x.errors+' ошибок'+(x.candidate?' · кандидат':'')).join('\n'));
+}
+async function saveRecording(values){try{await api('/api/recording/settings',values);await refreshState();}catch(e){toast(e.message,true);await refreshState();}}
+$('captureMode').addEventListener('change',()=>saveRecording({mode:$('captureMode').value}));
+$('captureDuration').addEventListener('change',()=>saveRecording({duration:Number($('captureDuration').value)}));
+$('shareEnabled').addEventListener('change',()=>saveRecording({enabled:$('shareEnabled').checked}));
+$('scanBitrate').addEventListener('click',async()=>{try{lastScanSelection=null;await api('/api/bitrate/scan',{});await refreshState();}catch(e){toast(e.message,true);}});
+$('cancelScan').addEventListener('click',async()=>{try{await api('/api/bitrate/cancel',{});}catch(e){toast(e.message,true);}});

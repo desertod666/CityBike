@@ -1,0 +1,23 @@
+[Unit]
+Description=CityBike private CAN capture receiver
+After=network.target
+
+[Service]
+Type=simple
+User=citybike
+Group=citybike
+ExecStart=/usr/bin/python3 /opt/citybike/app/receiver.py --data /opt/citybike/data --clients /opt/citybike/config/clients.json --port 18841
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/citybike/data
+MemoryMax=192M
+CPUQuota=50%
+TasksMax=24
+
+[Install]
+WantedBy=multi-user.target

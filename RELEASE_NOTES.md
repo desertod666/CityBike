@@ -1,13 +1,9 @@
-BafangReader 0.2.2 improves the first Wi-Fi and Windows release.
+BafangReader 0.3.0 adds marked recording and bitrate search to the Windows application.
 
-- Closing the last desktop dashboard tab stops CAN, closes logs and exits the process after a reload grace period. A heartbeat timeout handles browser crashes; firmware writes finish before exit.
-- ESP-IDF service logs use bounded typed JSON messages through the single USB writer; they cannot interleave with CAN/STATUS records.
-- Capture recovers a valid framed JSON suffix after a truncated legacy service-log prefix while preserving original wire bytes and a resync event.
-- Scan lists every COM port without opening devices. One native ESP32 USB candidate is selected automatically; multiple ESP32 devices require a manual choice. Other ports remain informational.
-- Capture files and the serial port are closed even if writing a log fails (for example, a full disk).
-- Includes the verified DHCP fix for the open ESP32 Wi-Fi access point.
-- Adds offline Wi-Fi dashboard, Windows raw USB/CAN capture, action marks, GitHub version checks and SHA256-verified program/ESP32 USB updates.
+- Default recording starts with Add mark and stops CAN after 30/60 seconds or manual Stop. A new mark resets the timer; continuous recording remains selectable.
+- Persistent opt-in checkbox queues completed captures for automatic private HTTPS upload. Offline/restart resume, SHA-256, 2 MiB chunks, original local logs retained. Upload credentials and a permanent server endpoint must be provisioned separately; no shared secret ships in the executable.
+- Finite listen-only bitrate search shows frames/errors per speed, selects only one qualifying candidate and leaves CAN stopped. Silence produces no detection.
+- Includes a separate bounded private receiver for a Linux server; it exposes no log-reading endpoint.
+- Fixes desktop log information layout and keeps recording controls near the action marker.
 
-CAN starts stopped and supports listen-only only. No CAN transmission, Bafang parameter writes or Bafang firmware flashing. Actual bicycle bitrate and SYM compatibility are unconfirmed. Browser preview is bounded, and maximum CAN-load/disconnect testing remains pending.
-
-Unpack BafangReader-Windows-x64.zip and run BafangReader.exe. Capture needs no internet. Downloads/updates need internet. Before updating ESP32 firmware, disconnect CANH/CANL from the bicycle.
+Builds and synthetic tests pass; COM9 stand tests verify 30-second auto-stop, manual stop and no false detection on a disconnected bus. Real bicycle bitrate, reception under load and SYM compatibility remain unconfirmed. Automatic recording/upload features are Windows-only; the embedded Wi-Fi panel remains a bounded manual preview. No CAN transmission or Bafang settings/flashing.

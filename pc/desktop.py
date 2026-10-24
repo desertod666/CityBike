@@ -21,6 +21,8 @@ from serial.tools import list_ports
 import serial
 from collector import Capture, open_port, select_port, send
 from updates import VERSION, REPOSITORY, RELEASE_URL, DOWNLOAD_URL, fetch_manifest, version_tuple, download_asset, unpack_program, unpack_firmware
+from sharing import Sharing
+from bitrate_scan import scan
 
 ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[1]))
 WEB = ROOT / 'web'
@@ -33,7 +35,7 @@ def allowed_command(command):
 
 
 class Runtime:
-    def __init__(self, log_root):
+    def __init__(self, log_root, sharing=None):
         self.lock = threading.RLock()
         self.device = {}
         self.frames = deque(maxlen=512)
@@ -53,6 +55,11 @@ class Runtime:
         self.update = {}
         self.manifest = None
         self.on_exit = lambda: None
+        self.sharing = sharing
+        self.recording = False
+        self.recording_deadline = None
+        self.scan_cancel = threading.Event()
+        self.scan_state = dict(active=False, results=[], selected=None)
         self.browser_sessions = {}
         self.browser_seen = False
         self.browser_required = False
@@ -148,10 +155,40 @@ class Runtime:
         s = cap = None
         identified = False
         active_request = None
-        try:
+        folder = None
+        def settings():
+            return self.sharing.settings() if self.sharing else dict(mode='continuous', duration=60)
+        def begin_capture():
+            nonlocal cap, folder
+            if self.recording:
+                return
+            cap.close()
             folder = self.log_root / (datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6])
             cap = Capture(folder)
+            cap.new_session(reason='recording_started', port=self.port, usb_identity=self.identity)
             self.log_path = str(folder.resolve())
+            self.recording = True
+        def finish_capture(reason):
+            nonlocal cap, folder
+            if not self.recording:
+                return
+            cap.event('recording_finished', reason=reason)
+            summary = dict(schema=1, frames=cap.frames, invalid=cap.invalid, sequence_gaps=cap.gaps,
+                           device=self.device, reason=reason, version=VERSION)
+            previous = cap
+            cap = Capture(None)
+            self.recording = False
+            self.recording_deadline = None
+            previous.close()
+            (folder / 'completed.json').write_text(json.dumps(summary, ensure_ascii=False), encoding='utf-8')
+            if self.sharing:
+                try:
+                    self.sharing.enqueue(folder)
+                except Exception:
+                    logging.exception('Could not queue capture; local log is retained')
+            folder = None
+        try:
+            cap = Capture(None)
             s = open_port(self.port)
             cap.new_session(reason='desktop_connect', port=self.port, usb_identity=self.identity)
             send(s, cap, 'STATUS')
@@ -174,18 +211,43 @@ class Runtime:
                     kind, value, result, event = active_request
                     try:
                         if kind == 'mark':
-                            cap.event('mark', action=value)
+                            if settings()['mode'] == 'marked':
+                                rate = value['bitrate']
+                                if not allowed_command('START ' + str(rate)):
+                                    raise ValueError('Выберите скорость CAN перед записью')
+                                begin_capture()
+                                if self.device.get('can') != 'running':
+                                    send(s, cap, 'START ' + str(rate))
+                                    self.wait(s, cap, 'START ' + str(rate))
+                                self.recording_deadline = time.monotonic() + settings()['duration']
+                            elif not self.recording:
+                                raise ValueError('Сначала начните непрерывную запись')
+                            cap.event('mark', action=value['action'])
                             result.update(ok=True, t_us=None)
                         else:
+                            if value.startswith('START ') and not self.scan_state.get('active'):
+                                if settings()['mode'] == 'marked':
+                                    raise ValueError('Для записи нажмите «Добавить отметку»')
+                                begin_capture()
                             send(s, cap, value)
                             response = self.wait(s, cap, value)
+                            if value == 'STOP':
+                                finish_capture('stop_button')
                             result.update(ok=True, response=response)
                     except (ValueError, serial.SerialException) as e:
                         result.update(ok=False, error=str(e))
+                        if self.recording and self.recording_deadline is None and settings()['mode'] == 'marked':
+                            send(s, cap, 'STOP')
+                            self.wait(s, cap, 'STOP')
+                            finish_capture('start_failed')
                     finally:
                         event.set()
                         active_request = None
                 now = time.monotonic()
+                if self.recording_deadline is not None and now >= self.recording_deadline:
+                    send(s, cap, 'STOP')
+                    self.wait(s, cap, 'STOP')
+                    finish_capture('timer')
                 if now >= next_status:
                     send(s, cap, 'STATUS')
                     next_status = now + 2
@@ -215,12 +277,15 @@ class Runtime:
                     logging.exception('Serial close failed')
             if cap:
                 try:
+                    finish_capture('disconnected')
                     cap.close()
                 except OSError as exc:
                     logging.exception('Could not close capture files')
                     self.error = 'Ошибка записи лога: ' + str(exc)
             with self.lock:
                 self.connected = False
+                self.recording = False
+                self.recording_deadline = None
             self.ready.set()
             while True:
                 try:
@@ -242,6 +307,7 @@ class Runtime:
         return result
 
     def disconnect(self):
+        self.scan_cancel.set()
         self.stop_event.set()
         if self.worker and self.worker.is_alive():
             self.worker.join(5)
@@ -259,7 +325,31 @@ class Runtime:
                         network=dict(ssid=d.get('ssid', ''), ip=d.get('ip', '192.168.4.1'), channel=d.get('wifi_channel'), clients=d.get('wifi_clients'),
                                      mac=d.get('ap_mac',''), saved_ssid=d.get('saved_ssid',''), saved_channel=d.get('saved_wifi_channel')),
                         app=dict(version=VERSION, repository=REPOSITORY, release_url=RELEASE_URL,
-                                 download_url=DOWNLOAD_URL, desktop=True, busy=self.busy, progress=self.progress, update=update))
+                                 download_url=DOWNLOAD_URL, desktop=True, busy=self.busy, progress=self.progress, update=update,
+                                 recording=self.recording, remaining=max(0, int(self.recording_deadline-time.monotonic()+.999)) if self.recording_deadline else None,
+                                 sharing=self.sharing.snapshot() if self.sharing else {}, scan=dict(self.scan_state)))
+
+    def configure_recording(self, values):
+        if not self.sharing:
+            raise ValueError('Settings unavailable')
+        if set(values) & {'mode', 'duration'} and (self.recording or self.device.get('can') == 'running' or self.scan_state.get('active')):
+            raise ValueError('Сначала остановите CAN')
+        self.sharing.configure(values)
+
+    def scan_bitrate(self):
+        if not self.connected or self.recording:
+            raise ValueError('Подключите ридер и завершите запись перед поиском')
+        self.scan_cancel.clear()
+        def progress(value):
+            with self.lock:
+                self.scan_state = value
+        def command(text):
+            return self.request('command', text)['response']
+        self.scan_state = dict(active=True, results=[], selected=None)
+        try:
+            scan(command, self.scan_cancel.is_set, progress)
+        finally:
+            self.scan_state['active'] = False
 
     def preview(self, after):
         with self.lock:
@@ -444,7 +534,7 @@ class Handler(BaseHTTPRequestHandler):
             if route in ('/api/session/ping', '/api/session/leave'):
                 r.browser_ping(body.get('session'), leaving=leave)
                 return self.answer(dict(ok=True))
-            if r.busy and r.job_kind != 'check' and route in ('/api/connect', '/api/disconnect', '/api/command', '/api/exit'):
+            if r.busy and r.job_kind != 'check' and route in ('/api/connect', '/api/disconnect', '/api/command', '/api/mark', '/api/exit'):
                 raise ValueError('Дождитесь завершения обновления')
             if route == '/api/connect':
                 r.connect(body.get('port'))
@@ -459,7 +549,15 @@ class Handler(BaseHTTPRequestHandler):
                 action = body.get('action')
                 if not isinstance(action, str) or not 0 < len(action) <= 120:
                     raise ValueError('Invalid mark')
-                return self.answer(r.request('mark', action))
+                return self.answer(r.request('mark', dict(action=action, bitrate=body.get('bitrate'))))
+            elif route == '/api/recording/settings':
+                r.configure_recording(body)
+            elif route == '/api/bitrate/scan':
+                if not r.connected or r.recording:
+                    raise ValueError('Подключите ридер и остановите запись')
+                r.job('scan', r.scan_bitrate)
+            elif route == '/api/bitrate/cancel':
+                r.scan_cancel.set()
             elif route == '/api/updates/check':
                 r.job('check', r.check_updates)
             elif route == '/api/updates/app':
@@ -498,11 +596,15 @@ def main():
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--port', type=int, default=0, help='localhost HTTP port; 0 selects a free port')
     parser.add_argument('--logs', default=str(DATA / 'logs'))
+    parser.add_argument('--data-dir', default=str(DATA), help='settings and upload queue directory')
     parser.add_argument('--no-update-check', action='store_true')
     args = parser.parse_args()
-    DATA.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename=DATA / 'application.log', level=logging.INFO, encoding='utf-8')
-    runtime = Runtime(args.logs)
+    data = Path(args.data_dir)
+    data.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(filename=data / 'application.log', level=logging.INFO, encoding='utf-8')
+    sharing = Sharing(data)
+    sharing.start()
+    runtime = Runtime(args.logs, sharing)
     Handler.runtime = runtime
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     runtime.on_exit = server.shutdown
@@ -518,7 +620,7 @@ def main():
                 return
     threading.Thread(target=watch_browser, name='Browser lifetime', daemon=True).start()
     url = f'http://127.0.0.1:{server.server_port}/'
-    instances = DATA / 'instances'
+    instances = data / 'instances'
     instances.mkdir(exist_ok=True)
     instance_file = instances / f'{os.getpid()}.json'
     instance_file.write_text(json.dumps(dict(pid=os.getpid(), url=url, version=VERSION)), encoding='utf-8')
@@ -535,6 +637,7 @@ def main():
     finally:
         lifecycle_stop.set()
         runtime.disconnect()
+        sharing.close()
         server.server_close()
         instance_file.unlink(missing_ok=True)
 

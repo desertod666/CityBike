@@ -128,7 +128,7 @@ static esp_err_t state_handler(httpd_req_t *req) {
     cJSON *connection = cJSON_AddObjectToObject(root, "connection");
     cJSON_AddStringToObject(connection, "transport", "wifi"); cJSON_AddBoolToObject(connection, "connected", true);
     cJSON *app = cJSON_AddObjectToObject(root, "app");
-    cJSON_AddStringToObject(app, "version", "0.2.2"); cJSON_AddStringToObject(app, "repository", REPO);
+    cJSON_AddStringToObject(app, "version", "0.3.0"); cJSON_AddStringToObject(app, "repository", REPO);
     cJSON_AddStringToObject(app, "download_url", DOWNLOAD); cJSON_AddStringToObject(app, "release_url", RELEASE);
     cJSON_AddBoolToObject(app, "desktop", false);
     return json_send(req, root);

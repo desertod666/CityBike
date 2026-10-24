@@ -3,6 +3,7 @@ import argparse
 import csv
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import queue
 import re
@@ -48,11 +49,12 @@ class Capture:
                'seq', 'id', 'extended', 'rtr', 'dlc', 'data', 'decode_status', 'decoded_json')
 
     def __init__(self, folder):
-        folder.mkdir(parents=True, exist_ok=False)
+        if folder is not None:
+            folder.mkdir(parents=True, exist_ok=False)
         self.decoder = Decoder()
-        self.wire = (folder / 'wire.bin').open('wb')
-        self.events = (folder / 'capture.jsonl').open('w', encoding='utf-8', buffering=1)
-        self.csv_file = (folder / 'frames.csv').open('w', encoding='utf-8-sig', newline='')
+        self.wire = (folder / 'wire.bin' if folder else Path(os.devnull)).open('wb')
+        self.events = (folder / 'capture.jsonl' if folder else Path(os.devnull)).open('w', encoding='utf-8', buffering=1)
+        self.csv_file = (folder / 'frames.csv' if folder else Path(os.devnull)).open('w', encoding='utf-8-sig', newline='')
         self.csv = csv.DictWriter(self.csv_file, fieldnames=self.COLUMNS)
         self.csv.writeheader()
         self.session = ''

@@ -7,7 +7,7 @@ import urllib.request
 from urllib.parse import urlparse
 import zipfile
 
-VERSION = '0.2.2'
+VERSION = '0.3.0'
 REPOSITORY = 'desertod666/CityBike'
 RELEASE_URL = f'https://github.com/{REPOSITORY}/releases/latest'
 DOWNLOAD_URL = RELEASE_URL + '/download/BafangReader-Windows-x64.zip'
