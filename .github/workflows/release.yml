@@ -1,0 +1,45 @@
+name: Build release
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish verified assets as the version in project.json
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  windows-and-esp32c3:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install build tools
+        run: python -m pip install platformio==6.2.0 -r pc/requirements-build.txt
+      - name: Test PC and browser decoders
+        run: |
+          python -m unittest discover -s pc -v
+          node scripts/test_web.cjs
+      - name: Build ESP32-C3 firmware
+        run: |
+          python -m platformio run
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          Copy-Item .pio/build/esp32c3/firmware.bin,.pio/build/esp32c3/bootloader.bin,.pio/build/esp32c3/partitions.bin artifacts
+      - name: Package and verify public release
+        run: python scripts/package_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BafangReader-release
+          path: release/*
+      - name: Publish GitHub Release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $project = Get-Content project.json | ConvertFrom-Json
+          $tag = 'v' + $project.version
+          gh release create $tag release/* --target $env:GITHUB_SHA --title "BafangReader $($project.version)" --notes-file RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

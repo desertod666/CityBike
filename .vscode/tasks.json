@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BafangReader: build (Windows path-safe)",
+      "type": "shell",
+      "command": ".\\build.bat",
+      "options": {"cwd": "${workspaceFolder}"},
+      "group": {"kind": "build", "isDefault": true},
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "BafangReader: PC tests",
+      "type": "shell",
+      "command": ".\\test_pc.bat",
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    }
+  ]
+}

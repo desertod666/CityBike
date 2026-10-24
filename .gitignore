@@ -1,0 +1,20 @@
+.pio/
+.venv/
+__pycache__/
+sdkconfig.esp32c3
+logs/
+artifacts/
+*.log
+.packaging/
+dist/
+build/
+release/
+qa/
+*.spec
+START_IN_CODEX.txt
+SYSTEM TESTING_BAFANG SYSTEM_V1.sym
+SYM_DECODE_RU.txt
+sym_messages.json
+sym_signals.csv
+VALIDATION.md
+LOCAL_HANDOFF.md
