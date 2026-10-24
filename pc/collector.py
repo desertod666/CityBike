@@ -145,13 +145,22 @@ class Capture:
         self.csv_file.flush()
 
     def close(self):
-        if self.buf:
-            self.event('partial_line', raw_hex=self.buf.hex())
-        self.event('summary', frames=self.frames, invalid=self.invalid, sequence_gaps=self.gaps, resets=self.resets)
-        self.flush()
-        self.wire.close()
-        self.events.close()
-        self.csv_file.close()
+        error = None
+        try:
+            if self.buf:
+                self.event('partial_line', raw_hex=self.buf.hex())
+            self.event('summary', frames=self.frames, invalid=self.invalid, sequence_gaps=self.gaps, resets=self.resets)
+            self.flush()
+        except OSError as exc:
+            error = exc
+        finally:
+            for handle in (self.wire, self.events, self.csv_file):
+                try:
+                    handle.close()
+                except OSError as exc:
+                    error = error or exc
+        if error:
+            raise error
 
 
 def send(s, cap, command):

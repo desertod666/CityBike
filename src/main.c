@@ -16,7 +16,7 @@
 #include "reader.h"
 #include "web_server.h"
 
-#define VERSION "0.2.0"
+#define VERSION "0.2.1"
 #define FRAME_QUEUE_LEN 256
 #define LINE_SIZE 1400
 #ifndef READER_LED_ACTIVE_LEVEL

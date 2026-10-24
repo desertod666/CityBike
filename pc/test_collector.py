@@ -4,10 +4,26 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import io
 from collector import Capture
 
 
 class StreamTests(unittest.TestCase):
+    def test_disk_full_still_closes_all_capture_files(self):
+        class FullDisk(io.StringIO):
+            def write(self, value):
+                raise OSError('synthetic disk full')
+        c = Capture.__new__(Capture)
+        c.wire = io.BytesIO()
+        c.events = FullDisk()
+        c.csv_file = io.StringIO()
+        c.buf, c.session = bytearray(), 'synthetic'
+        c.frames = c.invalid = c.gaps = c.resets = 0
+        with self.assertRaises(OSError):
+            c.close()
+        self.assertTrue(c.wire.closed)
+        self.assertTrue(c.events.closed)
+        self.assertTrue(c.csv_file.closed)
     def test_raw_fragments_gaps_unknown_and_reset(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / 'capture'

@@ -54,6 +54,12 @@ class Runtime:
         self.manifest = None
         self.on_exit = lambda: None
 
+    def safe_event(self, cap, kind, **values):
+        try:
+            cap.event(kind, **values)
+        except OSError:
+            logging.exception('Could not write capture event %s', kind)
+
     def ingest(self, cap, data):
         messages = cap.feed(data)
         with self.lock:
@@ -163,19 +169,22 @@ class Runtime:
             with self.lock:
                 self.error = str(exc)
             if cap:
-                cap.event('disconnect', error=str(exc))
+                self.safe_event(cap, 'disconnect', error=str(exc))
         finally:
             if s and s.is_open and cap and identified:
                 try:
                     send(s, cap, 'STOP')
                     self.wait(s, cap, 'STOP')
-                    cap.event('stop_confirmed', status=self.device)
+                    self.safe_event(cap, 'stop_confirmed', status=self.device)
                 except Exception as exc:
-                    cap.event('stop_unconfirmed', error=str(exc))
+                    self.safe_event(cap, 'stop_unconfirmed', error=str(exc))
                     with self.lock:
                         self.error = 'STOP не подтверждён: ' + str(exc)
             if s:
-                s.close()
+                try:
+                    s.close()
+                except serial.SerialException:
+                    logging.exception('Serial close failed')
             if cap:
                 try:
                     cap.close()
@@ -363,8 +372,9 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path in ('/api/state', '/api/info'):
                 return self.answer(self.runtime.snapshot())
             if parsed.path == '/api/ports':
-                return self.answer(dict(ports=[dict(port=p.device, description=p.description, serial=p.serial_number)
-                                               for p in list_ports.comports() if (p.vid, p.pid) == (0x303A, 0x1001)]))
+                return self.answer(dict(ports=[dict(port=p.device, description=p.description, serial=p.serial_number,
+                                                    compatible=(p.vid,p.pid)==(0x303A,0x1001))
+                                               for p in sorted(list_ports.comports(),key=lambda p:p.device)]))
             if parsed.path == '/api/frames':
                 after = int(parse_qs(parsed.query).get('after', ['0'])[0])
                 if not 0 <= after <= 0xffffffffffffffff:
