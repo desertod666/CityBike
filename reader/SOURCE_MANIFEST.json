@@ -1,0 +1,522 @@
+{
+  "version": "0.6.2",
+  "baseline": "verified native062; pinned SDK/toolchain; hosted CI only",
+  "files": {
+    "BUILD.txt": {
+      "size": 1131,
+      "sha256": "f3ba34cd891dcdf2167074f51904210027f6803ff969d4b8f083320f19c6df01"
+    },
+    "CMakeLists.txt": {
+      "size": 173,
+      "sha256": "abe194ad8981a39b177400ec46e0a03dcbe7a1e2a40f9cf3ae7589e5df744d73"
+    },
+    "partitions.csv": {
+      "size": 132,
+      "sha256": "8555b094067798f52d3ee9c2435a974c19cf7306f96e325fc0b87d7f2709dbd1"
+    },
+    "platformio.ini": {
+      "size": 1288,
+      "sha256": "3188ba57360730a827e62e03114bdb4bae6ffb2cb08d01a4969c60f46ab79f44"
+    },
+    "scripts/ctx-guard-stubs/driver/gpio.h": {
+      "size": 362,
+      "sha256": "9cd322e09baabeb665368c6584f58ad0c94287bf432d2c48e6fb4d899da2766a"
+    },
+    "scripts/ctx-guard-stubs/soc/gpio_reg.h": {
+      "size": 239,
+      "sha256": "cf928928564eacae8e459ca7057dc40c34aa93dbe7667e077c82a058e3b59170"
+    },
+    "scripts/ctx-guard-stubs/soc/gpio_sig_map.h": {
+      "size": 42,
+      "sha256": "1b1d5ad5869c38f72e349a3a70ef9476aa700764a83ed1262d40ccc0951c6fd1"
+    },
+    "scripts/ctx-guard-stubs/soc/io_mux_reg.h": {
+      "size": 135,
+      "sha256": "dfb1ea2a2864a2414f5347b3a09f4f323d480d1e2af6228c1ffb66f6a069a276"
+    },
+    "scripts/ctx-guard-stubs/soc/soc.h": {
+      "size": 175,
+      "sha256": "9a02faec4131e35e7059c43d6d052b08cb0297240b961f8974f2a6ec8e5c3c78"
+    },
+    "scripts/ecc-stubs/esp_attr.h": {
+      "size": 31,
+      "sha256": "eeb17565d81d387240a34f855611453654e19d747bd5a19c81765840ad0a331c"
+    },
+    "scripts/ecc-stubs/esp_timer.h": {
+      "size": 140,
+      "sha256": "ca0c9ada23243be5db5ffd3f20f5bce79ab283537f0dd822e0ae0d3a62332792"
+    },
+    "scripts/ecc-stubs/freertos/FreeRTOS.h": {
+      "size": 252,
+      "sha256": "d90c781f317ded9222214bc237d09c7515335b0a37f4532a60c8e547b9228016"
+    },
+    "scripts/ecc-stubs/hal/twai_hal.h": {
+      "size": 1968,
+      "sha256": "fe38cf7e9f3d03bc107f6ab82c6b181463454ea35f2ba58e94f362b25616262a"
+    },
+    "scripts/ecc-stubs/hal/twai_ll.h": {
+      "size": 2844,
+      "sha256": "bac2e781bc509a36402b6fb6322cbd44351a5cbbfa9d7bf8716e8ef23f089e02"
+    },
+    "scripts/firmware-stubs/driver/gpio.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/driver/rmt_rx.h": {
+      "size": 2632,
+      "sha256": "d26d5b9e06bfa87a04e555efad36b200b62648c8f309f7e794dd64a1d9c1f9f2"
+    },
+    "scripts/firmware-stubs/driver/twai.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/driver/usb_serial_jtag.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/esp_clk_tree.h": {
+      "size": 530,
+      "sha256": "75570dca799f0e73cb94134f9b0441579de6eab4089dcd23407fb26eb8ec45b6"
+    },
+    "scripts/firmware-stubs/esp_err.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/esp_log.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/esp_random.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/esp_rom_gpio.h": {
+      "size": 278,
+      "sha256": "5701902affa75e5da08874575f4c515c4d5f01c9060e767774af92d8636276dc"
+    },
+    "scripts/firmware-stubs/esp_system.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/esp_timer.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/freertos/FreeRTOS.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/freertos/queue.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/freertos/semphr.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/freertos/task.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/soc/gpio_reg.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/soc/gpio_sig_map.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/soc/gpio_struct.h": {
+      "size": 234,
+      "sha256": "a6331693abcd1ff8ad5dfe76da660e7eb7ea7424a2d38b203ed04954ca79e66b"
+    },
+    "scripts/firmware-stubs/soc/io_mux_reg.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/soc/soc.h": {
+      "size": 22,
+      "sha256": "717bc1122fdb1c5d880291a7a8a1a047b2b3cde1771923224b4899f76a26a510"
+    },
+    "scripts/firmware-stubs/soc/soc_caps.h": {
+      "size": 54,
+      "sha256": "0e536aeccee5d09b59ea304c21facfd6cf25a94751239ada324406a3a46a3a50"
+    },
+    "scripts/firmware-stubs/soc/twai_periph.h": {
+      "size": 118,
+      "sha256": "265aabdc7f2a8d914b1a07a8248b43eacf979a6bdb8681f90088cc1452b48c34"
+    },
+    "scripts/firmware-stubs/soc/twai_struct.h": {
+      "size": 418,
+      "sha256": "968d7f0b82d911e64a834d96db219182ac432e54af4b2f9329c9125659ef7b45"
+    },
+    "scripts/firmware-stubs/test_sdk.h": {
+      "size": 10400,
+      "sha256": "330a2014a743492be9885b7fe1feda9e55d9f9ae4540903d67d60f57a02247c0"
+    },
+    "scripts/host_ble_stub.c": {
+      "size": 559,
+      "sha256": "81caef340452ba5b1c2a33afff8e3bd6ac9b11f8e5f5b27e0d03e3f1505dc3f5"
+    },
+    "scripts/sdk_event_reference.inc": {
+      "size": 6785,
+      "sha256": "8df09abaa9a143d55a2e5cb5c0f58d1b82009afe112c74f3df6e4e4a425e5d5d"
+    },
+    "scripts/spard_reply_fixture.h": {
+      "size": 498,
+      "sha256": "26e7e91868ddc64fd1cf9414656e472dbc019e63d11f984a9deeca44bb37d38b"
+    },
+    "scripts/test_battery_query.c": {
+      "size": 10792,
+      "sha256": "7a0ebe02502e2016adb77b5f292d3652f346809ee033d159fb77f2c925a68002"
+    },
+    "scripts/test_command_protocol.c": {
+      "size": 1383,
+      "sha256": "37ebb5018d16e3d1c520d844d34940c49e428cd5dba1579a7f9c884cb6d5b692"
+    },
+    "scripts/test_ctx_guard.c": {
+      "size": 2029,
+      "sha256": "d11486a4598e26a588b0f321c63f95cd7e46ebbf2d3b8e17124f6d2c98d92261"
+    },
+    "scripts/test_ecc_observer.c": {
+      "size": 2965,
+      "sha256": "0a366513d8fc729a454d6e103991960093842ce91dccec8bd1fdbc316413807a"
+    },
+    "scripts/test_error_probe.c": {
+      "size": 647,
+      "sha256": "edfb82e1e388b7a13b63898956dcc2ca1a5c0b244fdbc0fe6b206f27fc139be7"
+    },
+    "scripts/test_firmware_lifecycle.c": {
+      "size": 9558,
+      "sha256": "f108472180eb33f6fbae1cbb14a5b1a47ed0b232e51f5b03ea0de072904e8a6f"
+    },
+    "scripts/test_firmware_native.py": {
+      "size": 4387,
+      "sha256": "3e687557e1a170b618693a52073f126c9f420831f13601b6693f3f6bbb8c63ef"
+    },
+    "scripts/test_fixed_receive.c": {
+      "size": 1170,
+      "sha256": "151c0fc9df73e19f69e8c84b94dddcb43c0e4049402ccfd1059e59d49c323f62"
+    },
+    "scripts/test_quiet_query.c": {
+      "size": 2963,
+      "sha256": "cdce2cc9e0f15f52c4a076a28f46cf7988d4708736f6899c445450569938afbe"
+    },
+    "scripts/test_remote_policy.c": {
+      "size": 1714,
+      "sha256": "802bf91548d322521e61232061a638260d827ba360e4286a333767020bdd21d3"
+    },
+    "scripts/test_rmt_trace.c": {
+      "size": 4227,
+      "sha256": "e3839f45d4774ee7c2b7e416633375167b7dedf65501348475c2bef6a6baf10b"
+    },
+    "scripts/test_rx_probe.c": {
+      "size": 1370,
+      "sha256": "01293c213a6fdfa2af6c1b72be2c672fcbba0f729a044c478e167b14114ac60b"
+    },
+    "scripts/test_rx_readback.c": {
+      "size": 6583,
+      "sha256": "80a409965ca08e1cd5060460b5e7aeda760b134483d42aa05334193762c2bba3"
+    },
+    "scripts/test_rx_sampling.c": {
+      "size": 1816,
+      "sha256": "2c0bb193532b38b865ca24782cd25d298288f6ded73367d43f79af481260adf1"
+    },
+    "scripts/test_selftest.c": {
+      "size": 7086,
+      "sha256": "6cc62c03ee25a32b0bc6173529acc0366afb11ae2c51962109db851ec7cb4711"
+    },
+    "scripts/test_tx_policy.c": {
+      "size": 3707,
+      "sha256": "4dd8f9e8cafaf305adbb98c464df68da7b7578c4a88fb8f6c226b4bcb6e2317e"
+    },
+    "scripts/test_tx_trace.c": {
+      "size": 1367,
+      "sha256": "93359197bf97762f32f5d71c8b3269ebf2091057241398d28c1bbbf88d5e6c87"
+    },
+    "scripts/verify_ci.py": {
+      "size": 2676,
+      "sha256": "a4906cb058abef6f8c5d83d8f5eb8484a26aeb013e6cd7342a0a1193dc3bf1d9"
+    },
+    "sdkconfig.defaults": {
+      "size": 1091,
+      "sha256": "026d371b89bef2831909ecc98ccf9e92ef9382b1e978ea0ffdcb16dd70ebe545"
+    },
+    "sdkconfig.esp32c3": {
+      "size": 67338,
+      "sha256": "ce4315eb385727848828f1cfb0a8642fed84a82609cc659ebece82400d35a6c5"
+    },
+    "src/CMakeLists.txt": {
+      "size": 1669,
+      "sha256": "32ae313450fca12b602dd49bb043593dad7f2e32455b83d37e7216f7736565d3"
+    },
+    "src/ESPRESSIF_HAL_LICENSE.txt": {
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "src/ble_remote.c": {
+      "size": 12403,
+      "sha256": "4edc229af5a11915ce6d02ae0bef11d61f30ba1ee6b350128b7adfcded2b38ba"
+    },
+    "src/ble_remote.h": {
+      "size": 263,
+      "sha256": "c892366d5ff96a2908482de7ffd0a9457f4fd20f9ec15cd41ef6bba64d01d74a"
+    },
+    "src/command_protocol.h": {
+      "size": 1592,
+      "sha256": "3021c74efd1176ef48236cc022b417a2e4afb0d5e7b29889f64fcf13b7ac4af4"
+    },
+    "src/ctx_guard.h": {
+      "size": 1879,
+      "sha256": "e9e6accadc6df5ef5d6acdcad2fd6782757d29cd72a6e1a8c3627fc595f1a038"
+    },
+    "src/ecc_capture_json.h": {
+      "size": 1402,
+      "sha256": "2fced45b5cc62f7a8736a0a6e3ed80b512c5c7ebfc1433d2b531c23d66172d24"
+    },
+    "src/error_probe.c": {
+      "size": 2211,
+      "sha256": "2b30579fdb2cdb7dee2b11b6020618aed079848206f92aba1d441d7a4e122098"
+    },
+    "src/error_probe.h": {
+      "size": 1061,
+      "sha256": "2330849645d2c57e182e592ff0456c4f8fac8a3302a24a8e22f9901244544ca5"
+    },
+    "src/main.c": {
+      "size": 39928,
+      "sha256": "08c9fd7b86b613d4339369f76b44832c5328f8c001dba64e2e2d8c0646d32a8f"
+    },
+    "src/reader.h": {
+      "size": 583,
+      "sha256": "8b76dac367fff5da05771a177aea7602b69220061f85dabfed85657fc381becc"
+    },
+    "src/remote_policy.h": {
+      "size": 1748,
+      "sha256": "a32f90589ca7863dc5ddc19eae6c8ac77577b576a968d702f223595b04561786"
+    },
+    "src/rmt_trace.h": {
+      "size": 8184,
+      "sha256": "42244e56f227b73d97112371bcfcd35b1227116075063601e19a9bc4f7e50105"
+    },
+    "src/rx_probe.h": {
+      "size": 1159,
+      "sha256": "54143fb03680956d1c5d4bae89135340f5e87b673db043db369d18f4b6bd503c"
+    },
+    "src/rx_readback.c": {
+      "size": 7179,
+      "sha256": "3d3a719ffb2c11cd3429e675a40200c200d5f04d25b6f7798204c6f1469b9583"
+    },
+    "src/rx_readback.h": {
+      "size": 2789,
+      "sha256": "7de8ad92ac889b352e8c77e285a795cd295e4c016deb5b37c530c110a2818aeb"
+    },
+    "src/rx_sampling.h": {
+      "size": 1728,
+      "sha256": "2a84d0619a07156815ff18f5e24d3b90ce9566163caa74f040574b3b02dc4a20"
+    },
+    "src/selftest_impl.h": {
+      "size": 12028,
+      "sha256": "34f461d6891ea0a27f8be0ab08815046204649683a95f6723cddc7b52408f085"
+    },
+    "src/spard_query_impl.h": {
+      "size": 16439,
+      "sha256": "65d1c98c0aadc8ae3b5dc12638fe88e054a3b20e52e233d6ebe09a7dcc0887b2"
+    },
+    "src/spard_read_request.h": {
+      "size": 1297,
+      "sha256": "d4f716b525917738de68a3c10603dc0b5c1d00012dbd5226f91ab681af066757"
+    },
+    "src/twai_event_observer.inc": {
+      "size": 7050,
+      "sha256": "c4c1b8bff0a14a1b673c73042462da393207494637f452fb25b22ce540276fc0"
+    },
+    "src/tx_policy.h": {
+      "size": 5856,
+      "sha256": "74109bd258f4063979041d07f56fc3565723db11b40fe06ddfb9f483a898950f"
+    },
+    "src/tx_trace.h": {
+      "size": 2438,
+      "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
+    },
+    "src/web_server.c": {
+      "size": 30746,
+      "sha256": "b7b0c4c18c21b19b11557f8275cb6e31c6df9419ba38df1a049f2530302d0b45"
+    },
+    "src/web_server.h": {
+      "size": 421,
+      "sha256": "7d7df31fd21a9fc2046fb2558a59a8397d7033be5cc6aaaab58969b44e69ce9b"
+    },
+    "web/THIRD_PARTY_LICENSES.txt": {
+      "size": 14333,
+      "sha256": "ed32a3905a233a7d93575955a109d8f0152197adb90780db57a28211469c9868"
+    },
+    "web/adapter.js": {
+      "size": 3136,
+      "sha256": "a0c683e13d9bb0fef59a73da93b419ad551b2f6de39c0290454f97d90e645d06"
+    },
+    "web/app.js": {
+      "size": 41154,
+      "sha256": "425f63edab303c1a9ef18daa4639b81c3119a9bfd04d889a448883b9ff9323fa"
+    },
+    "web/appearance.css": {
+      "size": 9938,
+      "sha256": "c2df97a533f89ca248f47d730b94888bfc23fea9f4177b4890492d35ff940166"
+    },
+    "web/archive-worker.js": {
+      "size": 442,
+      "sha256": "92d0a00d691be07bd7548bef04357a1a2d3ad84d488f16640058304bbceb534a"
+    },
+    "web/auto-update.js": {
+      "size": 6120,
+      "sha256": "29cccb2b0b08db5cfe95291d4702caf3b7fd7300b7320cf22887d96fa4a67cfe"
+    },
+    "web/bafang-battery.js": {
+      "size": 7026,
+      "sha256": "8ef1bc9a49cdd7a8318d9828ff9d00f0749bc74288a39ad8867fa249bcb5c65e"
+    },
+    "web/battery-query.js": {
+      "size": 10926,
+      "sha256": "27dd9fddeeafb0c83b8024ffe4a4a614b33b2f55baa71d4a10d09ce54bd16b95"
+    },
+    "web/ble-remote.js": {
+      "size": 24973,
+      "sha256": "af3bad7cb38e46dc6e0db37d383349b9c467d0fa3765c32bb22d5f4269079b8b"
+    },
+    "web/browser.js": {
+      "size": 35906,
+      "sha256": "0602869460adfe6df9b2de2aa010fd4c17e4719879853933ece69505aeed08f5"
+    },
+    "web/can-live.css": {
+      "size": 3356,
+      "sha256": "7c8515f9d55bf1107de81fea73d7128b594c8c413b599c2fc43890f646788d2b"
+    },
+    "web/can-live.js": {
+      "size": 34666,
+      "sha256": "d39c4dc8fd1540249e8019525f86f3889495ac4315ffaa82e4236cc0c6216989"
+    },
+    "web/capture_profiles.json": {
+      "size": 3568,
+      "sha256": "ecab44668acf901172127a550a0f95b4da1ad766e1b3cef1c383fefd0549d915"
+    },
+    "web/decoder.js": {
+      "size": 7448,
+      "sha256": "5efc91a9df4f7b206a6e5088c0c88fef43f9e2d5a81b0fa88aeb713ddc7f0381"
+    },
+    "web/decoder_reference.json": {
+      "size": 17605,
+      "sha256": "317649255f319410b36dbe3e6eeef7de10a57433e88d609e42e4c899bd15bb9f"
+    },
+    "web/esp-battery.js": {
+      "size": 7298,
+      "sha256": "63e54462573e9e4a559463098d9d4fa35f3e64850dc7f21748a71ffb22cd63b6"
+    },
+    "web/esp-flasher.js": {
+      "size": 317391,
+      "sha256": "e3898329d3898da6496b5bc156cd3d3ce7ee2d855c1e4f6786a3fe23eb143610"
+    },
+    "web/esp-remote.js": {
+      "size": 13891,
+      "sha256": "9b3d2861291a9167e508ff5ef91d5129db70d309fd803b222c7e39cd6845e367"
+    },
+    "web/files.js": {
+      "size": 6494,
+      "sha256": "0c0c7c0fb85c90422df7e6e474bf5133af45fc20aa5f45644b0b9d4d7f42d54e"
+    },
+    "web/flash-core.js": {
+      "size": 7854,
+      "sha256": "2356b37c32333ac5079f55b323a60c34e44eb2b19a2b76930c729f4b1c65baad"
+    },
+    "web/flash-page.js": {
+      "size": 7693,
+      "sha256": "ca09af9b509fd34fb77ebf0e5884bcd13a2688a643ad8008f19858c8b6d0bc78"
+    },
+    "web/flash.html": {
+      "size": 3819,
+      "sha256": "2e12e3a7aa288a4dba262b09ec4b7e4592e8b716175a39c9f184cc903311cf47"
+    },
+    "web/i18n.js": {
+      "size": 101194,
+      "sha256": "b3121b3c36b994ce184f61d1f7e23832bda82eafa793b6367107febd4af438dc"
+    },
+    "web/icon.svg": {
+      "size": 483,
+      "sha256": "4c0e6881eb504d936b1611712b87f6e63184acd5b5c90b5c7e5a05683262d8ca"
+    },
+    "web/index.html": {
+      "size": 43041,
+      "sha256": "20c230bf5453e3b6fea0e2035e7ed243237dd88a91f7960b3f3b0d9ca90f6e6f"
+    },
+    "web/manifest.webmanifest": {
+      "size": 250,
+      "sha256": "a7929386f63ff12cc0a9ad39d0ad461c8adb8bb817399974509f15e725dd23e6"
+    },
+    "web/metrics.js": {
+      "size": 2806,
+      "sha256": "5c57f1c8327af4d713d8f7aceaa998bed494846ffff2186421eb1f2f5896c923"
+    },
+    "web/monitor.js": {
+      "size": 5379,
+      "sha256": "8aa74437474ec6e913c3cb97ad88da7ec09a93aa119a4a453eb28aa2621a148d"
+    },
+    "web/preferences.js": {
+      "size": 3028,
+      "sha256": "04842f25c282a373756e7fc2db2912bd0ce676448baec0bb139c1788b9a6f68b"
+    },
+    "web/reader-selftest.js": {
+      "size": 9073,
+      "sha256": "a6b10450993db4012902f245b0d80abcab95458139b79b017a5190bbe692995d"
+    },
+    "web/remote-console.css": {
+      "size": 3206,
+      "sha256": "78d6aaaf7b68ec19ec74dd5b06ee6e5793cd33adb091609c811765306f558585"
+    },
+    "web/remote-console.js": {
+      "size": 29317,
+      "sha256": "ef71506445ae37f51c3877a58817cffedeac5443df9518bdf405c2d01ee19daa"
+    },
+    "web/remote-flash.js": {
+      "size": 5609,
+      "sha256": "9dcf6f8f96c53f54e962bb4a6e18913317c70cec84c10d491fa8bda3f80c2ac5"
+    },
+    "web/spard-battery.js": {
+      "size": 5091,
+      "sha256": "6e2317a926395d5855dee5038eb238eb0187a38abd3bebb865bf28d99dca492e"
+    },
+    "web/spard-can.js": {
+      "size": 3992,
+      "sha256": "7104baec19f798ba517a895f7b89f212e3948c72724f53bade7bfab1c713b9eb"
+    },
+    "web/spard-information.js": {
+      "size": 7365,
+      "sha256": "304270103fc86d1a9e1da66a1135894d7fe25c9dd9b326f65ffc3bd3a460d59c"
+    },
+    "web/spard-probe.js": {
+      "size": 11403,
+      "sha256": "deb4c7f6d68e46d311950a1c65c4d5e367d8f77f80295fc272d639ffac7d37f5"
+    },
+    "web/store.js": {
+      "size": 11171,
+      "sha256": "b3045daa461a83a19d0ae33642a65db1dee3789a8627d10b87b32826ae03cd7a"
+    },
+    "web/style.css": {
+      "size": 22369,
+      "sha256": "4cae701703af7288a28b2768f4ab8abfd64d1272c63baee4a3125e16a344f708"
+    },
+    "web/support.js": {
+      "size": 23100,
+      "sha256": "4a5249cb2147f34911f1e704fc34a0787b0f6903b59305b3352df1993fc0d0df"
+    },
+    "web/sw.js": {
+      "size": 4880,
+      "sha256": "f0d999890faae52d50d356751ddfb0e838ef6b0e6e35baf5a201fcd6f4be7ab0"
+    },
+    "web/transport.js": {
+      "size": 13808,
+      "sha256": "ad7b3846eb89fdf92fa85eba175430200b49ac30dc48cb025829e6baad1ba684"
+    },
+    "web/tuning.js": {
+      "size": 7730,
+      "sha256": "a44b286c161e681ce95ca569fddcfb922ac2a4a45186c55d5efb7c2e9dbec701"
+    }
+  }
+}
