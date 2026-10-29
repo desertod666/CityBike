@@ -1,6 +1,6 @@
 CURRENT ESP32 READER BUILD
 
-Version 0.6.3 refreshes the embedded portal to match hosted build 20261029-portal1.
+Version 0.6.3 refreshes the embedded portal to match hosted build 20261029-portal2.
 Manual attachment history and names are hidden; diagnostic logs remain available.
 Detailed Spard readings are on the main page, labelled by source and time.
 The native CAN and BLE command logic is unchanged from verified 0.6.2.

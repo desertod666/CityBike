@@ -1,11 +1,11 @@
 {
   "version": "0.6.3",
-  "web_build": "20261029-portal1",
+  "web_build": "20261029-portal2",
   "native_baseline": "0.6.2 CAN/BLE behavior preserved; portal and static HTTP assets updated",
   "files": {
     "BUILD.txt": {
       "size": 659,
-      "sha256": "f5ffe761b366df4233f89ec610cc4f2189141b7b1a7991afa1b8087392e620bd"
+      "sha256": "9687065c4888dd5eb5e0881020ed0081c3eac34aa09249d36a5ef0ec8239040c"
     },
     "CMakeLists.txt": {
       "size": 173,
@@ -393,7 +393,7 @@
     },
     "web/browser.js": {
       "size": 35906,
-      "sha256": "9f3bd6cf70d7acfa27188e798a93080792c12b2a26f8b55d5a0139b84a319e51"
+      "sha256": "ec9b842cd3fef5c99dbddf7d76f6ab412d84d1216d7c5cd20e9e6b74af7b328f"
     },
     "web/can-live.css": {
       "size": 3356,
@@ -416,8 +416,8 @@
       "sha256": "3881c77a991ecc2c723781f19d59fc2af52ad736910f3b751f4fb767d222f421"
     },
     "web/esp-battery.js": {
-      "size": 7298,
-      "sha256": "63e54462573e9e4a559463098d9d4fa35f3e64850dc7f21748a71ffb22cd63b6"
+      "size": 7317,
+      "sha256": "3ee26f55bb0a4e15c4468400243606b1a9186d1c37819ace9647e4e5704115e3"
     },
     "web/esp-flasher.js": {
       "size": 317391,
@@ -452,8 +452,8 @@
       "sha256": "6002bf4015040f8f414ca7295489ed75cbc6f37c55c3cf44d65e84e03477971a"
     },
     "web/index.html": {
-      "size": 38821,
-      "sha256": "9470b942a73bf0876ce853503509f276f5860fe6923efbaf31d8130536ea76a8"
+      "size": 38882,
+      "sha256": "6f35248f81595180281dbc310c59aac2e10cc9707c73f8736decbe9178d8c440"
     },
     "web/kolumbus-logo.svg": {
       "size": 2565,
@@ -521,7 +521,7 @@
     },
     "web/sw.js": {
       "size": 4884,
-      "sha256": "9ec88dbf2139ee473e8195524bebd244308a0ead8d175e9f824d21ac043ae447"
+      "sha256": "ee8e898a52c35f75bcf737f7adefa8612dcc6a7012b8838d79b469967ae3d0f8"
     },
     "web/transport.js": {
       "size": 13808,
