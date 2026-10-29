@@ -347,8 +347,8 @@
       "sha256": "7d7df31fd21a9fc2046fb2558a59a8397d7033be5cc6aaaab58969b44e69ce9b"
     },
     "web/THIRD_PARTY_LICENSES.txt": {
-      "size": 14333,
-      "sha256": "ed32a3905a233a7d93575955a109d8f0152197adb90780db57a28211469c9868"
+      "size": 14070,
+      "sha256": "6f138b99e9da94307e78d5e6c3fc94efc46e31526f8775547288d9d8580ab1dd"
     },
     "web/adapter.js": {
       "size": 3136,
@@ -403,8 +403,8 @@
       "sha256": "5efc91a9df4f7b206a6e5088c0c88fef43f9e2d5a81b0fa88aeb713ddc7f0381"
     },
     "web/decoder_reference.json": {
-      "size": 17605,
-      "sha256": "317649255f319410b36dbe3e6eeef7de10a57433e88d609e42e4c899bd15bb9f"
+      "size": 16763,
+      "sha256": "3881c77a991ecc2c723781f19d59fc2af52ad736910f3b751f4fb767d222f421"
     },
     "web/esp-battery.js": {
       "size": 7298,
