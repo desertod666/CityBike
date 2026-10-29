@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   let bundle, busy = false, uploader, selectedPort = null, selectedInfo = null, refreshing = false;
   const terminal = [];
-  const log = data => { terminal.push(String(data)); if(terminal.length>200)terminal.shift(); $('log').textContent = ($('log').textContent + String(data) + '\n').slice(-16000); };
+  const log = data => { terminal.push(String(data)); if(terminal.length>200)terminal.shift(); $('log').textContent = ($('log').textContent + (globalThis.ByI18n?.t?.(String(data))||String(data)) + '\n').slice(-16000); };
   const registered = () => selectedInfo && ByFlash.permitted(bundle?.manifest,selectedInfo.mac);
   function controls() {
     $('selectPort').disabled = busy || !bundle || !$('detached').checked || typeof ByFlash.identify !== 'function' || !!uploader?.updateHold;

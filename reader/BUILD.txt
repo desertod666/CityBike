@@ -1,19 +1,11 @@
 CURRENT ESP32 READER BUILD
 
-This directory is the verified native 0.6.2 baseline, including its original
-embedded portal. The old repository-root firmware is a separate legacy build.
-Use the workflow "Build current ESP32 reader on GitHub" for this directory.
+Version 0.6.3 refreshes the embedded portal to match hosted build 20261029-portal1.
+Manual attachment history and names are hidden; diagnostic logs remain available.
+Detailed Spard readings are on the main page, labelled by source and time.
+The native CAN and BLE command logic is unchanged from verified 0.6.2.
 
-The workflow uses GitHub-hosted ubuntu-24.04, never the Oracle self-hosted runner.
-PlatformIO, the ESP-IDF package and the RISC-V toolchain are pinned. Host C tests
-exercise the real CAN/USB implementation; a host-only BLE boundary allows those
-tests to link, and the actual remote policy is tested separately.
-
-Artifacts contain firmware.bin, bootloader.bin, partitions.bin and build-proof.json.
-The proof verifies every embedded portal file against the source through ELF
-symbols, checks firmware version and partition size, and records SHA-256 hashes.
-Artifacts expire after seven days. Compilation never deploys to Oracle or flashes
-a reader. No device logs, uploaded files or server credentials enter this build.
-
-The forthcoming captive-portal update is a separate versioned change after the
-server cleanup. Do not label this baseline as the updated public portal.
+Use the GitHub-hosted reader-ci workflow, never the old repository-root release.
+Compiler and SDK packages are pinned. Host tests, source hashes and actual ELF
+portal assets are verified before flash binaries are uploaded for seven days.
+The workflow never connects to a reader, deploys to Oracle or flashes a device.

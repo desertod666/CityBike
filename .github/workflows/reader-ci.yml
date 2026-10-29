@@ -29,13 +29,15 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: reader/requirements-ci.txt
       - name: Cache pinned compiler packages on GitHub
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.platformio/packages
-          key: esp32c3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('reader/platformio.ini') }}
+          key: esp32c3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('reader/toolchain-lock.json', 'reader/requirements-ci.txt') }}
       - name: Install build dependencies
-        run: python -m pip install --disable-pip-version-check platformio==6.1.18 pyelftools==0.32
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - name: Run firmware tests without devices
         run: python scripts/test_firmware_native.py
       - name: Check source manifest

@@ -109,8 +109,6 @@ extern const char remote_console_css_end[] asm("_binary_remote_console_css_end")
 
 extern const char esp_remote_start[] asm("_binary_esp_remote_js_start");
 extern const char esp_remote_end[] asm("_binary_esp_remote_js_end");
-extern const char ble_remote_start[] asm("_binary_ble_remote_js_start");
-extern const char ble_remote_end[] asm("_binary_ble_remote_js_end");
 void web_network_snapshot(reader_network_t *out) {
     portENTER_CRITICAL(&net_lock); *out = net; portEXIT_CRITICAL(&net_lock);
 }
@@ -347,10 +345,11 @@ static esp_err_t mark_handler(httpd_req_t *req) {
     return json_send(req, r); // Browser keeps marks alongside its bounded preview export.
 }
 
+extern const char kolumbus_logo_start[] asm("_binary_kolumbus_logo_svg_start");
+extern const char kolumbus_logo_end[] asm("_binary_kolumbus_logo_svg_end");
 static esp_err_t asset_handler(httpd_req_t *req) {
     const char *start = index_start, *end = index_end, *type = "text/html; charset=utf-8";
     if (!strcmp(req->uri, "/esp-remote.js")) {start=esp_remote_start;end=esp_remote_end;type="application/javascript";}
-    if (!strcmp(req->uri, "/ble-remote.js")) {start=ble_remote_start;end=ble_remote_end;type="application/javascript";}
     if (!strcmp(req->uri, "/spard-can.js")) { start = spard_can_js_start; end = spard_can_js_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/battery-query.js")) { start = battery_query_js_start; end = battery_query_js_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/esp-battery.js")) { start = esp_battery_js_start; end = esp_battery_js_end; type = "application/javascript"; }
@@ -378,6 +377,7 @@ static esp_err_t asset_handler(httpd_req_t *req) {
     if (!strcmp(req->uri, "/archive-worker.js")) { start = asset_3_start; end = asset_3_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/sw.js")) { start = asset_4_start; end = asset_4_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/manifest.webmanifest")) { start = asset_5_start; end = asset_5_end; type = "application/manifest+json"; }
+    if (!strcmp(req->uri, "/kolumbus-logo.svg")) { start = kolumbus_logo_start; end = kolumbus_logo_end; type = "image/svg+xml"; }
     if (!strcmp(req->uri, "/icon.svg")) { start = asset_6_start; end = asset_6_end; type = "image/svg+xml"; }
     if (!strcmp(req->uri, "/auto-update.js")) { start = auto_update_start; end = auto_update_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/files.js")) { start = files_start; end = files_end; type = "application/javascript"; }
@@ -452,7 +452,7 @@ esp_err_t web_start(void) {
     http.max_uri_handlers = 52; http.max_open_sockets = 5; http.lru_purge_enable = true;
     http.recv_wait_timeout = 2; http.send_wait_timeout = 2;
     httpd_handle_t server = NULL; r = httpd_start(&server, &http); if (r != ESP_OK) return r;
-    const char *paths[] = { "/esp-remote.js", "/ble-remote.js", "/reader-selftest.js", "/preferences.js", "/i18n.js", "/appearance.css", "/bafang-battery.js","/spard-can.js","/battery-query.js","/esp-battery.js","/can-live.js","/can-live.css","/remote-console.js","/remote-console.css","/auto-update.js","/files.js","/adapter.js","/spard-probe.js","/spard-information.js","/spard-battery.js","/", "/style.css", "/app.js", "/decoder.js", "/decoder_reference.json", "/capture_profiles.json","/store.js","/transport.js","/monitor.js","/tuning.js","/metrics.js","/support.js","/flash-core.js","/remote-flash.js","/browser.js","/archive-worker.js","/sw.js","/manifest.webmanifest","/icon.svg"};
+    const char *paths[] = { "/esp-remote.js", "/reader-selftest.js", "/preferences.js", "/i18n.js", "/appearance.css", "/bafang-battery.js","/spard-can.js","/battery-query.js","/esp-battery.js","/can-live.js","/can-live.css","/remote-console.js","/remote-console.css","/auto-update.js","/files.js","/adapter.js","/spard-probe.js","/spard-information.js","/spard-battery.js","/", "/style.css", "/app.js", "/decoder.js", "/decoder_reference.json", "/capture_profiles.json","/store.js","/transport.js","/monitor.js","/tuning.js","/metrics.js","/support.js","/flash-core.js","/remote-flash.js","/browser.js","/archive-worker.js","/sw.js","/manifest.webmanifest","/icon.svg", "/kolumbus-logo.svg"};
     for (int i = 0; i < sizeof(paths)/sizeof(paths[0]); i++) {
         httpd_uri_t uri = {.uri = paths[i], .method = HTTP_GET, .handler = asset_handler};
         ESP_ERROR_CHECK(httpd_register_uri_handler(server, &uri));

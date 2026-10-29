@@ -1,22 +1,27 @@
 {
-  "version": "0.6.2",
-  "baseline": "verified native062; pinned SDK/toolchain; hosted CI only",
+  "version": "0.6.3",
+  "web_build": "20261029-portal1",
+  "native_baseline": "0.6.2 CAN/BLE behavior preserved; portal and static HTTP assets updated",
   "files": {
     "BUILD.txt": {
-      "size": 1131,
-      "sha256": "f3ba34cd891dcdf2167074f51904210027f6803ff969d4b8f083320f19c6df01"
+      "size": 659,
+      "sha256": "f5ffe761b366df4233f89ec610cc4f2189141b7b1a7991afa1b8087392e620bd"
     },
     "CMakeLists.txt": {
       "size": 173,
-      "sha256": "abe194ad8981a39b177400ec46e0a03dcbe7a1e2a40f9cf3ae7589e5df744d73"
+      "sha256": "df0f9c8cbb2fbe9854b9c1b2c560653ddbec028096a0fd81f99f94579eff5680"
     },
     "partitions.csv": {
       "size": 132,
       "sha256": "8555b094067798f52d3ee9c2435a974c19cf7306f96e325fc0b87d7f2709dbd1"
     },
     "platformio.ini": {
-      "size": 1288,
-      "sha256": "3188ba57360730a827e62e03114bdb4bae6ffb2cb08d01a4969c60f46ab79f44"
+      "size": 1292,
+      "sha256": "cb6177f9db88064a9f72d61a6cc6926a087d5316ed020372b010b423718f00d9"
+    },
+    "requirements-ci.txt": {
+      "size": 36,
+      "sha256": "1c84843e4f337c57b6e069479322987d2e63f8011692398cb1ad2262d0c66901"
     },
     "scripts/ctx-guard-stubs/driver/gpio.h": {
       "size": 362,
@@ -247,8 +252,8 @@
       "sha256": "ce4315eb385727848828f1cfb0a8642fed84a82609cc659ebece82400d35a6c5"
     },
     "src/CMakeLists.txt": {
-      "size": 1669,
-      "sha256": "32ae313450fca12b602dd49bb043593dad7f2e32455b83d37e7216f7736565d3"
+      "size": 1673,
+      "sha256": "39046ce771d1752d5212247bf7c419e2fcf948afb2fea8dce7a0a3f012301ec2"
     },
     "src/ESPRESSIF_HAL_LICENSE.txt": {
       "size": 11358,
@@ -284,7 +289,7 @@
     },
     "src/main.c": {
       "size": 39928,
-      "sha256": "08c9fd7b86b613d4339369f76b44832c5328f8c001dba64e2e2d8c0646d32a8f"
+      "sha256": "bd55cd1c01b7a5c069eb7c54a4e261ecd2a42bfa1ced079b551c1903c8ea2428"
     },
     "src/reader.h": {
       "size": 583,
@@ -339,12 +344,16 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 30746,
-      "sha256": "b7b0c4c18c21b19b11557f8275cb6e31c6df9419ba38df1a049f2530302d0b45"
+      "size": 30775,
+      "sha256": "f48e6d71b1b66fe9febebc35318ad4b4020f5c2c0c5fdb75050e04395486d58c"
     },
     "src/web_server.h": {
       "size": 421,
       "sha256": "7d7df31fd21a9fc2046fb2558a59a8397d7033be5cc6aaaab58969b44e69ce9b"
+    },
+    "toolchain-lock.json": {
+      "size": 249,
+      "sha256": "fdea0b63dd3d8e158f781d7e3ca514dddc356795999e9b8a923a57d69f6322d7"
     },
     "web/THIRD_PARTY_LICENSES.txt": {
       "size": 14070,
@@ -355,12 +364,12 @@
       "sha256": "a0c683e13d9bb0fef59a73da93b419ad551b2f6de39c0290454f97d90e645d06"
     },
     "web/app.js": {
-      "size": 41154,
-      "sha256": "425f63edab303c1a9ef18daa4639b81c3119a9bfd04d889a448883b9ff9323fa"
+      "size": 41173,
+      "sha256": "c39c9c36935c47ef01ecf2d6d957fe6a183a4a7eb6aee5c5ca2ee5dde2cc3410"
     },
     "web/appearance.css": {
-      "size": 9938,
-      "sha256": "c2df97a533f89ca248f47d730b94888bfc23fea9f4177b4890492d35ff940166"
+      "size": 11142,
+      "sha256": "03273b292d5e65b3beb5425b595150bc1f644c8a34b94d252436ba1d78a7e45a"
     },
     "web/archive-worker.js": {
       "size": 442,
@@ -384,15 +393,15 @@
     },
     "web/browser.js": {
       "size": 35906,
-      "sha256": "0602869460adfe6df9b2de2aa010fd4c17e4719879853933ece69505aeed08f5"
+      "sha256": "9f3bd6cf70d7acfa27188e798a93080792c12b2a26f8b55d5a0139b84a319e51"
     },
     "web/can-live.css": {
       "size": 3356,
       "sha256": "7c8515f9d55bf1107de81fea73d7128b594c8c413b599c2fc43890f646788d2b"
     },
     "web/can-live.js": {
-      "size": 34666,
-      "sha256": "d39c4dc8fd1540249e8019525f86f3889495ac4315ffaa82e4236cc0c6216989"
+      "size": 34679,
+      "sha256": "a21d9f41966b277a1f91ec70ff101746e484212a497e34d929ec50314b22c140"
     },
     "web/capture_profiles.json": {
       "size": 3568,
@@ -415,40 +424,44 @@
       "sha256": "e3898329d3898da6496b5bc156cd3d3ce7ee2d855c1e4f6786a3fe23eb143610"
     },
     "web/esp-remote.js": {
-      "size": 13891,
-      "sha256": "9b3d2861291a9167e508ff5ef91d5129db70d309fd803b222c7e39cd6845e367"
+      "size": 19575,
+      "sha256": "aa2981e5fad6b7f23507f9067ba170a26458ce0fed3061a336021c68cf7a3071"
     },
     "web/files.js": {
-      "size": 6494,
-      "sha256": "0c0c7c0fb85c90422df7e6e474bf5133af45fc20aa5f45644b0b9d4d7f42d54e"
+      "size": 5599,
+      "sha256": "73437b342fa3dbacfaedafbd11003f385e8bb7b3383683bc7761e174c9120b6f"
     },
     "web/flash-core.js": {
       "size": 7854,
       "sha256": "2356b37c32333ac5079f55b323a60c34e44eb2b19a2b76930c729f4b1c65baad"
     },
     "web/flash-page.js": {
-      "size": 7693,
-      "sha256": "ca09af9b509fd34fb77ebf0e5884bcd13a2688a643ad8008f19858c8b6d0bc78"
+      "size": 7733,
+      "sha256": "98ba27e2cbff826e1b24fa51a5f2098d7ab7550a5d3d3b77c47d3c72d527f0bd"
     },
     "web/flash.html": {
       "size": 3819,
       "sha256": "2e12e3a7aa288a4dba262b09ec4b7e4592e8b716175a39c9f184cc903311cf47"
     },
     "web/i18n.js": {
-      "size": 101194,
-      "sha256": "b3121b3c36b994ce184f61d1f7e23832bda82eafa793b6367107febd4af438dc"
+      "size": 145086,
+      "sha256": "b4ff866555d058b837bb42820b14c3ee1d3e839ab6a6bad6180cf97ecd4194e4"
     },
     "web/icon.svg": {
-      "size": 483,
-      "sha256": "4c0e6881eb504d936b1611712b87f6e63184acd5b5c90b5c7e5a05683262d8ca"
+      "size": 549,
+      "sha256": "6002bf4015040f8f414ca7295489ed75cbc6f37c55c3cf44d65e84e03477971a"
     },
     "web/index.html": {
-      "size": 43041,
-      "sha256": "20c230bf5453e3b6fea0e2035e7ed243237dd88a91f7960b3f3b0d9ca90f6e6f"
+      "size": 38821,
+      "sha256": "9470b942a73bf0876ce853503509f276f5860fe6923efbaf31d8130536ea76a8"
+    },
+    "web/kolumbus-logo.svg": {
+      "size": 2565,
+      "sha256": "98505fd0fa6593aef5a962f8362457dd2fbc6e94cdfb41c42ab1e64a7f2124f1"
     },
     "web/manifest.webmanifest": {
-      "size": 250,
-      "sha256": "a7929386f63ff12cc0a9ad39d0ad461c8adb8bb817399974509f15e725dd23e6"
+      "size": 267,
+      "sha256": "f8b47c638c8f711b489c82e82f3ac76c95a0141f98875a5c00d67de476768256"
     },
     "web/metrics.js": {
       "size": 2806,
@@ -479,8 +492,8 @@
       "sha256": "9dcf6f8f96c53f54e962bb4a6e18913317c70cec84c10d491fa8bda3f80c2ac5"
     },
     "web/spard-battery.js": {
-      "size": 5091,
-      "sha256": "6e2317a926395d5855dee5038eb238eb0187a38abd3bebb865bf28d99dca492e"
+      "size": 5340,
+      "sha256": "38e8886058d15697175635863f5d580e69e3af1b38c33d5b24bfafe3d0cba429"
     },
     "web/spard-can.js": {
       "size": 3992,
@@ -507,8 +520,8 @@
       "sha256": "4a5249cb2147f34911f1e704fc34a0787b0f6903b59305b3352df1993fc0d0df"
     },
     "web/sw.js": {
-      "size": 4880,
-      "sha256": "f0d999890faae52d50d356751ddfb0e838ef6b0e6e35baf5a201fcd6f4be7ab0"
+      "size": 4884,
+      "sha256": "9ec88dbf2139ee473e8195524bebd244308a0ead8d175e9f824d21ac043ae447"
     },
     "web/transport.js": {
       "size": 13808,

@@ -204,7 +204,7 @@ function renderBrowser(s){
  const rx=s.device?.rx_check,rxRunning=rx?.state==='running';
  $('checkRx').disabled=!c.connected||!rx||recording||!!a.scan?.active||s.device?.can==='running'||rxRunning;
  text('rxCheckResult',!c.connected?'Подключите ридер.':!rx?'Нужна прошивка ESP32 0.4.2.':rxRunning?'Проверка… до 10 секунд':rx.state==='cancelled'?'Проверка остановлена.':rx.state==='complete'?(rx.edges>0?'На CRX есть активность.':'Импульсов на CRX нет.'):'Проверка не запускалась.');
- text('rxCheckDetails',rx?`${rx.limit_reached?'Не менее ':''}${rx.edges} перепадов · ${rx.elapsed_ms} мс · GPIO5: ${rx.level}. Это проверка цифровой активности, а не определение скорости или подтверждение CAN.`:'');
+ text('rxCheckDetails',rx&&rx.state!=='idle'?`${rx.limit_reached?'Не менее ':''}${rx.edges} перепадов · ${rx.elapsed_ms} мс · GPIO5: ${rx.level}. Это проверка цифровой активности, а не определение скорости или подтверждение CAN.`:'');
  if(rxRunning){$('stopButton').disabled=false;$('startButton').disabled=true;}
  const monitor=a.monitor||{};
  text('monitorState',a.support?.last?.kind==='flash'&&a.support.last.state==='started'?'Обновление ESP32…':a.support?.ready?(a.support.last?.state==='started'?'Удалённая проверка идёт':'Поддержка подключена'):!monitor.enabled?'Выключена':!c.connected?'USB отключён':monitor.error?'Нет связи с сервером':monitor.last_sent?'Отправляется':'Подключение…');

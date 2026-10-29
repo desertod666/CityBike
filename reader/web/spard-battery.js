@@ -23,12 +23,15 @@
     text('spardBatteryBadge',active?(state.mode==='listen'?'Наблюдение линии':'Идёт чтение'):!f?'Ожидание данных':reading.cached?'Сохранённое чтение':'Последнее чтение');
     text('spardBatteryCountdown',active&&state.remaining_ms>0?String(Math.floor(Math.ceil(state.remaining_ms/1000)/60)).padStart(2,'0')+':'+String(Math.ceil(state.remaining_ms/1000)%60).padStart(2,'0'):active?'Подготовка / сохранение':'');
     const progress=$('spardBatteryProgress');if(progress){progress.hidden=!active;progress.value=state.phase==='opening'?0:state.duration_s?Math.max(0,Math.min(1,1-state.remaining_ms/(state.duration_s*1000))):0;}
+    const history=$('spardBatteryHistoryNote');if(history)history.hidden=!f||!reading.cached;
     if(!f)return;
     text('spardBatterySummary','Прошивка '+(f.firmware_version||'не определена')+' · '+f.cell_count+' ячеек · разброс '+f.delta_cell_mv+' мВ');
-    const stamp=new Date(reading.receivedUtc);text('spardBatteryTime',(reading.cached?'Сохранено: ':'Прочитано: ')+(Number.isNaN(stamp.getTime())?'время неизвестно':stamp.toLocaleTimeString(globalThis.ByI18n?.locale?.()||'ru-RU'))+' · штатный адаптер Spard');
+    const stamp=new Date(reading.receivedUtc);text('spardBatteryTime',(reading.cached?'Сохранено: ':'Прочитано: ')+(Number.isNaN(stamp.getTime())?'время неизвестно':stamp.toLocaleString(globalThis.ByI18n?.locale?.()||'ru-RU'))+' · штатный адаптер Spard');
     text('spardCellSumValue',number.format(f.cell_sum_mv/1000));
     text('spardCurrentValue',number.format(f.current_ma/1000));
     text('spardSocValue',f.soc_percent>=0&&f.soc_percent<=100?number.format(f.soc_percent):'—');
+    text('spardFullCapacityValue',number.format(f.full_charge_capacity_mah));
+    text('spardRemainingCapacityValue',number.format(f.remaining_capacity_mah));
     text('spardPowerValue',number.format(f.cell_sum_mv*f.current_ma/1e6));
     const cells=$('spardCells');cells.replaceChildren();
     for(const [index,value]of f.cells_mv.entries()){

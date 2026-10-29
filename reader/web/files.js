@@ -47,18 +47,16 @@
   }
   globalThis.ByFiles={FileUploader,LIMIT,get busy(){return activeUploads>0;}};
   if(typeof document==='undefined')return;
-  const input=document.getElementById('analysisFile'),button=document.getElementById('sendAnalysisFile'),cancel=document.getElementById('cancelAnalysisFile'),progress=document.getElementById('analysisFileProgress'),status=document.getElementById('analysisFileStatus'),list=document.getElementById('analysisFileReceipts');
+  const input=document.getElementById('analysisFile'),button=document.getElementById('sendAnalysisFile'),cancel=document.getElementById('cancelAnalysisFile'),progress=document.getElementById('analysisFileProgress'),status=document.getElementById('analysisFileStatus');
   if(!input||!button)return;
-  let receipts=[];try{const saved=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(saved))receipts=saved.filter(x=>x&&typeof x.filename==='string'&&typeof x.id==='string').slice(0,5);}catch{}
-  const filename=value=>{const span=document.createElement('span');span.dataset.i18nSkip='';span.textContent=value;return span;};
-  const fileStatus=(prefix,name,suffix)=>status.replaceChildren(document.createTextNode(prefix),filename(name),document.createTextNode(suffix));
-  const render=()=>{list.replaceChildren();for(const row of receipts){const item=document.createElement('p');item.append(filename(row.filename),document.createTextNode(' · '+(row.bytes/1048576).toFixed(2)+' МиБ · код '+row.id));list.append(item);}};render();
-  const uploader=new FileUploader(row=>{progress.hidden=false;progress.value=row.percent;fileStatus(row.phase==='hashing'?'Проверка файла: ':row.phase==='verifying'?'Проверка получения: ':'Отправка: ',row.name,' · '+row.percent+'%');});
+  // Manual attachment history is deliberately not retained in the UI.
+  try{localStorage.removeItem(KEY);}catch{}
+  const uploader=new FileUploader(row=>{progress.hidden=false;progress.value=row.percent;status.textContent=(row.phase==='hashing'?'Проверка файла: ':row.phase==='verifying'?'Проверка получения: ':'Отправка: ')+row.percent+'%';});
   button.addEventListener('click',()=>input.click());cancel.addEventListener('click',()=>uploader.cancel());
   input.addEventListener('change',async()=>{
     const file=input.files?.[0];if(!file)return;
     button.disabled=true;cancel.hidden=false;
-    try{const receipt=await uploader.send(file);receipts=[receipt,...receipts].slice(0,5);try{localStorage.setItem(KEY,JSON.stringify(receipts));}catch{}render();fileStatus('Файл «',file.name,'» получен. Напишите в чате «готово» для начала разбора.');}
+    try{await uploader.send(file);status.textContent='Файл получен сервером.';}
     catch(error){status.textContent=error.name==='AbortError'?'Загрузка отменена или истекло время ожидания. Можно выбрать файл повторно.':String(error.message||error);}
     finally{button.disabled=false;cancel.hidden=true;progress.hidden=true;input.value='';}
   });

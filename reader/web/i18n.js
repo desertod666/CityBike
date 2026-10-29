@@ -1,9 +1,313 @@
 /* UI text only. Protocol payloads, passwords and user-entered values are excluded. */
 'use strict';
 (() => {
-  const rows=String.raw`Управлять пультом\tControl remote\tStyr fjernkontroll
+  const rows=String.raw`Пульт доступен при подключении ESP32 по USB	The remote is available when ESP32 is connected by USB	Fjernkontrollen er tilgjengelig når ESP32 er koblet til via USB
+Файл получен сервером.	File received by the server.	Filen er mottatt av serveren.
+Чтение через адаптер Spard	Reading through the Spard adapter	Avlesning via Spard-adapteren
+Полные данные батареи ещё не получены. Последние показания CAN доступны выше.	Detailed battery data has not been received yet. The latest CAN readings are shown above.	Detaljerte batteridata er ikke mottatt ennå. De siste CAN-avlesningene vises ovenfor.
+Сохранённые данные. Для текущей батареи нужно новое чтение.	Saved readings. A new reading is needed for the current battery.	Lagrede avlesninger. Det kreves en ny avlesning for det nåværende batteriet.
+Найдено портов:	Ports found:	Funnet porter:
+Автоподбор · этап	Auto tuning · stage	Automatisk innstilling · trinn
+с на этап	s per stage	s per trinn
+Этап	Stage	Trinn
+Не меняйте состояние велосипеда. Остановка — кнопкой «Остановить автоподбор».	Keep the bicycle state unchanged. Use “Stop tuning” to stop.	Hold sykkelens tilstand uendret. Bruk «Stopp automatisk innstilling» for å stoppe.
+Очередь:	Queued:	I kø:
+Нужен ключ владельца	Owner key required	Eiernøkkel kreves
+Серверная панель владельца выключена	The owner server console is disabled	Eierens serverpanel er deaktivert
+Одновременно подключены два USB-моста	Two USB bridges are connected at the same time	To USB-broer er tilkoblet samtidig
+Нет свежего состояния USB-ридера	No fresh USB reader status	Ingen fersk status fra USB-leseren
+Не выбран единственный штатный адаптер	A single original adapter has not been selected	Én enkelt originaladapter er ikke valgt
+Удалённые тесты не разрешены на USB-мосте	Remote tests are not permitted on the USB bridge	Fjerntester er ikke tillatt på USB-broen
+Нужны точные поля задания	Exact job fields are required	Nøyaktige oppgavefelt kreves
+Подтвердите физическое отсоединение CAN для выбранного ридера	Confirm physical CAN disconnection for the selected reader	Bekreft fysisk frakoblet CAN for den valgte leseren
+Неизвестное действие	Unknown action	Ukjent handling
+Справка Spard пока недоступна	Spard reference is currently unavailable	Spard-referansen er utilgjengelig nå
+Слишком много неверных попыток. Повторите позже.	Too many failed attempts. Try again later.	For mange mislykkede forsøk. Prøv igjen senere.
+Не подтверждён ключ USB-моста	The USB bridge key was not verified	USB-broens nøkkel er ikke bekreftet
+Смена ридера требует ключ владельца	Changing the reader requires the owner key	Bytte av leser krever eiernøkkelen
+Не подтверждён штатный USB-адаптер	The original USB adapter was not verified	Originaladapteren via USB er ikke bekreftet
+Первое подключение адаптера требует ключ владельца	First adapter connection requires the owner key	Første tilkobling av adapteren krever eiernøkkelen
+Время USB-моста сброшено; нужна новая эпоха	The USB bridge clock reset; a new epoch is required	USB-broens klokke ble nullstilt; en ny epoke kreves
+Вкладка USB-моста не поддерживает действие	The USB bridge tab does not support this action	Fanen for USB-broen støtter ikke denne handlingen
+Штатный адаптер поддерживает только чтение Spard	The original adapter supports Spard reading only	Originaladapteren støtter bare avlesning av Spard
+Этот id уже относится к другому действию	This ID already belongs to a different action	Denne ID-en tilhører allerede en annen handling
+Тест ещё не подтвердил запуск; дождитесь состояния started	Test start is not confirmed yet; wait for the started state	Teststart er ikke bekreftet ennå; vent til tilstanden er started
+Есть неподтверждённое задание	A job is awaiting confirmation	En oppgave venter på bekreftelse
+Выбранный ридер изменился; подтвердите его подключение заново	The selected reader changed; confirm its connection again	Den valgte leseren ble endret; bekreft tilkoblingen på nytt
+Предыдущее задание ещё не завершено	The previous job has not finished yet	Den forrige oppgaven er ikke ferdig ennå
+Нужна прошивка ESP 0.5.5 с самотестом	ESP firmware 0.5.5 with selftest support is required	ESP-fastvare 0.5.5 med støtte for selvtest kreves
+Нужна прошивка ESP 0.5.2+ с опросом батареи	ESP firmware 0.5.2+ with battery query support is required	ESP-fastvare 0.5.2+ med støtte for batterilesing kreves
+Выбранный ридер изменился; подтвердите его состояние заново	The selected reader changed; confirm its state again	Den valgte leseren ble endret; bekreft tilstanden på nytt
+Для опроса тихой линии нужна прошивка ESP 0.5.7	Quiet-bus queries require ESP firmware 0.5.7	Forespørsler på stille buss krever ESP-fastvare 0.5.7
+USB-ридер занят	USB reader is busy	USB-leseren er opptatt
+Не подтверждена защита CTX	CTX protection was not verified	CTX-beskyttelsen ble ikke bekreftet
+Пассивный приём не подтверждён или уже запущен	Passive reception is not confirmed or is already running	Passivt mottak er ikke bekreftet eller kjører allerede
+Обновите вкладку записи	Reload the recording tab	Last opptaksfanen på nytt
+Нет профилей автоподбора	No reception tuning profiles	Ingen profiler for automatisk mottaksinnstilling
+Обновите вкладку для режима наблюдения	Reload the tab for observation mode	Last fanen på nytt for observasjonsmodus
+Нужен Chrome или Edge с доступом к последовательным портам	Chrome or Edge with serial-port access is required	Chrome eller Edge med tilgang til serieporter kreves
+Выбран наш ESP32. Нажмите снова и выберите штатный донгл Spard (COM4).	You selected the ESP32. Try again and choose the original Spard adapter (COM4).	Du valgte ESP32. Prøv igjen og velg originaladapteren fra Spard (COM4).
+Сначала завершите текущий тест	Finish the current test first	Avslutt den pågående testen først
+Обновление ESP32 ·	ESP32 update ·	ESP32-oppdatering ·
+Запись ещё не завершена	Recording has not finished yet	Opptaket er ikke ferdig ennå
+Обновление сайта ждёт завершения текущей работы	Site update is waiting for the current operation to finish	Nettstedsoppdateringen venter til den pågående operasjonen er ferdig
+Устанавливаю обновление сайта…	Installing site update…	Installerer nettstedsoppdatering…
+Сайт обновлён. Восстанавливаю подключение…	Site updated. Restoring connection…	Nettstedet er oppdatert. Gjenoppretter tilkobling…
+Счётчики CAN изменились; запрос BMS не отправлен	CAN counters changed; BMS query was not sent	CAN-tellerne ble endret; BMS-forespørselen ble ikke sendt
+Превышен допуск CAN-ошибок; запрос BMS не отправлен	CAN error allowance exceeded; BMS query was not sent	Grensen for CAN-feil ble overskredet; BMS-forespørselen ble ikke sendt
+Недостаточно CAN-данных в пределах допуска; запрос BMS не отправлен	Insufficient CAN data within the allowed error rate; BMS query was not sent	For lite CAN-data innenfor tillatt feilrate; BMS-forespørselen ble ikke sendt
+Опрос отменён	Query cancelled	Forespørselen ble avbrutt
+Связь или загрузка ESP изменилась; опрос прекращён	Connection or ESP boot changed; query stopped	Tilkoblingen eller ESP-oppstarten ble endret; forespørselen ble stoppet
+Остановка и пассивное состояние ESP не подтверждены	ESP stop and passive state were not confirmed	Stans og passiv tilstand for ESP ble ikke bekreftet
+Завершите текущую операцию перед опросом BMS	Finish the current operation before querying the BMS	Avslutt den pågående operasjonen før du leser BMS
+Для опроса нужен подтверждённый USB-ридер ESP	Queries require a verified USB ESP reader	Forespørsler krever en bekreftet ESP-leser via USB
+Нужна прошивка ESP с подтверждённым режимом опроса BMS	ESP firmware with verified BMS query support is required	ESP-fastvare med bekreftet støtte for BMS-forespørsler kreves
+Нужен фиксированный TRIPLE	Fixed TRIPLE sampling is required	Fast TRIPLE-sampling kreves
+Приём занят другой операцией	Reception is busy with another operation	Mottak er opptatt med en annen operasjon
+Пассивный режим перед проверкой не подтверждён	Passive mode was not confirmed before the check	Passiv modus ble ikke bekreftet før kontrollen
+Проверка CAN не запущена	CAN check did not start	CAN-kontrollen startet ikke
+Состояние CAN изменилось; запрос BMS не отправлен	CAN state changed; BMS query was not sent	CAN-tilstanden ble endret; BMS-forespørselen ble ikke sendt
+Есть потери данных; запрос BMS не отправлен	Data loss detected; BMS query was not sent	Datatap ble oppdaget; BMS-forespørselen ble ikke sendt
+Эпоха CAN изменилась; запрос BMS не отправлен	CAN epoch changed; BMS query was not sent	CAN-epoken ble endret; BMS-forespørselen ble ikke sendt
+Потери при завершении проверки; запрос BMS не отправлен	Data loss while ending the check; BMS query was not sent	Datatap ved avslutning av kontrollen; BMS-forespørselen ble ikke sendt
+Опрос не подтвердил безопасное завершение	Safe query completion was not confirmed	Sikker avslutning av forespørselen ble ikke bekreftet
+Граница CAN-потока опроса не подтверждена	The query CAN stream boundary was not confirmed	Grensen for forespørselens CAN-strøm ble ikke bekreftet
+Полный проверенный ответ BMS не получен	A complete verified BMS reply was not received	Et fullstendig bekreftet BMS-svar ble ikke mottatt
+Результат запроса ESP не подтверждён	The ESP query result was not confirmed	Resultatet av ESP-forespørselen ble ikke bekreftet
+Просмотр не восстановлен:	Live view was not restored:	Direktevisningen ble ikke gjenopprettet:
+Запись или обновление ещё идёт	Recording or update is still in progress	Opptak eller oppdatering pågår fortsatt
+Сначала остановите CAN	Stop CAN first	Stopp CAN først
+Прошивка не поддерживает фиксированный TRIPLE	Firmware does not support fixed TRIPLE sampling	Fastvaren støtter ikke fast TRIPLE-sampling
+Завершите текущую операцию и подключите ESP32	Finish the current operation and connect the ESP32	Avslutt den pågående operasjonen og koble til ESP32
+Приём уже запущен	Reception has already started	Mottak er allerede startet
+Пассивный приём ESP32 не подтверждён	Passive ESP32 reception was not confirmed	Passivt mottak fra ESP32 ble ikke bekreftet
+Запуск просмотра не подтверждён	Live view start was not confirmed	Start av direktevisning ble ikke bekreftet
+Идёт отдельный тест; используйте его остановку	A separate test is running; use its stop control	En separat test pågår; bruk testens stoppknapp
+Живой просмотр не запущен	Live view has not started	Direktevisning er ikke startet
+Остановка просмотра не подтверждена	Live view stop was not confirmed	Stans av direktevisning ble ikke bekreftet
+Контекст меняется перед записью	Context is changing before recording	Konteksten endres før opptak
+Хранилище:	Storage:	Lagring:
+Хранилище этого браузера	This browser's storage	Lagring i denne nettleseren
+Идёт автоподбор приёма CAN	CAN reception tuning is in progress	Automatisk innstilling av CAN-mottak pågår
+Дождитесь завершения проверки штатного адаптера	Wait for the original adapter check to finish	Vent til kontrollen av originaladapteren er ferdig
+Приём закреплён: TRIPLE, 250 кбит/с	Reception fixed: TRIPLE, 250 kbit/s	Mottak er fastsatt: TRIPLE, 250 kbit/s
+Подключите ридер	Connect the reader	Koble til leseren
+Сначала остановите CAN и проверку сигнала	Stop CAN and the signal check first	Stopp CAN og signalkontrollen først
+Этот профиль требует прошивку ESP32 0.4.8	This profile requires ESP32 firmware 0.4.8	Denne profilen krever ESP32-fastvare 0.4.8
+Ридер не подтвердил профиль приёма	The reader did not confirm the reception profile	Leseren bekreftet ikke mottaksprofilen
+Выберите тест 30 с, 60 с или 10 минут	Choose a 30 s, 60 s or 10 minute test	Velg en test på 30 s, 60 s eller 10 minutter
+Скорость закреплена: 250 кбит/с	Bitrate fixed: 250 kbit/s	Bithastigheten er fastsatt: 250 kbit/s
+Дождитесь завершения текущей операции	Wait for the current operation to finish	Vent til den pågående operasjonen er ferdig
+Выберите скорость CAN	Choose the CAN bitrate	Velg CAN-bithastighet
+CAN уже запущен; сначала остановите текущий приём	CAN is already running; stop reception first	CAN kjører allerede; stopp mottaket først
+Дождитесь проверки сигнала	Wait for the signal check	Vent på signalkontrollen
+Запуск CAN не подтверждён	CAN start was not confirmed	Start av CAN ble ikke bekreftet
+Запуск отменён до отправки команды	Start cancelled before sending the command	Start ble avbrutt før kommandoen ble sendt
+Остановка исходного сеанса CAN не подтверждена	Stop of the original CAN session was not confirmed	Stans av den opprinnelige CAN-økten ble ikke bekreftet
+Не подтверждено получение последних кадров	Receipt of the final frames was not confirmed	Mottak av de siste rammene ble ikke bekreftet
+Запись сохранена локально; завершение приёма не подтверждено	Recording saved locally; reception stop was not confirmed	Opptaket er lagret lokalt; stans av mottak ble ikke bekreftet
+Запись в браузере сохранена; файл в папку не записан:	Recording saved in the browser; file was not written to the folder:	Opptaket er lagret i nettleseren; filen ble ikke skrevet til mappen:
+Опишите действие, до 120 символов	Describe the action using up to 120 characters	Beskriv handlingen med opptil 120 tegn
+Сначала начните запись	Start recording first	Start opptak først
+Неизвестная настройка	Unknown setting	Ukjent innstilling
+Неверная галочка	Invalid checkbox value	Ugyldig avkrysningsverdi
+Длительность 30 с, 60 с или 10 минут	Duration: 30 s, 60 s or 10 minutes	Varighet: 30 s, 60 s eller 10 minutter
+Неверный режим	Invalid mode	Ugyldig modus
+Неизвестный профиль	Unknown profile	Ukjent profil
+Подключите ридер и остановите CAN	Connect the reader and stop CAN	Koble til leseren og stopp CAN
+Поиск остановлен.	Search stopped.	Søket er stoppet.
+Найдены CAN-кадры. Запуск записи — вручную.	CAN frames found. Start recording manually.	CAN-rammer er funnet. Start opptak manuelt.
+Найдены CAN-кадры, но есть ошибки. Проверьте качество линии; запуск записи — вручную.	CAN frames found with errors. Check the connection quality; start recording manually.	CAN-rammer er funnet med feil. Kontroller tilkoblingen; start opptak manuelt.
+Скорость не установлена: нет однозначного кандидата.	Bitrate not determined: no unambiguous candidate.	Bithastigheten er ikke fastslått: ingen entydig kandidat.
+Отправка выключена	Uploading is off	Opplasting er slått av
+Сервер:	Server:	Server:
+Истекло время подготовки архива; локальная запись сохранена	Archive preparation timed out; the local recording was retained	Klargjøring av arkivet tok for lang tid; det lokale opptaket er beholdt
+Подготовка архива:	Preparing archive:	Klargjør arkiv:
+Отсутствует часть архива	An archive part is missing	En del av arkivet mangler
+Квитанция не соответствует архиву	The receipt does not match the archive	Kvitteringen samsvarer ikke med arkivet
+Результат теста:	Test result:	Testresultat:
+Остановите запись и поиск скорости	Stop recording and bitrate search	Stopp opptak og søk etter bithastighet
+Сначала остановите текущий тест или CAN	Stop the current test or CAN first	Stopp den pågående testen eller CAN først
+Обновите ESP32 до 0.4.2	Update ESP32 to 0.4.2	Oppdater ESP32 til 0.4.2
+Выбор папки доступен на HTTPS-странице в Chrome/Edge	Folder selection requires an HTTPS page in Chrome or Edge	Valg av mappe krever en HTTPS-side i Chrome eller Edge
+Сначала завершите запись	Finish recording first	Avslutt opptaket først
+Идёт обновление ESP32	ESP32 update is in progress	Oppdatering av ESP32 pågår
+Выбрать ESP32 USB…	Select ESP32 USB…	Velg ESP32 USB…
+Нужен Chrome/Edge и HTTPS	Chrome or Edge and HTTPS are required	Chrome eller Edge og HTTPS kreves
+Обновите страницу для самотеста	Reload the page for the selftest	Last siden på nytt for selvtesten
+Обновите страницу для опроса батареи	Reload the page to query the battery	Last siden på nytt for å lese batteriet
+Автоподбор завершён: закреплён TRIPLE, 250 кбит/с	Reception tuning finished: fixed TRIPLE, 250 kbit/s	Mottaksinnstillingen er ferdig: fast TRIPLE, 250 kbit/s
+Используйте отдельную проверку с подтверждением отсоединения CAN	Use the separate check that requires confirming CAN disconnection	Bruk den separate kontrollen som krever bekreftelse på frakoblet CAN
+Дождитесь завершения поиска	Wait for the search to finish	Vent til søket er ferdig
+Эта функция доступна в Windows-программе	This function is available in the Windows application	Denne funksjonen er tilgjengelig i Windows-programmet
+Флаги / DLC	Flags / DLC	Flagg / DLC
+Длина DATA	DATA length	DATA-lengde
+Объект колеса V2.5 требует 6 байт	The V2.5 wheel object requires 6 bytes	Hjulobjektet i V2.5 krever 6 byte
+Длина / флаги SYM	SYM length / flags	SYM-lengde / flagg
+Неподдерживаемое поле SYM; сырые данные сохранены	Unsupported SYM field; raw data retained	SYM-feltet støttes ikke; rådata er beholdt
+Нет связи с пультом	No connection to the remote	Ingen forbindelse med fjernkontrollen
+Не удалось сохранить CAN-запись; отправка кнопки остановлена	Could not save the CAN recording; button transmission stopped	Kunne ikke lagre CAN-opptaket; overføring av knappetrykk ble stoppet
+Сначала включите пульт	Turn the remote on first	Slå på fjernkontrollen først
+Отпустите кнопку перед повторным нажатием	Release the button before pressing again	Slipp knappen før du trykker igjen
+Подтвердите выключение	Confirm shutdown	Bekreft avslåing
+Пульт остановлен. Выключите и включите его снова.	The remote stopped. Turn it off and on again.	Fjernkontrollen er stoppet. Slå den av og på igjen.
+Ридер занят	Reader is busy	Leseren er opptatt
+Включите чтение CAN перед нажатием	Start CAN reading before pressing a button	Start CAN-avlesning før du trykker på en knapp
+Дождитесь BLE-подключения и подписки	Wait for BLE connection and subscription	Vent på BLE-tilkobling og abonnement
+Хранилище недоступно	Storage is unavailable	Lagring er utilgjengelig
+Подключите ESP32 с новой прошивкой	Connect an ESP32 with updated firmware	Koble til en ESP32 med oppdatert fastvare
+Неверный пакет прошивки ридера	Invalid reader firmware package	Ugyldig fastvarepakke for leseren
+Нет проверенного адреса ридера	No verified reader address	Ingen bekreftet leseradresse
+Неполный пакет прошивки	Incomplete firmware package	Ufullstendig fastvarepakke
+Неверный образ или адрес записи	Invalid image or write address	Ugyldig fastvarebilde eller skriveadresse
+Пакет прошивки сейчас недоступен	The firmware package is currently unavailable	Fastvarepakken er utilgjengelig nå
+Не удалось скачать	Could not download	Kunne ikke laste ned
+Проверка SHA-256 не пройдена:	SHA-256 verification failed:	SHA-256-kontrollen mislyktes:
+Монитор: сервер не подтвердил пакет	Monitor: server did not acknowledge the packet	Overvåking: serveren bekreftet ikke pakken
+Ридер занят отдельным тестом	Reader is busy with a separate test	Leseren er opptatt med en separat test
+Дождитесь проверки RX	Wait for the RX check	Vent på RX-kontrollen
+Пассивное состояние ESP не подтверждено	Passive ESP state was not confirmed	Passiv ESP-tilstand ble ikke bekreftet
+Для самотеста нужна прошивка ESP 0.5.5+.	The selftest requires ESP firmware 0.5.5+.	Selvtesten krever ESP-fastvare 0.5.5+.
+Сначала выключите пульт ESP32	Turn the ESP32 remote off first	Slå av ESP32-fjernkontrollen først
+Для обновления нужен свободный подтверждённый USB-ридер и остановленный CAN	Updating requires an available verified USB reader and stopped CAN	Oppdatering krever en ledig, bekreftet USB-leser og stoppet CAN
+Не подтверждён пакет обновления	The update package was not verified	Oppdateringspakken ble ikke bekreftet
+Удалённая поддержка выключена или идут ручные испытания	Remote support is off or manual testing is active	Fjernstøtte er slått av, eller manuell testing er aktiv
+Пакет прошивки изменился; запись отменена	The firmware package changed; writing cancelled	Fastvarepakken ble endret; skriving ble avbrutt
+Состояние ридера изменилось до обновления	Reader state changed before the update	Leserens tilstand ble endret før oppdateringen
+Разрешение на обновление отозвано до записи	Update permission was revoked before writing	Tillatelsen til oppdatering ble trukket tilbake før skriving
+Разрешение отозвано до физической записи	Permission was revoked before the physical write	Tillatelsen ble trukket tilbake før fysisk skriving
+После обновления пришла другая версия или CAN не остановлен	After updating, the version differs or CAN is not stopped	Etter oppdatering er versjonen en annen, eller CAN er ikke stoppet
+Файлы записаны; USB после перезапуска пока не подтверждён	Files written; USB connection after restart is not yet confirmed	Filene er skrevet; USB-tilkobling etter omstart er ikke bekreftet ennå
+Неизвестный режим адаптера	Unknown adapter mode	Ukjent adaptermodus
+Проверка адаптера: 30 или 120 секунд	Adapter check: 30 or 120 seconds	Adapterkontroll: 30 eller 120 sekunder
+Неверный контекст парного теста	Invalid paired-test context	Ugyldig kontekst for sammenligningstesten
+Штатный адаптер уже занят диагностикой	The original adapter is already busy with diagnostics	Originaladapteren er allerede opptatt med diagnostikk
+Диагностика адаптера остановлена	Adapter diagnostics stopped	Adapterdiagnostikken er stoppet
+Чтение адаптера:	Reading adapter:	Leser adapter:
+Найдено несколько CH340. Оставьте подключённым один штатный адаптер.	Multiple CH340 devices found. Leave only one original adapter connected.	Flere CH340-enheter er funnet. La bare én originaladapter være tilkoblet.
+Сначала нажмите «Определить адаптер Spard» и выберите COM4.	First click “Identify Spard adapter” and select COM4.	Trykk først på «Identifiser Spard-adapter» og velg COM4.
+Открываю штатный адаптер. Программа Spard должна освободить COM4…	Opening the original adapter. The Spard application must release COM4…	Åpner originaladapteren. Spard-programmet må frigjøre COM4…
+USB-поток адаптера закрыт	The adapter USB stream closed	Adapterens USB-strøm er lukket
+Достигнут предел записи USB; не сохранено	USB recording limit reached; bytes not saved:	Grensen for USB-opptak er nådd; byte som ikke ble lagret:
+Наблюдение линии · осталось	Line observation · remaining	Observerer linjen · gjenstår
+Штатный адаптер · осталось	Original adapter · remaining	Originaladapter · gjenstår
+с · принято	s · received	s · mottatt
+· диагностический лог отправлен, код	· diagnostic log uploaded, ID	· diagnostikkloggen er lastet opp, ID
+Наблюдение линии завершено:	Line observation finished:	Observasjonen av linjen er ferdig:
+Проверка адаптера завершена:	Adapter check finished:	Adapterkontrollen er ferdig:
+целых пакетов. Лог отправлен, код	complete packets. Log uploaded, ID	fullstendige pakker. Loggen er lastet opp, ID
+Не удалось отправить диагностический лог:	Could not upload the diagnostic log:	Kunne ikke laste opp diagnostikkloggen:
+Сначала завершите текущий тест ESP32	Finish the current ESP32 test first	Avslutt den pågående ESP32-testen først
+Проверка адаптера ещё идёт	Adapter check is still running	Adapterkontrollen pågår fortsatt
+Закройте другие вкладки панели для обновления хранилища	Close other panel tabs to update storage	Lukk andre faner med panelet for å oppdatere lagringen
+Ошибка хранилища	Storage error	Lagringsfeil
+Запись уже открыта в другой вкладке	Recording is already open in another tab	Opptaket er allerede åpent i en annen fane
+Вкладка закрыта или браузер перезапущен	The tab closed or the browser restarted	Fanen ble lukket, eller nettleseren startet på nytt
+Не удалось сохранить запись	Could not save the recording	Kunne ikke lagre opptaket
+Отсутствует часть записи	Missing recording part	Manglende opptaksdel
+Размер архива вне лимита сервера	Archive size exceeds the server limit	Arkivet er større enn serverens grense
+Запись уже завершается	Recording is already being finalized	Opptaket ferdigstilles allerede
+Достигнут лимит сеанса 128 МиБ; запись сохранена	Session limit of 128 MiB reached; recording saved	Øktgrensen på 128 MiB er nådd; opptaket er lagret
+Удалённое действие отозвано или срок истёк	Remote action revoked or expired	Fjernhandlingen er trukket tilbake eller utløpt
+Парный тест отозван, ридер отключён или срок истёк	Paired test revoked, reader disconnected or time expired	Sammenligningstesten er trukket tilbake, leseren er frakoblet eller tiden er utløpt
+Исходная запись парного теста больше не активна	The original recording for the paired test is no longer active	Det opprinnelige opptaket for sammenligningstesten er ikke lenger aktivt
+Парный тест требует один разрешённый штатный адаптер 1A86:7523	Paired testing requires one permitted original adapter 1A86:7523	Sammenligningstesting krever én tillatt originaladapter 1A86:7523
+Нет исходного сеанса записи CAN	No original CAN recording session	Ingen opprinnelig CAN-opptaksøkt
+Запись CAN завершилась до конца парного теста	CAN recording ended before the paired test finished	CAN-opptaket ble avsluttet før sammenligningstesten var ferdig
+Нет квитанции диагностического лога адаптера	No receipt for the adapter diagnostic log	Ingen kvittering for adapterens diagnostikklogg
+Сеанс записи CAN изменился	The CAN recording session changed	CAN-opptaksøkten ble endret
+Завершение исходной записи CAN не подтверждено	Completion of the original CAN recording was not confirmed	Avslutning av det opprinnelige CAN-opptaket ble ikke bekreftet
+STOP не относится к текущей удалённой проверке	STOP does not refer to the current remote check	STOP gjelder ikke den pågående fjernkontrollen
+Ридер занят пользователем	Reader is being used locally	Leseren brukes lokalt
+Удалённая проверка адаптера отозвана или срок истёк	Remote adapter check revoked or expired	Fjernkontrollen av adapteren er trukket tilbake eller utløpt
+Удалённый автоподбор отозван или срок серии истёк	Remote tuning revoked or the test series expired	Fjerninnstillingen er trukket tilbake, eller testserien er utløpt
+Ридер не подтвердил настройку выборки	The reader did not confirm sampling settings	Leseren bekreftet ikke samplingsinnstillingene
+Ридер: HTTP	Reader: HTTP	Leser: HTTP
+Команда отклонена	Command rejected	Kommandoen ble avvist
+Для USB откройте эту HTTPS-страницу в Chrome или Edge на ПК	For USB, open this HTTPS page in Chrome or Edge on a PC	For USB må du åpne denne HTTPS-siden i Chrome eller Edge på en PC
+Выбрано другое устройство	A different device was selected	En annen enhet ble valgt
+Это не наш подтверждённый ESP32 CAN-ридер	This is not a verified ESP32 CAN reader	Dette er ikke en bekreftet ESP32 CAN-leser
+Ридер перезапущен или ответ не соответствует команде	Reader restarted or the reply does not match the command	Leseren startet på nytt, eller svaret samsvarer ikke med kommandoen
+Нет итогового состояния команды	No final command state	Ingen avsluttende kommandotilstand
+Ридер перезапущен во время команды	Reader restarted during the command	Leseren startet på nytt under kommandoen
+Выбранный USB-ридер изменился	The selected USB reader changed	Den valgte USB-leseren ble endret
+Команда запрещена	Command is not permitted	Kommandoen er ikke tillatt
+Исход предыдущей команды неизвестен; переподключите USB	The previous command outcome is unknown; reconnect USB	Utfallet av forrige kommando er ukjent; koble til USB på nytt
+Самостоятельный опрос требует подтверждённый USB ESP 0.5.2+	Independent queries require a verified USB ESP running 0.5.2+	Selvstendige forespørsler krever en bekreftet USB-ESP med 0.5.2+
+Нет ответа USB; исход команды неизвестен:	No USB reply; command outcome is unknown:	Ingen USB-respons; utfallet av kommandoen er ukjent:
+Это не наш CAN-ридер	This is not our CAN reader	Dette er ikke vår CAN-leser
+Сеть или устройство изменились; команды не отправляются	Network or device changed; commands are not being sent	Nettverket eller enheten ble endret; kommandoer sendes ikke
+Нет полной серии с двумя контрольными записями TRIPLE.	The complete series with two TRIPLE reference recordings is missing.	Den fullstendige serien med to TRIPLE-referanseopptak mangler.
+Состав или интенсивность CAN изменились между контрольными тестами.	CAN message mix or traffic rate changed between reference tests.	Sammensetningen eller mengden av CAN-trafikk ble endret mellom referansetestene.
+Частота ошибок между контрольными тестами изменилась более чем вдвое.	The error rate more than doubled between reference tests.	Feilraten ble mer enn doblet mellom referansetestene.
+Предварительный кандидат по ошибкам и сохранению состава сообщений. Требует повторной проверки.	Preliminary candidate based on errors and retained message mix. Repeat verification is required.	Foreløpig kandidat basert på feil og bevart meldingssammensetning. Ny kontroll kreves.
+Нет профиля с достаточным приёмом сообщений.	No profile received enough messages.	Ingen profil mottok nok meldinger.
+Выберите 30 или 60 секунд на этап	Choose 30 or 60 seconds per stage	Velg 30 eller 60 sekunder per trinn
+Подключите USB-ридер и завершите текущую операцию	Connect the USB reader and finish the current operation	Koble til USB-leseren og avslutt den pågående operasjonen
+Для автоподбора установите прошивку ESP32 0.4.8	Install ESP32 firmware 0.4.8 for reception tuning	Installer ESP32-fastvare 0.4.8 for automatisk mottaksinnstilling
+Автоподбор остановлен	Reception tuning stopped	Automatisk mottaksinnstilling er stoppet
+Этап прерван или сохранение всех принятых кадров не подтверждено	Stage interrupted or preservation of all received frames was not confirmed	Trinnet ble avbrutt, eller lagring av alle mottatte rammer ble ikke bekreftet
+Исходный профиль не восстановлен:	The original profile was not restored:	Den opprinnelige profilen ble ikke gjenopprettet:
+Не сохранён итог серии:	Could not save the series summary:	Kunne ikke lagre sammendraget av serien:
+В текущем сообщении нет предупреждения	No current warning reported	Ingen aktuell advarsel rapportert
+Тормоз уже нажат	Brake already applied	Bremsen er aktivert
+Ошибка ручки газа	Throttle fault	Feil på gasshendel
+Ручка газа не вернулась в ноль	Throttle not returned to zero	Gasshendelen er ikke tilbake i nullstilling
+Пониженное напряжение	Undervoltage	Underspenning
+Повышенное напряжение	Overvoltage	Overspenning
+Ошибка сигнальных проводов датчиков Холла мотора	Motor Hall signal wiring fault	Feil på ledninger til motorens Hall-sensorer
+Ошибка фазных проводов мотора	Motor phase wiring fault	Feil på motorens faseledninger
+Защита от перегрева мотора	Motor overtemperature protection	Motorvern mot overtemperatur
+Ошибка датчика температуры мотора	Motor temperature sensor fault	Feil på motorens temperatursensor
+Ошибка датчика тока	Current sensor fault	Feil på strømsensor
+Защита от перегрева контроллера	Controller overtemperature protection	Kontrollervern mot overtemperatur
+Ошибка датчика температуры контроллера	Controller temperature sensor fault	Feil på kontrollerens temperatursensor
+Ошибка датчика скорости	Speed sensor fault	Feil på hastighetssensor
+Ошибка переднего света	Headlight fault	Feil på frontlys
+Ошибка сигнала датчика момента	Torque sensor signal fault	Feil på signal fra momentsensor
+Превышен ток	Overcurrent	Overstrøm
+Ошибка связи HMI и контроллера	HMI/controller communication fault	Kommunikasjonsfeil mellom HMI og kontroller
+Защита от низкого напряжения	Low voltage protection	Vern mot underspenning
+Защита от повышенного напряжения	Overvoltage protection	Vern mot overspenning
+Ошибка цепи определения тормоза	Brake detection circuit fault	Feil i krets for bremseregistrering
+Ошибка контроля питания 15 В	15 V supply detection fault	Feil i overvåking av 15 V forsyning
+Ошибка цепи определения кнопки	Key detection circuit fault	Feil i krets for knapperegistrering
+Напряжение батареи слишком высокое	Battery total voltage too high	Batterispenningen er for høy
+Напряжение батареи слишком низкое	Battery total voltage too low	Batterispenningen er for lav
+Ток ячеек батареи слишком большой	Battery cell current too high	Battericellenes strøm er for høy
+Температура батареи слишком высокая	Battery temperature too high	Batteritemperaturen er for høy
+Температура батареи слишком низкая	Battery temperature too low	Batteritemperaturen er for lav
+SOC батареи слишком высокий	Battery SOC too high	Batteriets SOC er for høy
+SOC батареи слишком низкий	Battery SOC too low	Batteriets SOC er for lav
+Трансмиссия заклинила	Transmission stuck	Giret sitter fast
+Трансмиссия не сбрасывается	Transmission cannot reset	Giret kan ikke tilbakestilles
+Электронный замок заклинил	Electronic lock stuck	Den elektroniske låsen sitter fast
+Ошибка модуля Bluetooth	Bluetooth module fault	Feil på Bluetooth-modul
+Для самостоятельного опроса нужна прошивка ESP 0.5.2+. Ответы из CAN отображаются и с 0.4.9.	Independent queries require ESP firmware 0.5.2+. CAN replies can also be displayed with 0.4.9.	Selvstendige forespørsler krever ESP-fastvare 0.5.2+. CAN-svar kan også vises med 0.4.9.
+контроллер	controller	kontroller
+датчик	sensor	sensor
+батарея	battery	batteri
+SYM проверяется	SYM decoding under review	SYM-dekoding kontrolleres
+получено	received	mottatt
+Напряжения ячеек	Cell voltages	Cellespenninger
+История показаний	Reading history	Avlesningshistorikk
+Не менее	At least	Minst
+перепадов	edges	flanker
+мс	ms	ms
+Это проверка цифровой активности, а не определение скорости или подтверждение CAN.	This checks digital activity; it does not determine the bitrate or confirm CAN traffic.	Dette kontrollerer digital aktivitet, men fastslår ikke bithastighet eller bekrefter CAN-trafikk.
+Файлы	Files	Filer
+Загруженные файлы	Uploaded files	Opplastede filer
+Адаптер Spard	Spard adapter	Spard-adapter
+Подключение адаптера	Adapter connection	Adaptertilkobling
+Подключите штатный адаптер в настройках ниже.	Connect the original adapter using the settings below.	Koble til originaladapteren i innstillingene nedenfor.
+Kolumbus Bysykkel · Диагностика	Kolumbus Bysykkel · Diagnostics	Kolumbus Bysykkel · Diagnostikk
+CAN записывается до нажатия и после отпускания: 3 секунды для обычных кнопок, 30 секунд для Power off.	CAN is recorded before the press and after release: 3 seconds for other buttons, 30 seconds for Power off.	CAN tas opp før knappetrykk og etter at knappen slippes: 3 sekunder for andre knapper, 30 sekunder for Power off.
+Русский	Russian	Russisk
+Управлять пультом\tControl remote\tStyr fjernkontroll
 Пульт ESP32\tESP32 remote\tESP32-fjernkontroll
 Включить пульт\tTurn remote on\tSlå på fjernkontroll
+Управление пультом передано другой странице\tRemote control was transferred to another page\tStyringen av fjernkontrollen ble overført til en annen side
+CAN и пульт работают вместе через одно подключение ESP32. При включении пульта чтение CAN запускается автоматически.\tCAN and the remote share one ESP32 connection. Turning the remote on also starts CAN reading.\tCAN og fjernkontrollen bruker samme ESP32-tilkobling. CAN-avlesning starter når fjernkontrollen slås på.
 Выключить пульт\tTurn remote off\tSlå av fjernkontroll
 Удерживайте кнопку для действия. Отпустите, чтобы завершить.\tHold a button to act. Release it to stop.\tHold inne en knapp for å utføre handlingen. Slipp for å avslutte.
 Точно хотите выключить велосипед?\tAre you sure you want to turn the bike off?\tEr du sikker på at du vil slå av sykkelen?
@@ -18,6 +322,9 @@ BLE подключён · кнопки готовы\tBLE connected · buttons re
 BLE подключён · ожидаю подписку\tBLE connected · waiting for subscription\tBLE tilkoblet · venter på abonnement
 Пульт включён · ожидаю велосипед\tRemote is on · waiting for bike\tFjernkontroll er på · venter på sykkelen
 Запускаю пульт…\tStarting remote…\tStarter fjernkontroll…
+Удержание прервано. Отпустите кнопку и нажмите снова.\tHold interrupted. Release the button and press again.\tHoldet ble avbrutt. Slipp knappen og trykk igjen.
+Достигнут лимит 30 секунд. Отпустите кнопку и нажмите снова.\tThe 30-second limit was reached. Release the button and press again.\tGrensen på 30 sekunder er nådd. Slipp knappen og trykk igjen.
+Одно удержание — до 30 секунд.\tEach hold lasts up to 30 seconds.\tHvert hold varer opptil 30 sekunder.
 Сохраняются кадры до нажатия, удержание и 3 секунды после отпускания. Дополнительные провода питания этим ридером не измеряются.\tRecords before the press, during the hold and 3 seconds after release. This reader does not measure the additional power wires.\tLagrer rammer før trykket, under holdet og 3 sekunder etter at knappen slippes. Leseren måler ikke de ekstra strømledningene.
 Показывать все BLE-устройства	Show all BLE devices	Vis alle BLE-enheter
 По умолчанию ищу сервис пульта или имя Citybike Tester. Если пульта нет в списке, включите показ всех устройств.	Searches for the remote service or Citybike Tester name by default. If the remote is missing, enable all devices.	Søker som standard etter fjernkontrollens tjeneste eller navnet Citybike Tester. Hvis fjernkontrollen mangler, vis alle enheter.
@@ -859,7 +1166,7 @@ Bafang V2.5 · справочно	Bafang V2.5 · reference only	Bafang V2.5 · k
 Версия ПО	Software version	Programvareversjon
 Модель контроллера	Controller model	Kontrollermodell
 Серийный номер контроллера	Controller serial number	Kontrollerens serienummer
-`.split('\n').filter(Boolean).map(line=>line.split('\t'));
+`.split('\n').filter(Boolean).map(line=>line.split(/\t|\\t/));
   const catalog=new Map();for(const [ru,en,nb]of rows){if(en&&nb)catalog.set(ru,{en,nb});}
   const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   const patterns=[...catalog.keys()].sort((a,b)=>b.length-a.length).map(k=>['В','А','с','ч'].includes(k)?'(?<=\\d\\s)'+escape(k)+'(?![\\p{L}])':k.length<=3?'(?<![\\p{L}\\p{N}])'+escape(k)+'(?![\\p{L}\\p{N}])':escape(k));
