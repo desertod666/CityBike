@@ -50,7 +50,7 @@ body.browser .connection-bar label,body.browser #refreshPorts{display:none!impor
 
 /* The authenticated shared panel owns readings and test controls on every PC. */
 .bridge-connection{margin:16px 0}.bridge-connection>summary{cursor:pointer;font-size:12px;color:var(--muted)}
-body.operator-mode:not(.operator-bridge) .hero,body.operator-mode:not(.operator-bridge) #connectionAlert,body.operator-mode:not(.operator-bridge) #spardBatteryCard,body.operator-mode:not(.operator-bridge) .test-card,body.operator-mode:not(.operator-bridge) section[aria-labelledby="readingsHeading"]{display:none!important}
+body.operator-mode:not(.operator-bridge) .hero,body.operator-mode:not(.operator-bridge) #connectionAlert,body.operator-mode:not(.operator-bridge) .test-card,body.operator-mode:not(.operator-bridge) section[aria-labelledby="readingsHeading"]{display:none!important}
 body.operator-mode:not(.operator-bridge) .top-status{display:none}
 
 /* Keep manual USB setup available even when no reader is enrolled yet. */

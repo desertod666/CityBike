@@ -180,11 +180,11 @@
   function remoteState(state){globalThis.ByReaderSelftest?.remoteState(state);globalThis.ByEspBattery?.remoteState(state);remote=state;remoteAt=performance.now();paint();}
   function bind(runtime){globalThis.ByReaderSelftest?.bind(runtime);globalThis.ByEspBattery?.bind(runtime);local=runtime;paint();}
   function source(){
-    if(local?.transport?.connected)return {local:true,snapshot:local.liveData?.snapshot(local.device,true),device:local.device,connected:true,viewing:!!local.liveViewing,recording:!!local.recorder,extraAge:0};
+    if(local?.transport?.connected)return {local:true,snapshot:local.liveData?.snapshot(local.device,true),device:local.device,connected:true,viewing:!!local.liveViewing,recording:!!local.recorder,extraAge:0,schema:local.schema,query:local.batteryQuery?.snapshot()};
     const state=remote||globalThis.ByRemoteConsole?.snapshot?.().state;
     if(state?.bridge?.kind==='stock')return {snapshot:null,connected:false,device:{},extraAge:0};
     const live=state?.control?.can_live;
-    return {local:false,snapshot:live,device:state?.device||{},connected:state?.online===true&&!state?.conflict,viewing:state?.control?.live_view?.active===true,recording:state?.control?.recording===true,extraAge:performance.now()-remoteAt+Math.max(0,state?.age_seconds||0)*1000};
+    return {local:false,snapshot:live,device:state?.device||{},connected:state?.online===true&&!state?.conflict,viewing:state?.control?.live_view?.active===true,recording:state?.control?.recording===true,schema:globalThis.__canLiveSchema,query:state?.control?.battery_information,extraAge:performance.now()-remoteAt+Math.max(0,state?.age_seconds||0)*1000};
   }
   async function action(mode){
     if(pending)return;pending=true;actionError='';paint();
@@ -232,7 +232,7 @@
     if(dom.raw){const known=new Set(list.flatMap(c=>[c.id,...(c.consumed_ids||[])]));const extra=(s.snapshot?.frames||[]).filter(f=>f.rtr||!known.has(f.id));dom.raw.textContent=extra.length?extra.map(f=>f.id+'  '+(f.rtr?'RTR':f.data)).join('\n'):'Дополнительных ID пока нет.';}
   }
   function mount(){const root=globalThis.document?.getElementById('canLivePanel');if(!root)return;const get=id=>document.getElementById(id);dom={root,badge:get('canLiveBadge'),origin:get('canLiveOrigin'),mode:get('canLiveMode'),start:get('canLiveStart'),stop:get('canLiveStop'),notice:get('canLiveNotice'),grid:get('canLiveGrid'),coverage:get('canLiveCoverage'),raw:get('canLiveRaw'),warnings:get('canFaultEvents'),all:get('canLiveAll'),favorites:get('canLiveFavorites'),favoriteCount:get('canLiveFavoriteCount')};dom.start.onclick=()=>action('start');dom.stop.onclick=()=>action('stop');if(dom.all){dom.all.onclick=()=>globalThis.ByPreferences?.update({view:'all'});dom.favorites.onclick=()=>globalThis.ByPreferences?.update({view:'favorites'});}globalThis.addEventListener?.('citybike-preferences',e=>{if(dom.language!==e.detail.language)dom.signature=null;dom.language=e.detail.language;paint();});setInterval(paint,500);paint();}
-  globalThis.ByCanLive={WarningJournal,warningFrame,validateWarningJournal,WARNING_LIMIT,IdentityAssembler,validateIdentity,interpretIdentity,Cache,cards,valid,LIMIT,bind,remoteState,paint};
+  globalThis.ByCanLive={WarningJournal,warningFrame,validateWarningJournal,WARNING_LIMIT,IdentityAssembler,validateIdentity,interpretIdentity,Cache,cards,valid,LIMIT,bind,remoteState,paint,source};
   if(typeof module!=='undefined')module.exports=globalThis.ByCanLive;
   if(globalThis.document){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();}
 })();

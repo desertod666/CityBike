@@ -6,6 +6,17 @@
 Чтение через адаптер Spard	Reading through the Spard adapter	Avlesning via Spard-adapteren
 Полные данные батареи ещё не получены. Последние показания CAN доступны выше.	Detailed battery data has not been received yet. The latest CAN readings are shown above.	Detaljerte batteridata er ikke mottatt ennå. De siste CAN-avlesningene vises ovenfor.
 Сохранённые данные. Для текущей батареи нужно новое чтение.	Saved readings. A new reading is needed for the current battery.	Lagrede avlesninger. Det kreves en ny avlesning for det nåværende batteriet.
+Ожидание CAN батареи	Waiting for battery CAN	Venter på batteriets CAN
+ESP32 · данные CAN	ESP32 · CAN readings	ESP32 · CAN-avlesninger
+Последние данные CAN	Latest CAN readings	Siste CAN-avlesninger
+Напряжение, ток, заряд и ёмкость поступают напрямую через ESP32.	Voltage, current, charge and capacity come directly through ESP32.	Spenning, strøm, ladenivå og kapasitet mottas direkte via ESP32.
+Кадры батареи ещё не получены.	No battery CAN frames received yet.	Ingen CAN-meldinger fra batteriet er mottatt ennå.
+Источник: ESP32 · CAN	Source: ESP32 · CAN	Kilde: ESP32 · CAN
+Напряжение батареи × ток	Battery voltage × current	Batterispenning × strøm
+Напряжения ячеек пока не получены. Они приходят отдельным ответом батареи.	Cell voltages have not been received yet. They arrive in a separate battery response.	Cellespenningene er ikke mottatt ennå. De kommer i et eget svar fra batteriet.
+Получена только часть показаний ячеек.	Only some cell readings have been received.	Bare noen av celleavlesningene er mottatt.
+Показания ячеек устарели.	Cell readings are outdated.	Celleavlesningene er utdaterte.
+Напряжения ячеек получены через ESP32.	Cell voltages received through ESP32.	Cellespenninger mottatt via ESP32.
 Найдено портов:	Ports found:	Funnet porter:
 Автоподбор · этап	Auto tuning · stage	Automatisk innstilling · trinn
 с на этап	s per stage	s per trinn

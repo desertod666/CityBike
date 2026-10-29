@@ -36,3 +36,5 @@ code{background:var(--surface-inset);color:var(--ink)}pre,.monitor-console,.flas
 
 /* Detailed adapter readings stay visible; adapter controls remain in Settings. */
 #spardBatteryCard[data-state=empty] .spard-metrics,#spardBatteryCard[data-state=empty] #spardCells,#spardBatteryCard[data-state=empty] details{display:none}#spardBatteryCard[data-state=cached] .spard-metrics{opacity:.75}#spardBatteryCard{margin:18px 0}
+
+#spardBatteryCard .metric.is-stale .metric-value,#spardBatteryCard .spard-cell.is-stale strong{color:var(--text-faint)}#spardBatteryCard .spard-temperature{margin:12px 0;max-width:240px}#spardBatteryCard[data-state=empty] .spard-temperature{display:none}

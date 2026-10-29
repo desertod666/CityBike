@@ -1,11 +1,12 @@
 CURRENT ESP32 READER BUILD
 
-Version 0.6.3 refreshes the embedded portal to match hosted build 20261029-portal2.
-Manual attachment history and names are hidden; diagnostic logs remain available.
-Detailed Spard readings are on the main page, labelled by source and time.
-The native CAN and BLE command logic is unchanged from verified 0.6.2.
+Version 0.6.4 aligns the embedded portal with hosted build 20261029-battery1.
+The main battery card reads current ESP CAN posts immediately. Full Information
+and standard cell replies add detail when actually received; missing cells are
+explicit, measured voltage stays separate from the cell sum, and old adapter
+snapshots never replace current ESP readings. Local/remote USB and Wi-Fi share
+the same display. Native CAN and BLE behavior is unchanged from verified 0.6.2.
 
-Use the GitHub-hosted reader-ci workflow, never the old repository-root release.
-Compiler and SDK packages are pinned. Host tests, source hashes and actual ELF
-portal assets are verified before flash binaries are uploaded for seven days.
-The workflow never connects to a reader, deploys to Oracle or flashes a device.
+Build only on the GitHub-hosted reader-ci workflow with pinned tools. Source
+hashes, native tests, ELF assets and partition fit are checked before artifacts.
+CI has no production credentials, USB access, server deploy or flashing step.
