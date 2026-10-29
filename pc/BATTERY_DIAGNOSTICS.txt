@@ -1,0 +1,38 @@
+OFFLINE BATTERY DIAGNOSTIC CONVERSATIONS
+
+Run from any directory:
+  python3 pc/battery_conversations.py capture.jsonl.gz > battery-report.json
+  PYTHONPATH=pc python3 -m unittest pc/test_battery_conversations.py
+
+The analyzer reads existing JSONL or gzip JSONL files. It never opens a USB
+port, sends CAN frames, changes a battery, or modifies an input capture.
+No third-party packages are needed. Results include input SHA256 values;
+archive receipts and original USB wire parity require separate verification.
+
+Bafang GYE-1--02 V2.5 specifies source/destination/instruction fields and
+battery objects 6400..6409. Ordinary voltage/charge posts are independent of
+these addressed diagnostic exchanges. Cell data does not have to appear
+continuously just because ordinary battery posts are present.
+
+Observed request/reply address examples:
+  03216400 -> 041A6400: declared series/parallel count and design capacity
+  03216401 -> 041A6401: charge cycles and uncharged intervals
+  03216402 -> 041A6402: cells 1..4
+  03216403 -> 041A6403: cells 5..8
+  03216404 -> 041A6404: cells 9..12; ignore padding beyond declared count
+
+Only observed zero-payload read requests are paired. A normal reply must
+reverse the addresses and match the object within 100 ms. Gaps, scope changes,
+clock resets and invalid frames prevent cross-boundary pairing. Repeated
+outstanding requests are ambiguous. Cell totals require a complete coherent
+set and are calculated, not an independent pack-voltage measurement.
+
+Source address 3 is the HMI address; it does not physically identify a sender.
+Software timestamps do not measure precise wire response time. An absent
+recorded reply does not prove that the battery never sent one. Never infer a
+battery vendor/model or a hardware fault from this correlation alone.
+
+A reader which only listens depends on requests sent by another node. Sending
+our own fixed reads is a separate feature requiring a verified working CAN
+transmitter and a deliberate source-address policy. This analyzer does not
+implement or authorize transmission, replay, writes or firmware updates.
