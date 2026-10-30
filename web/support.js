@@ -28,7 +28,12 @@
       else if(!this.identityVerified()||job.expected_mac?.toLowerCase()!==this.runtime.device.ap_mac?.toLowerCase()||job.expected_boot!==this.runtime.device.boot)return;
       if(job.kind==='stop'&&stock!==(this.runningJob?.bridge_kind==='stock'))return;
       if(!['rx_check','capture','stop','flash','spard_probe','live_view','battery_information','reader_selftest'].includes(job.kind))return;
-      if(job.kind==='reader_selftest'&&(!globalThis.ByReaderSelftest?.available(this.runtime.device)||!this.pairedGuard()||job.isolation_asserted!==true||Object.keys(job).some(k=>!['id','kind','expected_mac','expected_boot','expires_at','isolation_asserted'].includes(k))))return;
+      if(job.kind==='reader_selftest'){
+        const meter=Object.prototype.hasOwnProperty.call(job,'voltmeter');
+        if(!globalThis.ByReaderSelftest?.available(this.runtime.device)||!this.pairedGuard()||job.isolation_asserted!==true||
+          meter&&(job.voltmeter!==true||!globalThis.ByReaderSelftest?.meterAvailable(this.runtime.device))||
+          Object.keys(job).some(k=>!['id','kind','expected_mac','expected_boot','expires_at','isolation_asserted',...(meter?['voltmeter']:[])].includes(k)))return;
+      }
       if(job.kind==='battery_information'&&(!this.batteryAvailable()||!this.pairedGuard()||(job.read_mode==='quiet'?(!globalThis.ByEspBattery?.quietAvailable(this.runtime.device)||job.session_ended!==true||Object.keys(job).some(k=>!['id','kind','read_mode','session_ended','expected_mac','expected_boot','expires_at'].includes(k))):Object.keys(job).some(k=>!['id','kind','expected_mac','expected_boot','expires_at'].includes(k)))))return;
       if(job.kind==='live_view'&&(!this.runtime.liveData||!['start','stop'].includes(job.mode)||job.bitrate!==250000||(job.mode==='start'&&!this.pairedGuard())||Object.keys(job).some(k=>!['id','kind','mode','bitrate','expected_mac','expected_boot','expires_at'].includes(k))))return;
       if(job.kind==='paired_probe'&&(!this.pairedAvailable()||!this.pairedGuard()||job.bitrate!==250000||job.duration!==60||job.stock_duration!==30||job.mode!=='information'||job.sampling!=='DEFAULT'||job.adapter_vid!=='1A86'||job.adapter_pid!=='7523'))return;

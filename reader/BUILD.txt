@@ -12,6 +12,8 @@ restore GPIO4 HIGH before returning. No arbitrary timing or pin API exists.
 It requires the isolated_gpio_voltmeter_v1 capability; Wi-Fi/RPC is denied.
 No battery-service request, battery write or motor command is sent.
 
-The portal build is 20261030-voltmeter1. Normal CAN timing, battery request
+The working portal build is 20261030-voltmeter2. This fixes the incoming
+USB-browser job whitelist for the voltmeter flag. Installed local0.6.8 from
+commit16d3dad0 still embeds portal1; the hosted site can update independently. Normal CAN timing, battery request
 policy and BLE controls are unchanged. Prefer GitHub-hosted reader-ci with
 pinned tools; verify native tests, ELF assets and partition size before use.

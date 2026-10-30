@@ -1,11 +1,11 @@
 {
   "version": "0.6.8",
-  "web_build": "20261030-voltmeter1",
-  "native_baseline": "0.6.7 plus explicit GPIO5 input setup and bounded fixed multimeter hold",
+  "web_build": "20261030-voltmeter2",
+  "native_baseline": "0.6.8 native behavior; hosted voltmeter2 job-receipt hotfix, installed local068 source16d3dad0 retains embedded portal1",
   "files": {
     "BUILD.txt": {
-      "size": 1006,
-      "sha256": "1bbcbbbaff3077722d74a093b2ab7ce2630d0f9ce7d8f264f535595142b07e3e"
+      "size": 1193,
+      "sha256": "c5ae86231a8cdfc447711dcfccc9630f18d22cc124204beaf9d45594131c8064"
     },
     "CMakeLists.txt": {
       "size": 173,
@@ -393,7 +393,7 @@
     },
     "web/browser.js": {
       "size": 38792,
-      "sha256": "16b9a46e0c060b26011052d3661500da57a8cb826238ba7ababdc25515ceca87"
+      "sha256": "95d59e11d8213f6eb2aa1e6b542891f9ea774fc0c1af66b5eb168d8f40d561ac"
     },
     "web/can-live.css": {
       "size": 3356,
@@ -516,12 +516,12 @@
       "sha256": "dc561c9eb30a371bedc66043c560c94fda157c6c5bd404f6ab803b325bbf4cb9"
     },
     "web/support.js": {
-      "size": 23131,
-      "sha256": "e098238a6ffa7c03f8c9a0c4868baf32825cba69ca531a1fc8d2288aeb91dc6f"
+      "size": 23372,
+      "sha256": "a60c9c6db5aa63053412033d034f245a942e7c4fe197fcc957384bb75bef08ed"
     },
     "web/sw.js": {
       "size": 4887,
-      "sha256": "ca8dbb306d031dc1548e6fa617bdd66b6f682de4c1c51ad0782071e2c3dc296e"
+      "sha256": "2179ea71a404defa96ffffdcdbd8a9b3ed8402a35ac3eeff6df5ae9cba9cad20"
     },
     "web/transport.js": {
       "size": 14126,

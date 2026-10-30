@@ -5,7 +5,7 @@ const {Test,validate}=require('../web/reader-selftest.js');
 const fixtureFile=process.env.CITYBIKE_SELFTEST_FIXTURE||'pc/fixtures/reader-selftest-055.json',fixture=JSON.parse(fs.readFileSync(fixtureFile)),fixtures=fixture.results;
 function scenario(options={}){
  const native=structuredClone(fixtures[options.retained?2:options.failed?1:0]);
- let d={type:'status',product:'BafangReader',protocol:1,version:fixture.version||'0.5.5',boot:native.boot,ap_mac:'02:13:24:35:46:58',can:options.live?'running':'stopped',epoch:native.epoch-1,received:37,rx_sampling_250k:'TRIPLE',capabilities:['command_ids','isolated_twai_selftest_v1'],ctx_guard:{policy:'fixed_recessive',valid:true,level:1}};
+ let d={type:'status',product:'BafangReader',protocol:1,version:fixture.version||'0.5.5',boot:native.boot,ap_mac:'02:13:24:35:46:58',tx_gpio:4,rx_gpio:5,twai_tx_gpio:10,can:options.live?'running':'stopped',epoch:native.epoch-1,received:37,rx_sampling_250k:'TRIPLE',capabilities:['command_ids','isolated_twai_selftest_v1'],ctx_guard:{policy:'fixed_recessive',valid:true,level:1,out_sel:128,mux:1,enabled:true,input_enabled:true,latch_high:true,inverted:false}};
  const r={device:structuredClone(d),liveViewing:!!options.live,scan:{active:false},tuner:{active:false}},commands=[];
  const t=r.transport={verified:true,connected:true,uncertain:false,state:structuredClone(d),async poll(){return structuredClone(d);},async drain(){return !options.drainFail;},async call(command){
   commands.push(command);if(command==='STOP'){d.can='stopped';return t.state=structuredClone(d);}
@@ -47,5 +47,15 @@ function scenario(options={}){
  s=scenario({meter:true});await s.r.readerSelftest.run({isolationAsserted:true,voltmeter:true});assert.equal(s.r.readerSelftest.phase,'complete');assert.deepEqual(s.commands,['STOP','SELFTEST VOLTMETER ISOLATED']);
  s=scenario();await assert.rejects(()=>s.r.readerSelftest.run({isolationAsserted:true,voltmeter:true}));assert.equal(s.commands.length,0);
  s=scenario({meter:true});s.d.capabilities=[];s.r.device=structuredClone(s.d);await assert.rejects(()=>s.r.readerSelftest.run({isolationAsserted:true,voltmeter:true}));assert.equal(s.commands.length,0);
+ // Exercise real receive -> execute -> reader test, rather than bypassing the
+ // incoming-job whitelist by calling Test.run directly.
+ globalThis.ByStore={uuid:()=> 'a'.repeat(32)};require('../web/support.js');
+ const job=d=>({id:'b'.repeat(32),kind:'reader_selftest',expected_mac:d.ap_mac,expected_boot:d.boot,expires_at:Date.now()/1000+60,isolation_asserted:true,voltmeter:true});
+ const bridge=s=>{s.r.settings={remote_support_enabled:true,manual_mode:false,monitor_enabled:true};return new BySupport.Support(s.r);};
+ s=scenario({meter:true});let support=bridge(s);support.receive(job(s.r.device));assert.equal(support.last.state,'accepted');await support.work;assert.equal(support.last.state,'complete');assert.deepEqual(s.commands,['STOP','SELFTEST VOLTMETER ISOLATED']);
+ for(const mutate of [j=>j.voltmeter=false,j=>j.voltmeter=1,j=>j.voltmeter='true',j=>j.hold_us=8000000,j=>j.isolation_asserted=false,j=>j.expected_boot='BADBOOT',j=>j.expires_at=Date.now()/1000-1]){
+  s=scenario({meter:true});support=bridge(s);const j=job(s.r.device);mutate(j);support.receive(j);assert.equal(support.last,null);assert.equal(s.commands.length,0);
+ }
+ s=scenario();support=bridge(s);support.receive(job(s.r.device));assert.equal(support.last,null);assert.equal(s.commands.length,0);
  console.log('PASS actual-C selftest result/browser integration: success, causal failure, retained driver, isolation/scope/correlation/USB/busy/final-state guards, no resume or battery requests');
 })().catch(e=>{console.error(e);process.exitCode=1;});
