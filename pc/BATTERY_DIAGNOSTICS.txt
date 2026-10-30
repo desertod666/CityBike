@@ -1,0 +1,82 @@
+OFFLINE BATTERY DIAGNOSTIC CONVERSATIONS
+
+Run from any directory:
+  python3 pc/battery_conversations.py capture.jsonl.gz > battery-report.json
+  PYTHONPATH=pc python3 -m unittest pc/test_battery_conversations.py
+
+The analyzer reads existing JSONL or gzip JSONL files. It never opens a USB
+port, sends CAN frames, changes a battery, or modifies an input capture.
+No third-party packages are needed. Results include input SHA256 values;
+archive receipts and original USB wire parity require separate verification.
+
+Bafang GYE-1--02 V2.5 specifies source/destination/instruction fields and
+battery objects 6400..6409. Ordinary voltage/charge posts are independent of
+these addressed diagnostic exchanges. Cell data does not have to appear
+continuously just because ordinary battery posts are present.
+
+Observed request/reply address examples:
+  03216400 -> 041A6400: declared series/parallel count and design capacity
+  03216401 -> 041A6401: charge cycles and uncharged intervals
+  03216402 -> 041A6402: cells 1..4
+  03216403 -> 041A6403: cells 5..8
+  03216404 -> 041A6404: cells 9..12; ignore padding beyond declared count
+
+Only observed zero-payload read requests are paired. A normal reply must
+reverse the addresses and match the object within 100 ms. Gaps, scope changes,
+clock resets and invalid frames prevent cross-boundary pairing. Repeated
+outstanding requests are ambiguous. Cell totals require a complete coherent
+set and are calculated, not an independent pack-voltage measurement.
+
+Source address 3 is the HMI address; it does not physically identify a sender.
+Software timestamps do not measure precise wire response time. An absent
+recorded reply does not prove that the battery never sent one. Never infer a
+battery vendor/model or a hardware fault from this correlation alone.
+
+A reader which only listens depends on requests sent by another node. Sending
+our own fixed reads is a separate feature requiring a verified working CAN
+transmitter and a deliberate source-address policy. This analyzer does not
+implement or authorize transmission, replay, writes or firmware updates.
+
+An observed reverse-addressed operation3 error reply is reported separately in
+error_transactions. It answers a request without establishing success. Raw
+abort bytes are preserved; an SDO access/format error is not a motor Hall fault.
+The same scope, sequence, timing and duplicate-request rules apply to errors.
+
+Objects 6415, 6416 and 6417 are also correlated as raw normal replies. The
+supplied V2.5 reference contradicts itself: revision history p3 calls 6416 the
+error history and 6417 the production date, whereas dictionary p29 assigns
+date to 6416 and error history to 6417. The analyzer never guesses between
+these layouts. Device-specific evidence is needed before naming these fields.
+
+
+OFFLINE SPARD IDENTITY CHANGE PLAN
+
+pc/spard_identity_plan.py prepares an Identity31 request relative to an
+independently identified normal Identity30 response. It preserves untouched
+32-byte slots exactly and generates a restoration request from the baseline.
+
+  PYTHONPATH=pc python3 -m unittest pc/test_spard_identity_plan.py
+
+The format is checked against the supplied PC code and BMS2.4 static handler.
+The planner does not open USB or CAN and has no site/ESP write integration.
+A generated packet is not authorization or evidence of a successful write.
+Live target binding, permissions, acknowledgement, persistent readback and
+restoration remain unverified. There is no Phylion write format in this module.
+
+The portable C codec is reader/src/spard_identity_codec.h, with matching host
+checks in reader/scripts/test_spard_identity_codec.c and
+pc/test_spard_identity_parity.py. It is not included by main.c or the frozen
+0.6.8 build. Normal slots and restoration bytes agree with the Python planner;
+there is still no active identity-write endpoint.
+
+compare_identity_readback(baseline_reply, readback_reply, ...) compares a normal
+Identity30 reply with the intended change. It checks both 32-byte slots, including
+unmodified binary bytes. A write-request echo, invalid XOR, reserved-byte change,
+or missing normal-service context is rejected. An unchanged old response or a
+partial change is reported separately from an exact match. Packet equality does
+not establish the sender, freshness, a successful write, or persistence after
+a power cycle. No readback comparison can enable transmission.
+
+The default app regression runner includes service-decoder, identity-plan and
+C/Python parity tests. The default native runner includes the portable encoder.
+All identity examples are synthetic; no live write or restoration was performed.

@@ -1,0 +1,62 @@
+name: Build current ESP32 reader on GitHub
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - reader/**
+      - web/**
+      - scripts/sync_reader_web.py
+      - .github/workflows/reader-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - reader/**
+      - web/**
+      - scripts/sync_reader_web.py
+      - .github/workflows/reader-ci.yml
+permissions:
+  contents: read
+concurrency:
+  group: reader-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  esp32c3:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: reader
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: reader/requirements-ci.txt
+      - name: Cache pinned compiler packages on GitHub
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.platformio/packages
+          key: esp32c3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('reader/toolchain-lock.json', 'reader/requirements-ci.txt') }}
+      - name: Install build dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Run firmware tests without devices
+        run: python scripts/test_firmware_native.py
+      - name: Check hosted and embedded portal parity
+        run: python ../scripts/sync_reader_web.py --check
+      - name: Check source manifest
+        run: python scripts/verify_ci.py --source-only
+      - name: Compile ESP32-C3
+        run: python -m platformio run -e esp32c3 -j 2
+      - name: Verify ELF assets and create checksummed artifact
+        run: python scripts/verify_ci.py
+      - name: Keep verified firmware for seven days
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: esp32c3-${{ github.sha }}
+          path: reader/ci-artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 9

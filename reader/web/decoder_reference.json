@@ -1,0 +1,842 @@
+{
+  "sha256": "ba47c692071f6edd15ab01a9b684f4512b943fe8545231d12d8a2544e1ac0b18",
+  "notice": "SYM compatibility with BYS-BK-100 remains unconfirmed; raw frames are authoritative.",
+  "messages": [
+    {
+      "id": "0x02FF1200",
+      "name": "CR_Warning",
+      "picture_bytes": 1,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Error",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x04F83400",
+      "name": "Battery_SOC_SOH_ Information",
+      "picture_bytes": 7,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Total_Capacity_mAh",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "mAh"
+        },
+        {
+          "symbol": "b",
+          "name": "Residual_Capacity_mAh",
+          "type": "unsigned",
+          "bits_lsb0": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "mAh"
+        },
+        {
+          "symbol": "c",
+          "name": "Relative_Capacity %",
+          "type": "unsigned",
+          "bits_lsb0": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        },
+        {
+          "symbol": "d",
+          "name": "Absolut_Capacity %",
+          "type": "unsigned",
+          "bits_lsb0": [
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "%"
+        },
+        {
+          "symbol": "e",
+          "name": "SOH",
+          "type": "unsigned",
+          "bits_lsb0": [
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x04F83401",
+      "name": "Battery_Current_Voltage_Temp",
+      "picture_bytes": 5,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Battery_Current_A",
+          "type": "signed",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "A"
+        },
+        {
+          "symbol": "b",
+          "name": "Battery_Voltage_V",
+          "type": "unsigned",
+          "bits_lsb0": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "V"
+        },
+        {
+          "symbol": "c",
+          "name": "Temperature",
+          "type": "unsigned",
+          "bits_lsb0": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": -40.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83202",
+      "name": "CR_Walk_Assist_Information",
+      "picture_bytes": 1,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Walk_Assist_Status",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83200",
+      "name": "CR_Torque_Sensor_Information",
+      "picture_bytes": 8,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Remaining_Capacity",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "%"
+        },
+        {
+          "symbol": "b",
+          "name": "Trip",
+          "type": "unsigned",
+          "bits_lsb0": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "km"
+        },
+        {
+          "symbol": "c",
+          "name": "Pedal_Revolution",
+          "type": "unsigned",
+          "bits_lsb0": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "rpm"
+        },
+        {
+          "symbol": "d",
+          "name": "Torque_Sensor_Voltage",
+          "type": "unsigned",
+          "bits_lsb0": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "mV"
+        },
+        {
+          "symbol": "e",
+          "name": "Remaining_Distance",
+          "type": "unsigned",
+          "bits_lsb0": [
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "km"
+        }
+      ]
+    },
+    {
+      "id": "0x02F83201",
+      "name": "CR_Speed_Current_Voltage_Temp",
+      "picture_bytes": 8,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Speed",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "km/h"
+        },
+        {
+          "symbol": "b",
+          "name": "Current",
+          "type": "unsigned",
+          "bits_lsb0": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "A"
+        },
+        {
+          "symbol": "c",
+          "name": "CR_Voltage",
+          "type": "unsigned",
+          "bits_lsb0": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 0.01,
+          "offset": 0.0,
+          "unit": "V"
+        },
+        {
+          "symbol": "d",
+          "name": "Motor_Temperature",
+          "type": "unsigned",
+          "bits_lsb0": [
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": -40.0,
+          "unit": "°C"
+        },
+        {
+          "symbol": "e",
+          "name": "Controller_Temperature",
+          "type": "unsigned",
+          "bits_lsb0": [
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": -40.0,
+          "unit": "°C"
+        }
+      ]
+    },
+    {
+      "id": "0x01F83100",
+      "name": "Torque_Sensor_Signal",
+      "picture_bytes": 4,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Torque_Sensor_Voltage",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "mV"
+        },
+        {
+          "symbol": "b",
+          "name": "Cadence",
+          "type": "unsigned",
+          "bits_lsb0": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": "rpm"
+        },
+        {
+          "symbol": "c",
+          "name": "Frame_Counts",
+          "type": "unsigned",
+          "bits_lsb0": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83204",
+      "name": "CR_Turn_Off_Instruction",
+      "picture_bytes": 1,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "1 means do not turn off",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83205",
+      "name": "CR_Calories",
+      "picture_bytes": 2,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Calories",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 16,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83206",
+      "name": "CR_Mode",
+      "picture_bytes": 1,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Mode",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x02F83000",
+      "name": "Pulse_Count",
+      "picture_bytes": 4,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "Pulse_Count",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 32,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "id": "0x03106300",
+      "name": "HMI_Mode",
+      "picture_bytes": 4,
+      "signals": [
+        {
+          "symbol": "a",
+          "name": "No_of_total_Modes",
+          "type": "unsigned",
+          "bits_lsb0": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "bit_length": 4,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        },
+        {
+          "symbol": "b",
+          "name": "Mode",
+          "type": "unsigned",
+          "bits_lsb0": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "bit_length": 4,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        },
+        {
+          "symbol": "c",
+          "name": "Gears",
+          "type": "unsigned",
+          "bits_lsb0": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        },
+        {
+          "symbol": "d",
+          "name": "Light_Status",
+          "type": "unsigned",
+          "bits_lsb0": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        },
+        {
+          "symbol": "e",
+          "name": "Trip_Reset",
+          "type": "unsigned",
+          "bits_lsb0": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "bit_length": 8,
+          "byte_order": "little_endian",
+          "factor": 1.0,
+          "offset": 0.0,
+          "unit": ""
+        }
+      ]
+    }
+  ]
+}
