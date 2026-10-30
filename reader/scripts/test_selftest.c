@@ -7,6 +7,33 @@
 #undef main
 
 static unsigned stage_number, sent, fail_stage, installs;
+static enum { PROBE_OK, RX_STUCK_HIGH, TX_STUCK_HIGH, LOW_SET_FAIL,
+    HIGH_SET_FAIL, CANCEL_WHILE_LOW, USB_LOST_WHILE_LOW, IDLE_LOW } probe_fault;
+static unsigned probe_lows, probe_delivered, probe_high_failed;
+static bool probe_usb_lost;
+int fake_probe_set(int pin, int level) {
+    if (pin != 4) return ESP_OK;
+    if (!level) {
+        assert(!installed && !fake_driver_installed && atomic_load(&battery_query_active));
+        assert(installs == 2 && sent == 2 && fake_pad == 1);
+        probe_lows++;
+        if (probe_fault == LOW_SET_FAIL) return ESP_FAIL;
+        fake_reg[1] &= ~BIT(4); fake_pad = probe_fault == TX_STUCK_HIGH ? 1 : 0;
+        if (probe_fault == CANCEL_WHILE_LOW) atomic_store(&battery_query_cancel, true);
+        if (probe_fault == USB_LOST_WHILE_LOW) probe_usb_lost = true;
+        probe_delivered++;
+    } else {
+        if (probe_fault == HIGH_SET_FAIL && probe_delivered && !probe_high_failed++) return ESP_FAIL;
+        fake_reg[1] |= BIT(4); fake_pad = 1;
+    }
+    return ESP_OK;
+}
+int fake_probe_get(int pin) {
+    if (pin == 4) return fake_pad;
+    if (pin != 5) return 1;
+    if (probe_fault == IDLE_LOW && installs == 2 && !fake_driver_installed) return 0;
+    return !fake_pad && probe_fault != RX_STUCK_HIGH ? 0 : 1;
+}
 static enum { NOMINAL, BIT_ERROR, NO_ECHO, WRONG_ECHO, USB_DROP, STOP_CANCEL,
     BAD_RX_ROUTE, STATUS_FAIL, INSTALL_FAIL, START_FAIL, STOP_FAIL, UNINSTALL_FAIL,
     TRANSMIT_FAIL, ROUTE_CHANGED, RX_OVERFLOW, WRONG_DLC, WRONG_DATA } injected;
@@ -32,6 +59,8 @@ void fake_selftest_install(const twai_general_config_t *g, const twai_timing_con
 void fake_query_status(twai_status_info_t *s) {
     if (stage_number == fail_stage && injected == BIT_ERROR && sent == stage_number) {
         s->tx_failed_count = s->bus_error_count = 1; s->tx_error_counter = 8;
+        fake_ecc.count = 1; fake_ecc.total = 1;
+        fake_ecc.events[0] = (error_ecc_event_t){.event = 1, .t_us = fake_clock, .capture = 129};
     }
     if (stage_number == fail_stage && injected == RX_OVERFLOW && sent == stage_number) s->rx_missed_count = 1;
 }
@@ -55,12 +84,17 @@ int fake_query_transmit(const twai_message_t *m) {
     return ESP_OK;
 }
 bool fake_query_connected(void) {
-    return !(stage_number == fail_stage && injected == USB_DROP && sent == stage_number);
+    return !probe_usb_lost && !(stage_number == fail_stage && injected == USB_DROP && sent == stage_number);
 }
 void fake_query_route(int gpio, int signal) { assert(gpio == 4); fake_reg[2] = signal; }
 void fake_query_received(void) {}
 void fake_query_delay(unsigned ticks) { (void)ticks; }
-void fake_query_stopping(void) { assert(reader_ctx_guard().valid); }
+void fake_query_stopping(void) {
+    assert(reader_ctx_guard().valid);
+    if (stage_number == 3 && injected == BIT_ERROR) {
+        fake_ecc.total = 2; fake_ecc.events[0].event = 2; fake_ecc.events[0].capture = 17;
+    }
+}
 
 static void setup(void) {
     reset_test();
@@ -68,6 +102,7 @@ static void setup(void) {
     atomic_store(&battery_normal_driver, false); atomic_store(&reader_selftest_driver, false);
     installed = false; fake_driver_installed = false; stats.running = false;
     stage_number = sent = fail_stage = installs = 0; injected = NOMINAL;
+    probe_fault = PROBE_OK; probe_lows = probe_delivered = probe_high_failed = 0; probe_usb_lost = false;
     stats.received = 37; /* Existing real frames must stay untouched. */
 }
 static void run(void) {
@@ -82,12 +117,18 @@ int main(void) {
     setup(); run(); assert(sent == 3 && installs == 3 && !installed && !atomic_load(&reader_selftest_driver));
     for (unsigned i = 0; i < 3; i++) assert(reader_selftest_stages[i].passed && reader_selftest_stages[i].attempted == 1);
     assert(strstr(fake_wire, "\"state\":\"complete\"") && strstr(fake_wire, "\"ok\":true"));
+    assert(reader_gpio_probe.passed && probe_lows == 1 && probe_delivered == 1);
     if (getenv("READER_TEST_WIRE")) puts(fake_wire);
     for (unsigned stage = 1; stage <= 3; stage++) {
         for (unsigned error = BIT_ERROR; error <= WRONG_DATA; error++) {
             if (error == ROUTE_CHANGED && stage == 1) continue;
             setup(); fail_stage = stage; injected = error; run();
             assert(installs == stage && !reader_selftest_stages[stage - 1].passed);
+            if (stage == 3 && error == BIT_ERROR) {
+                assert(strstr(reader_selftest_stage3_ecc, "\"raw\":129"));
+                assert(fake_ecc.total == 2 && fake_ecc.events[0].capture == 17);
+                assert(!strstr(reader_selftest_stage3_ecc, "\"raw\":17"));
+            }
             assert(strstr(fake_wire, "\"state\":\"failed\"") && strstr(fake_wire, "\"ok\":false"));
             if (getenv("READER_SELFTEST_FAILURE_FIXTURE") && stage == 2 && (error == BIT_ERROR || error == UNINSTALL_FAIL)) puts(fake_wire);
             for (unsigned i = stage; i < 3; i++) assert(!reader_selftest_stages[i].attempted);
@@ -101,6 +142,14 @@ int main(void) {
             } else assert(!installed && !atomic_load(&reader_selftest_driver));
         }
     }
+    for (unsigned fault = RX_STUCK_HIGH; fault <= IDLE_LOW; fault++) {
+        setup(); probe_fault = fault; run();
+        assert(installs == 2 && sent == 2 && !installed && !fake_driver_installed);
+        assert(!reader_gpio_probe.passed && reader_gpio_probe.ctx_restored && !reader_selftest_stages[2].attempted);
+        assert(!strcmp(reader_selftest_stages[2].reason, "gpio_probe_failed"));
+        assert(strstr(fake_wire, "\"state\":\"failed\""));
+        assert(probe_lows == (fault == IDLE_LOW ? 0 : 1));
+    }
     setup(); command_t uncorrelated = {.text = "SELFTEST ISOLATED"}; execute_command(&uncorrelated); flush_replies(); assert(!installs);
     setup(); command_t rpc = {.text = "SELFTEST ISOLATED", .id = "rpc", .token = 1}; execute_command(&rpc); flush_replies(); assert(!installs);
     setup(); installed = true; fake_driver_installed = true;
@@ -108,6 +157,6 @@ int main(void) {
     setup(); atomic_store(&stop_fences, 1); execute_command(&busy); flush_replies(); assert(!installs);
     setup(); rx_check.state = RX_RUNNING; execute_command(&busy); flush_replies(); assert(!installs);
     setup(); atomic_store(&battery_query_cancel, true); execute_command(&busy); flush_replies(); assert(!installs);
-    puts("PASS actual isolated selftest: three fixed single-shot echo stages, each failure stops progression, inhibit-first cleanup/recovery, USB-only dispatch, zero synthetic bike frames");
+    puts("PASS isolated selftest: single GPIO pulse with driver absent, stuck TX/RX, set/restore failure, cancel/USB loss and idle fault; fixed single-shot CAN echoes and inhibit-first cleanup; zero synthetic bike frames");
     return 0;
 }

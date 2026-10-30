@@ -35,7 +35,9 @@ with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
                 if message["type"] == "command_result":
                     assert isinstance(message["status"], dict)
                 if message["type"] == "reader_selftest_result":
-                    assert len(line)<3400 and message["state"]=="complete"
+                    assert len(line)<3900 and message["state"]=="complete"
+                    assert message['gpio_probe']['passed']
+                    assert message['gpio_probe']['tx']==message['gpio_probe']['rx']==[1,0,1]
                     assert message["ctx_restored"] and not message["driver_retained"]
                     assert [(x["tx_gpio"],x["rx_gpio"]) for x in message["stages"]]==[(10,10),(4,4),(4,5)]
                     assert all(x["passed"] and x["attempted"]==1 for x in message["stages"])

@@ -1,11 +1,14 @@
-CURRENT ESP32 READER SOURCE: 0.6.6
+CURRENT ESP32 READER SOURCE: 0.6.7
 
-Adds the latest already-observed CAN ECC event to STATUS as last_bus_error.
-It includes raw type/direction/segment and the original event timestamp.
-The scope is boot_history, not an asserted capture epoch. No peripheral
-register is re-read and no CAN mode, timing, route or transmission rule changes.
-The portal remains build 20261030-auditfix1 from installed 0.6.5.
+Adds one fixed 100 us GPIO4 LOW hold / GPIO5 readback to the isolated USB
+selftest, between pad self-echo and the external transceiver CAN echo stage.
+TWAI must be uninstalled. The test requires bike CAN physically detached;
+GPIO4 returns HIGH before leaving its critical section. Failed level readback
+prevents the external CAN echo stage. It does not identify a faulty component.
+The stage3 latest observed ECC event is saved before inhibition/STOP, so
+cleanup-induced error flags cannot overwrite the diagnostic snapshot.
 
-Prefer the GitHub-hosted reader-ci workflow with pinned tools. Verify source
-hashes, native tests, exact ELF assets and image size before publication.
-CI has no device or production-server access.
+The portal build is 20261030-gpioprobe1. Normal CAN timing, modes, battery
+request policy and BLE controls are unchanged. No arbitrary transmit endpoint.
+Prefer GitHub-hosted reader-ci with pinned tools. Verify source hashes,
+native tests, exact ELF assets and image size before publication.

@@ -3,6 +3,39 @@ from reader_version import version_at_least
 import re
 
 
+def valid_gpio_probe(p):
+    if (not isinstance(p, dict) or any(type(p.get(k)) is not bool for k in ('attempted', 'passed', 'ctx_restored'))
+            or p.get('driver_installed') is not (False if p['attempted'] else None)
+            or type(p.get('low_hold_us')) is not int or p['low_hold_us'] != 100
+            or not isinstance(p.get('reason'), str) or not re.fullmatch(r'[a-z_]{1,64}', p['reason'])):
+        return False
+    for key in ('tx', 'rx'):
+        if not isinstance(p.get(key), list) or len(p[key]) != 3 or any(type(v) is not int or v not in (-1, 0, 1) for v in p[key]):
+            return False
+    if any(type(p.get(k)) is not int or not -2147483648 <= p[k] <= 2147483647 for k in ('low_rc', 'high_rc')):
+        return False
+    if not p['attempted'] and (p['passed'] or p['tx'] != [-1]*3 or p['rx'] != [-1]*3):
+        return False
+    return not p['passed'] or (p['attempted'] and p['ctx_restored'] and p['tx'] == p['rx'] == [1, 0, 1]
+                              and p['low_rc'] == p['high_rc'] == 0 and p['reason'] == 'gpio_loopback_verified')
+
+
+def valid_stage_ecc(e):
+    if e is None:
+        return True
+    if (not isinstance(e, dict) or e.get('captured_before_cleanup') is not True
+            or type(e.get('after_event')) is not int or not 0 <= e['after_event'] <= 0xffffffff):
+        return False
+    v = e.get('last')
+    return v is None or (isinstance(v, dict) and v.get('source') == 'single_HAL_ECC_read' and v.get('scope') == 'boot_history'
+        and type(v.get('event')) is int and e['after_event'] < v['event'] <= 0xffffffff
+        and type(v.get('t_us')) is int and 0 <= v['t_us'] <= 0xffffffffffffffff
+        and type(v.get('raw')) is int and 0 <= v['raw'] <= 255
+        and all(type(v.get(k)) is int for k in ('type', 'direction', 'segment'))
+        and (v['type'], v['direction'], v['segment']) == (v['raw'] >> 6, (v['raw'] >> 5) & 1, v['raw'] & 31)
+        and type(v.get('saturated')) is bool)
+
+
 def sanitize_selftest(value, device):
     if not isinstance(value, dict) or value.get('phase') not in ('idle', 'preparing', 'running', 'complete', 'failed'):
         return None
@@ -53,10 +86,23 @@ def sanitize_selftest(value, device):
         stages.append({k: s[k] for k in ('name', 'tx_gpio', 'rx_gpio', 'attempted', 'passed', 'echo_received', 'status_valid', 'reason') + unsigned + signed})
     if version_at_least(device.get('version'),'0.5.6') and raw.get('test_frame_dlc') != 8:
         return result
+    if version_at_least(device.get('version'), '0.6.7') or 'gpio_probe' in raw:
+        p = raw.get('gpio_probe')
+        if (not valid_gpio_probe(p) or not valid_stage_ecc(raw.get('stage3_ecc'))
+                or stages[2]['attempted'] and (not p['passed'] or raw.get('stage3_ecc') is None)
+                or not stages[2]['attempted'] and raw.get('stage3_ecc') is not None
+                or p['attempted'] and not all(s['passed'] for s in stages[:2])):
+            return result
     if (raw['state'] == 'complete') != (not failed and raw['ctx_restored'] and not raw['driver_retained']):
         return result
     result['result'] = {k: raw[k] for k in ('type', 'id', 'boot', 'epoch', 'state', 'isolation_asserted', 'bitrate', 'sampling', 'ack_required', 'ctx_restored', 'driver_retained')}
     result['result']['stages'] = stages
+    if 'gpio_probe' in raw:
+        p = raw['gpio_probe']
+        result['result']['gpio_probe'] = {k: p[k] for k in ('attempted', 'passed', 'ctx_restored', 'reason', 'driver_installed', 'low_hold_us', 'tx', 'rx', 'low_rc', 'high_rc')}
+        e = raw.get('stage3_ecc')
+        result['result']['stage3_ecc'] = None if e is None else dict(after_event=e['after_event'], captured_before_cleanup=True,
+            last={k: e['last'][k] for k in ('source','scope','event','t_us','raw','type','direction','segment','saturated')} if e.get('last') is not None else None)
     if raw.get('test_frame_dlc') == 8:
         result['result']['test_frame_dlc'] = 8
         for output, source in zip(stages, raw['stages']):

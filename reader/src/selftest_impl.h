@@ -20,6 +20,8 @@ typedef struct {
     uint32_t alerts, elapsed_us, tx_out_raw, rx_matrix_raw;
 } reader_selftest_stage_t;
 static reader_selftest_stage_t reader_selftest_stages[READER_SELFTEST_STAGES];
+#include "isolated_gpio_probe.h"
+static char reader_selftest_stage3_ecc[360];
 
 /* Additional refusal only: an idle RX pin is NOT evidence of physical isolation.
  * A visible dominant bit means the physical assertion/setup must be rechecked. */
@@ -93,6 +95,7 @@ static void reader_selftest_cleanup(reader_selftest_stage_t *s) {
 
 static void reader_selftest_stage(reader_selftest_stage_t *s) {
     uint64_t began = (uint64_t)esp_timer_get_time(), deadline = began + READER_SELFTEST_STAGE_US;
+    uint32_t ecc_before = reader_error_ecc_history().total;
     twai_timing_config_t timing;
     if (!reader_ctx_hold()) { s->reason = "ctx_hold_failed"; goto done; }
     if (battery_cancelled()) { s->reason = "usb_or_stop_cancelled"; goto done; }
@@ -145,19 +148,37 @@ static void reader_selftest_stage(reader_selftest_stage_t *s) {
     }
     s->reason = "self_echo_timeout";
 done:
+    if (s->rx_gpio == 5) {
+        /* Snapshot before inhibition/STOP: their error flags must not replace
+         * the original observation. Latest only; not necessarily first error. */
+        error_ecc_history_t h = reader_error_ecc_history();
+        char last[256] = "null";
+        if (h.total > ecc_before) reader_last_ecc_json(h, last, sizeof(last));
+        snprintf(reader_selftest_stage3_ecc, sizeof(reader_selftest_stage3_ecc),
+            "{\"after_event\":%u,\"captured_before_cleanup\":true,\"last\":%s}", (unsigned)ecc_before, last);
+    }
     reader_selftest_cleanup(s);
     s->elapsed_us = (uint32_t)((uint64_t)esp_timer_get_time() - began);
 }
 
 static void reader_selftest_result(const command_t *command, bool passed) {
     /* Static scratch belongs to CAN owner, avoiding another large CAN stack frame. */
-    static char event[3400];
+    static char event[3900];
     int n = snprintf(event, sizeof(event),
         "{\"type\":\"reader_selftest_result\",\"id\":\"%s\",\"boot\":\"%s\",\"epoch\":%u,"
         "\"isolation_asserted\":true,\"bitrate\":250000,\"sampling\":\"TRIPLE\",\"ack_required\":false,\"test_frame_dlc\":8,"
-        "\"state\":\"%s\",\"ctx_restored\":%s,\"driver_retained\":%s,\"stages\":[",
+        "\"state\":\"%s\",\"ctx_restored\":%s,\"driver_retained\":%s,"
+        "\"gpio_probe\":{\"attempted\":%s,\"passed\":%s,\"ctx_restored\":%s,\"reason\":\"%s\","
+        "\"driver_installed\":%s,\"low_hold_us\":100,\"tx\":[%d,%d,%d],\"rx\":[%d,%d,%d],\"low_rc\":%d,\"high_rc\":%d},"
+        "\"stage3_ecc\":%s,\"stages\":[",
         command->id, boot_text, (unsigned)stats.epoch, passed ? "complete" : "failed",
-        reader_ctx_guard().valid ? "true" : "false", installed ? "true" : "false");
+        reader_ctx_guard().valid ? "true" : "false", installed ? "true" : "false",
+        reader_gpio_probe.attempted ? "true" : "false", reader_gpio_probe.passed ? "true" : "false",
+        reader_gpio_probe.ctx_restored ? "true" : "false", reader_gpio_probe.reason,
+        reader_gpio_probe.attempted ? "false" : "null",
+        reader_gpio_probe.tx[0], reader_gpio_probe.tx[1], reader_gpio_probe.tx[2],
+        reader_gpio_probe.rx[0], reader_gpio_probe.rx[1], reader_gpio_probe.rx[2],
+        reader_gpio_probe.low_rc, reader_gpio_probe.high_rc, reader_selftest_stage3_ecc);
     if (n < 0 || (size_t)n >= sizeof(event)) return;
     size_t used = (size_t)n;
     for (unsigned i = 0; i < READER_SELFTEST_STAGES; i++) {
@@ -201,6 +222,8 @@ static void reader_selftest_run(const command_t *command, command_outcome_t *out
     atomic_store(&battery_query_active, true);
     LOCK(); stats.epoch++; UNLOCK();
     memset(reader_selftest_stages, 0, sizeof(reader_selftest_stages));
+    reader_gpio_probe_reset();
+    strcpy(reader_selftest_stage3_ecc, "null");
     const char *names[] = {"peripheral_pad10", "ctx_pad4", "transceiver_rx5"};
     unsigned rx[] = {10, 4, 5};
     bool passed = true;
@@ -209,6 +232,7 @@ static void reader_selftest_run(const command_t *command, command_outcome_t *out
         s->name = names[i]; s->rx_gpio = rx[i]; s->tx_gpio = i ? 4 : 10;
         s->reason = "not_run_after_failure";
         s->install_rc = s->start_rc = s->transmit_rc = s->status_rc = s->stop_rc = s->uninstall_rc = ESP_ERR_INVALID_STATE;
+        if (passed && i == 2 && !reader_gpio_probe_run()) { passed = false; s->reason = "gpio_probe_failed"; }
         if (passed) { reader_selftest_stage(s); passed = s->passed; }
     }
     atomic_store(&battery_query_active, false);

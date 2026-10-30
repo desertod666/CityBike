@@ -4,9 +4,25 @@
  const CAP='isolated_twai_selftest_v1',COMMAND='SELFTEST ISOLATED';
  const layout=[['peripheral_pad10',10,10],['ctx_pad4',4,4],['transceiver_rx5',4,5]];
  function available(d){return d?.product==='BafangReader'&&d.protocol===1&&globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.5.5')===true&&d.rx_sampling_250k==='TRIPLE'&&['command_ids',CAP].every(c=>d.capabilities?.includes(c));}
+ function validProbe(p){
+  if(!p||['attempted','passed','ctx_restored'].some(k=>typeof p[k]!=='boolean')||p.driver_installed!==(p.attempted?false:null)||p.low_hold_us!==100||typeof p.reason!=='string'||!/^[a-z_]{1,64}$/.test(p.reason))return false;
+  if(['tx','rx'].some(k=>!Array.isArray(p[k])||p[k].length!==3||p[k].some(x=>![-1,0,1].includes(x))))return false;
+  if(['low_rc','high_rc'].some(k=>!Number.isInteger(p[k])||p[k]<-2147483648||p[k]>2147483647))return false;
+  if(!p.attempted&&(p.passed||[...p.tx,...p.rx].some(x=>x!==-1)))return false;
+  return !p.passed||(p.attempted&&p.ctx_restored&&p.low_rc===0&&p.high_rc===0&&p.reason==='gpio_loopback_verified'&&p.tx.every((x,i)=>x===[1,0,1][i])&&p.rx.every((x,i)=>x===[1,0,1][i]));
+ }
+ function validEcc(e){
+  if(e===null)return true;
+  if(!e||e.captured_before_cleanup!==true||!Number.isInteger(e.after_event)||e.after_event<0||e.after_event>0xffffffff)return false;
+  const v=e.last;if(v===null)return true;
+  return !!v&&v.source==='single_HAL_ECC_read'&&v.scope==='boot_history'&&Number.isInteger(v.event)&&v.event>e.after_event&&v.event<=0xffffffff&&Number.isInteger(v.t_us)&&v.t_us>=0&&Number.isInteger(v.raw)&&v.raw>=0&&v.raw<=255&&v.type===(v.raw>>6)&&v.direction===((v.raw>>5)&1)&&v.segment===(v.raw&31)&&typeof v.saturated==='boolean';
+ }
  function validate(m,d,id){
   if(!m||m.type!=='reader_selftest_result'||m.id!==id||m.boot!==d.boot||!Number.isSafeInteger(m.epoch)||m.epoch!==d.epoch+1||m.isolation_asserted!==true||m.bitrate!==250000||m.sampling!=='TRIPLE'||m.ack_required!==false||!['complete','failed'].includes(m.state)||typeof m.ctx_restored!=='boolean'||typeof m.driver_retained!=='boolean'||!Array.isArray(m.stages)||m.stages.length!==3)return null;
   if(globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.5.6')===true&&m.test_frame_dlc!==8)return null;
+  if(globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.6.7')===true||Object.hasOwn(m,'gpio_probe')){
+   if(!validProbe(m.gpio_probe)||!validEcc(m.stage3_ecc)||m.stages[2]?.attempted&&(!m.gpio_probe.passed||!m.stage3_ecc)||!m.stages[2]?.attempted&&m.stage3_ecc!==null||m.gpio_probe.attempted&&!m.stages.slice(0,2).every(s=>s.passed))return null;
+  }
   let failed=false;
   for(let i=0;i<3;i++){
    const s=m.stages[i],[name,tx,rx]=layout[i];

@@ -55,11 +55,27 @@ extern int fake_driver_installed,fake_driver_state,fake_status_calls,fake_status
 #define SIG_GPIO_OUT_IDX 128
 #define PIN_FUNC_GPIO 1
 static inline esp_err_t gpio_reset_pin(int pin){if(fake_gpio_fail)return ESP_FAIL;if(pin==4)fake_reg[0]=0;return 0;}
-static inline esp_err_t gpio_set_level(int pin,int level){if(fake_gpio_fail)return ESP_FAIL;if(pin==4){assert(level==1);fake_reg[1]|=BIT(4);fake_pad=1;}return 0;}
+#ifdef READER_TEST_SELFTEST
+int fake_probe_set(int pin,int level);
+int fake_probe_get(int pin);
+#endif
+static inline esp_err_t gpio_set_level(int pin,int level){if(fake_gpio_fail)return ESP_FAIL;
+#ifdef READER_TEST_SELFTEST
+return fake_probe_set(pin,level);
+#else
+if(pin==4){assert(level==1);fake_reg[1]|=BIT(4);fake_pad=1;}return 0;
+#endif
+}
 static inline esp_err_t gpio_set_direction(int pin,int mode){if(fake_gpio_fail)return ESP_FAIL;if(pin==4){assert(mode==3 && (fake_reg[1]&BIT(4)));fake_reg[0]|=BIT(4);fake_reg[2]=128;fake_reg[3]=FUN_IE|(1<<12);}return 0;}
 static inline int gpio_pullup_en(int pin){fake_reg[pin==4?3:4]|=FUN_PU;return ESP_OK;}
 static inline int gpio_pullup_dis(int pin){fake_reg[pin==4?3:4]&=~FUN_PU;return ESP_OK;}
-static inline int gpio_get_level(int pin){return pin==4?fake_pad:1;}
+static inline int gpio_get_level(int pin){
+#ifdef READER_TEST_SELFTEST
+return fake_probe_get(pin);
+#else
+return pin==4?fake_pad:1;
+#endif
+}
 static inline int gpio_config(const gpio_config_t *c){(void)c;return 0;}
 static inline int gpio_intr_disable(int p){(void)p;return 0;}
 static inline int gpio_intr_enable(int p){(void)p;return 0;}
