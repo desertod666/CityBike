@@ -1,14 +1,18 @@
 /* Fixed isolated reader selftest. This sends no battery-service command. */
 'use strict';
 (()=>{
- const CAP='isolated_twai_selftest_v1',COMMAND='SELFTEST ISOLATED';
+ const CAP='isolated_twai_selftest_v1',COMMAND='SELFTEST ISOLATED',METER='SELFTEST VOLTMETER ISOLATED';
  const layout=[['peripheral_pad10',10,10],['ctx_pad4',4,4],['transceiver_rx5',4,5]];
  function available(d){return d?.product==='BafangReader'&&d.protocol===1&&globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.5.5')===true&&d.rx_sampling_250k==='TRIPLE'&&['command_ids',CAP].every(c=>d.capabilities?.includes(c));}
+ function meterAvailable(d){return available(d)&&globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.6.8')===true&&d.capabilities.includes('isolated_gpio_voltmeter_v1');}
  function validProbe(p){
-  if(!p||['attempted','passed','ctx_restored'].some(k=>typeof p[k]!=='boolean')||p.driver_installed!==(p.attempted?false:null)||p.low_hold_us!==100||typeof p.reason!=='string'||!/^[a-z_]{1,64}$/.test(p.reason))return false;
+  if(!p||['attempted','passed','ctx_restored'].some(k=>typeof p[k]!=='boolean')||p.driver_installed!==(p.attempted?false:null)||![100,8000000].includes(p.low_hold_us)||typeof p.reason!=='string'||!/^[a-z_]{1,64}$/.test(p.reason))return false;
   if(['tx','rx'].some(k=>!Array.isArray(p[k])||p[k].length!==3||p[k].some(x=>![-1,0,1].includes(x))))return false;
   if(['low_rc','high_rc'].some(k=>!Number.isInteger(p[k])||p[k]<-2147483648||p[k]>2147483647))return false;
   if(!p.attempted&&(p.passed||[...p.tx,...p.rx].some(x=>x!==-1)))return false;
+  if(Object.hasOwn(p,'rx_config_rc')||Object.hasOwn(p,'rx_config_valid')){
+   if(!Number.isInteger(p.rx_config_rc)||p.rx_config_rc< -2147483648||p.rx_config_rc>2147483647||typeof p.rx_config_valid!=='boolean'||p.rx_config_valid&&p.rx_config_rc!==0||p.attempted&&!p.rx_config_valid)return false;
+  }
   return !p.passed||(p.attempted&&p.ctx_restored&&p.low_rc===0&&p.high_rc===0&&p.reason==='gpio_loopback_verified'&&p.tx.every((x,i)=>x===[1,0,1][i])&&p.rx.every((x,i)=>x===[1,0,1][i]));
  }
  function validEcc(e){
@@ -17,11 +21,13 @@
   const v=e.last;if(v===null)return true;
   return !!v&&v.source==='single_HAL_ECC_read'&&v.scope==='boot_history'&&Number.isInteger(v.event)&&v.event>e.after_event&&v.event<=0xffffffff&&Number.isInteger(v.t_us)&&v.t_us>=0&&Number.isInteger(v.raw)&&v.raw>=0&&v.raw<=255&&v.type===(v.raw>>6)&&v.direction===((v.raw>>5)&1)&&v.segment===(v.raw&31)&&typeof v.saturated==='boolean';
  }
- function validate(m,d,id){
+ function validate(m,d,id,voltmeter=false){
+  if(voltmeter&&!meterAvailable(d))return null;
   if(!m||m.type!=='reader_selftest_result'||m.id!==id||m.boot!==d.boot||!Number.isSafeInteger(m.epoch)||m.epoch!==d.epoch+1||m.isolation_asserted!==true||m.bitrate!==250000||m.sampling!=='TRIPLE'||m.ack_required!==false||!['complete','failed'].includes(m.state)||typeof m.ctx_restored!=='boolean'||typeof m.driver_retained!=='boolean'||!Array.isArray(m.stages)||m.stages.length!==3)return null;
   if(globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.5.6')===true&&m.test_frame_dlc!==8)return null;
   if(globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.6.7')===true||Object.hasOwn(m,'gpio_probe')){
    if(!validProbe(m.gpio_probe)||!validEcc(m.stage3_ecc)||m.stages[2]?.attempted&&(!m.gpio_probe.passed||!m.stage3_ecc)||!m.stages[2]?.attempted&&m.stage3_ecc!==null||m.gpio_probe.attempted&&!m.stages.slice(0,2).every(s=>s.passed))return null;
+   if(m.gpio_probe.low_hold_us!==(voltmeter?8000000:100)||globalThis.ByBatteryQuery?.versionAtLeast(d.version,'0.6.8')===true&&!Object.hasOwn(m.gpio_probe,'rx_config_rc'))return null;
   }
   let failed=false;
   for(let i=0;i<3;i++){
@@ -40,14 +46,16 @@
  class Test{
   constructor(r){this.r=r;this.phase='idle';this.active=false;this.error='';this.result=null;}
   snapshot(){return {phase:this.phase,error:this.error||null,result:this.result};}
-  feed(m){const p=this.r.transport?.pending;if(this.active&&p?.command===COMMAND&&m?.id===p.id){const v=validate(m,this.started,p.id);if(v)this.result=v;if(m.type==='command_result'&&m.command===COMMAND&&m.boot===this.started?.boot&&m.status?.type==='status'&&m.status.boot===m.boot)this.completedStatus=m.status;}}
-  async run({isolationAsserted=false,expectedMac,expectedBoot,beforeStep=async()=>{}}={}){
+  feed(m){const p=this.r.transport?.pending;if(this.active&&p?.command===this.command&&m?.id===p.id){const v=validate(m,this.started,p.id,this.voltmeter);if(v)this.result=v;if(m.type==='command_result'&&m.command===this.command&&m.boot===this.started?.boot&&m.status?.type==='status'&&m.status.boot===m.boot)this.completedStatus=m.status;}}
+  async run({isolationAsserted=false,expectedMac,expectedBoot,voltmeter=false,beforeStep=async()=>{}}={}){
    const r=this.r,t=r.transport;
    if(isolationAsserted!==true)throw Error('Сначала отсоедините CAN-H/CAN-L от велосипеда и подтвердите это');
+   if(typeof voltmeter!=='boolean'||voltmeter&&!meterAvailable(r.device))throw Error('Voltmeter test requires USB reader 0.6.8');
    if(this.active||r.operation||r.recorder||r.ending||r.flashBusy||r.scan?.active||r.tuner?.active||globalThis.BySpardProbe?.active)throw Error('Ридер занят отдельным тестом');
    if(r.wifi||!t?.connected||!t.verified||t.uncertain)throw Error('Самотест доступен только через подтверждённый USB ESP');
    const boot=expectedBoot||r.device.boot,mac=expectedMac||r.device.ap_mac;
-   const guard=()=>{if(!t.connected||t.uncertain||r.device.boot!==boot||r.device.ap_mac!==mac||!available(r.device))throw Error('Ридер изменился или отключён; самотест отменён');};
+   const guard=()=>{if(!t.connected||t.uncertain||r.device.boot!==boot||r.device.ap_mac!==mac||!available(r.device)||voltmeter&&!meterAvailable(r.device))throw Error('Ридер изменился или отключён; самотест отменён');};
+   this.voltmeter=voltmeter;this.command=voltmeter?METER:COMMAND;
    this.active=true;r.operation=true;this.phase='preparing';this.error='';this.result=null;this.completedStatus=null;
    try{
     r.device=await t.poll();guard();await beforeStep();guard();
@@ -56,7 +64,7 @@
     const d=await t.call('STOP');r.device=d;
     if(!await t.drain(d.received||0)||d.can!=='stopped'||d.ctx_guard?.valid!==true||d.ctx_guard?.policy!=='fixed_recessive'||d.ctx_guard?.level!==1)throw Error('Пассивное состояние ESP не подтверждено');
     r.liveViewing=false;r.liveRemote=false;guard();await beforeStep();guard();this.started=structuredClone(d);this.phase='running';
-    let failure;try{r.device=await t.call(COMMAND);}catch(e){failure=e;}
+    let failure;try{r.device=await t.call(this.command);}catch(e){failure=e;}
     const final=this.completedStatus||t.state;r.device=final;guard();
     if(!this.result)throw failure||Error('Полный результат самотеста ESP не получен');
     if(final.boot!==boot||final.epoch!==this.result.epoch||final.can!=='stopped'||final.ctx_guard?.valid!==true||!this.result.ctx_restored||this.result.driver_retained)throw Error('Безопасное завершение самотеста не подтверждено');
@@ -92,6 +100,6 @@
   }catch(e){actionError=String(e.message||e);}finally{pending=false;paint();}
  }
  function mount(){const root=document.getElementById('readerSelftestPanel');if(!root)return;const get=id=>document.getElementById(id);dom={start:get('readerSelftestStart'),confirm:get('readerSelftestIsolated'),status:get('readerSelftestStatus'),rows:get('readerSelftestRows'),raw:get('readerSelftestRaw')};dom.confirm.onchange=paint;dom.start.onclick=start;setInterval(paint,500);paint();}
- globalThis.ByReaderSelftest={Test,available,validate,bind,remoteState,paint};if(typeof module!=='undefined')module.exports=globalThis.ByReaderSelftest;
+ globalThis.ByReaderSelftest={Test,available,meterAvailable,validate,bind,remoteState,paint};if(typeof module!=='undefined')module.exports=globalThis.ByReaderSelftest;
  if(globalThis.document){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();}
 })();

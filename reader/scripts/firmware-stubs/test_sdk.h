@@ -58,6 +58,7 @@ static inline esp_err_t gpio_reset_pin(int pin){if(fake_gpio_fail)return ESP_FAI
 #ifdef READER_TEST_SELFTEST
 int fake_probe_set(int pin,int level);
 int fake_probe_get(int pin);
+int fake_probe_config(const gpio_config_t *c);
 #endif
 static inline esp_err_t gpio_set_level(int pin,int level){if(fake_gpio_fail)return ESP_FAIL;
 #ifdef READER_TEST_SELFTEST
@@ -76,7 +77,13 @@ return fake_probe_get(pin);
 return pin==4?fake_pad:1;
 #endif
 }
-static inline int gpio_config(const gpio_config_t *c){(void)c;return 0;}
+static inline int gpio_config(const gpio_config_t *c){
+#ifdef READER_TEST_SELFTEST
+return fake_probe_config(c);
+#else
+(void)c;return 0;
+#endif
+}
 static inline int gpio_intr_disable(int p){(void)p;return 0;}
 static inline int gpio_intr_enable(int p){(void)p;return 0;}
 static inline int gpio_set_intr_type(int p,int t){(void)p;(void)t;return 0;}

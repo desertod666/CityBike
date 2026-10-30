@@ -1,15 +1,15 @@
 {
-  "version": "0.6.7",
-  "web_build": "20261030-gpioprobe1",
-  "native_baseline": "0.6.6 plus isolated GPIO loopback and ECC snapshot before selftest cleanup",
+  "version": "0.6.8",
+  "web_build": "20261030-voltmeter1",
+  "native_baseline": "0.6.7 plus explicit GPIO5 input setup and bounded fixed multimeter hold",
   "files": {
     "BUILD.txt": {
-      "size": 854,
-      "sha256": "eb8551ae721cfc02d560e27eceaa1c2d3b68558d0a9375ba0b4a5cd2925595cd"
+      "size": 1006,
+      "sha256": "1bbcbbbaff3077722d74a093b2ab7ce2630d0f9ce7d8f264f535595142b07e3e"
     },
     "CMakeLists.txt": {
       "size": 173,
-      "sha256": "5f14fcb40bc016aca837a296387c92150a333177262a9a9d080c3b690a07e216"
+      "sha256": "a40d923856d9956566675cc6e0067f0df1cd7d15991f558fcfdeb9ba9736c3fa"
     },
     "partitions.csv": {
       "size": 132,
@@ -156,8 +156,8 @@
       "sha256": "968d7f0b82d911e64a834d96db219182ac432e54af4b2f9329c9125659ef7b45"
     },
     "scripts/firmware-stubs/test_sdk.h": {
-      "size": 10651,
-      "sha256": "f94c58a70db83abba2a17ddb4472daf685f3fbe2f71df48c39baefbdeec82950"
+      "size": 10770,
+      "sha256": "1f955b630ab1f8f5786ec036ebe7d5abdcfd4e51a245b67eb76d9351f879c720"
     },
     "scripts/host_ble_stub.c": {
       "size": 559,
@@ -228,8 +228,8 @@
       "sha256": "2c0bb193532b38b865ca24782cd25d298288f6ded73367d43f79af481260adf1"
     },
     "scripts/test_selftest.c": {
-      "size": 9706,
-      "sha256": "bb3306b0a25146c6fdc214a8b9d751ff267e15feb04e458ea6c4db0c1e4c74b2"
+      "size": 12680,
+      "sha256": "5b18eb5a408ce1e19509c876f445887f1f8c9577664e220d43502391d6cdd48e"
     },
     "scripts/test_tx_policy.c": {
       "size": 3707,
@@ -288,8 +288,8 @@
       "sha256": "2330849645d2c57e182e592ff0456c4f8fac8a3302a24a8e22f9901244544ca5"
     },
     "src/main.c": {
-      "size": 40127,
-      "sha256": "9abb5045bb44434464ddac38aec79b76fe9c313d01d5d12f3d4aa91246215f31"
+      "size": 40158,
+      "sha256": "f247db55da959a04a4d04b27e83f9ca54f9c5cce1334d0033947c14ae7a25eda"
     },
     "src/reader.h": {
       "size": 583,
@@ -320,8 +320,8 @@
       "sha256": "2a84d0619a07156815ff18f5e24d3b90ce9566163caa74f040574b3b02dc4a20"
     },
     "src/selftest_impl.h": {
-      "size": 13656,
-      "sha256": "7bf3a892b5fb82e7bbad68acf8edec031e8c470d1a1895d01aaf2e04140a39fe"
+      "size": 14226,
+      "sha256": "969c1df86fc6b4d1b3e1a8dcbf64a0e3adff37fdb8e681175b184b63978369bf"
     },
     "src/spard_query_impl.h": {
       "size": 16439,
@@ -393,7 +393,7 @@
     },
     "web/browser.js": {
       "size": 38792,
-      "sha256": "fb5dfb1b7459fef1339a6cc4efd8a0754e6beabed28b751cf8bcf6130236bb49"
+      "sha256": "16b9a46e0c060b26011052d3661500da57a8cb826238ba7ababdc25515ceca87"
     },
     "web/can-live.css": {
       "size": 3356,
@@ -476,8 +476,8 @@
       "sha256": "04842f25c282a373756e7fc2db2912bd0ce676448baec0bb139c1788b9a6f68b"
     },
     "web/reader-selftest.js": {
-      "size": 10732,
-      "sha256": "9cc3d15b1a52f69624f7038d8bb8686113f6e073838644602031e7ea31146a48"
+      "size": 11803,
+      "sha256": "8546a8a57a28329ca89a4c202250d7a939ddd8335d16f059e2ae1435a6949352"
     },
     "web/remote-console.css": {
       "size": 3206,
@@ -516,24 +516,24 @@
       "sha256": "dc561c9eb30a371bedc66043c560c94fda157c6c5bd404f6ab803b325bbf4cb9"
     },
     "web/support.js": {
-      "size": 23100,
-      "sha256": "4a5249cb2147f34911f1e704fc34a0787b0f6903b59305b3352df1993fc0d0df"
+      "size": 23131,
+      "sha256": "e098238a6ffa7c03f8c9a0c4868baf32825cba69ca531a1fc8d2288aeb91dc6f"
     },
     "web/sw.js": {
       "size": 4887,
-      "sha256": "0e53c9d183ba275523264be79ef532c31a398091206d416650544cf86cdf389f"
+      "sha256": "ca8dbb306d031dc1548e6fa617bdd66b6f682de4c1c51ad0782071e2c3dc296e"
     },
     "web/transport.js": {
-      "size": 13808,
-      "sha256": "ad7b3846eb89fdf92fa85eba175430200b49ac30dc48cb025829e6baad1ba684"
+      "size": 14126,
+      "sha256": "a8fe1b582842f122816a96162469b2f878d0130fd7da6ace834aaa60096a2533"
     },
     "web/tuning.js": {
       "size": 7730,
       "sha256": "a44b286c161e681ce95ca569fddcfb922ac2a4a45186c55d5efb7c2e9dbec701"
     },
     "src/isolated_gpio_probe.h": {
-      "size": 2552,
-      "sha256": "89bb56c98240f7a8f57b09992dbce64bf4c6f141109564f7cc551edc955da5a3"
+      "size": 4030,
+      "sha256": "ba83c00cd3ecbaf9b353dd2b121b6e7fd8467c85b159b21b353ab44c08bd8b99"
     },
     "scripts/firmware-stubs/esp_rom_sys.h": {
       "size": 106,

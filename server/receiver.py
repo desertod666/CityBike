@@ -359,8 +359,11 @@ class Storage:
                 return None
             if job['kind']=='reader_selftest':
                 record=self.operator.load_job(job['id'])
-                if (set(job)!={'id','kind','expected_mac','expected_boot','expires_at','key_sha256','isolation_asserted'} or job.get('isolation_asserted') is not True
-                        or 'reader_selftest' not in capabilities or not record or record.get('kind')!='reader_selftest' or record.get('action')!='reader_selftest'
+                voltmeter=bool(record and record.get('action')=='reader_voltmeter')
+                fields={'id','kind','expected_mac','expected_boot','expires_at','key_sha256','isolation_asserted'}|({'voltmeter'} if voltmeter else set())
+                if voltmeter and (job.get('voltmeter') is not True or not version_at_least(device.get('version'),'0.6.8') or 'isolated_gpio_voltmeter_v1' not in device.get('capabilities',[])):return None
+                if (set(job)!=fields or job.get('isolation_asserted') is not True
+                        or 'reader_selftest' not in capabilities or not record or record.get('kind')!='reader_selftest' or record.get('action') not in ('reader_selftest','reader_voltmeter')
                         or not version_at_least(device.get('version'),'0.5.5') or device.get('rx_sampling_250k')!='TRIPLE' or not self.operator.ctx(device)
                         or not isinstance(device.get('capabilities'),list) or not all(x in device['capabilities'] for x in ('command_ids','isolated_twai_selftest_v1'))
                         or control.get('busy') is True or control.get('recording') is True or control.get('updating') is True

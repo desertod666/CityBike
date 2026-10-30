@@ -32,7 +32,7 @@
 #include "web_server.h"
 #include "ble_remote.h"
 
-#define VERSION "0.6.7"
+#define VERSION "0.6.8"
 #define FRAME_QUEUE_LEN 256
 #define PREVIEW_LEN 128
 #define LINE_SIZE (READER_STATUS_SIZE + 768)
@@ -233,7 +233,7 @@ void reader_status_json(char *buffer, size_t capacity) {
     int64_t elapsed_ms = rx.state == RX_IDLE ? 0 : ((rx.state == RX_RUNNING ? esp_timer_get_time() : rx.ended_us) - rx.started_us) / 1000;
     int length = snprintf(buffer, capacity,
         "{\"type\":\"status\",\"product\":\"BafangReader\",\"protocol\":1,\"version\":\"%s\",\"boot\":\"%08" PRIX32 "\",\"reset_reason\":%d,"
-        "\"capabilities\":[\"command_ids\",\"stream_end\",\"twai_hardware_readback\",\"spard_information_query\",\"spard_query_quality_v1\",\"spard_tx_trace_v1\",\"isolated_twai_selftest_v1\",\"isolated_twai_selftest_v2\",\"spard_quiet_query_v1\",\"spard_rmt_trace_v1\",\"spard_tx_echo_v1\",\"spard_ecc_capture_v1\",\"spard_tx_hardware_check_v1\",\"ble_remote_v1\"],\"received_semantics\":\"application_dequeued\",\"error_counters_valid\":false,\"error_counters_reason\":\"%s\",\"uptime_us\":%" PRId64 ",\"can\":\"%s\",\"mode\":\"%s\",\"bitrate\":%" PRIu32 ",\"epoch\":%" PRIu32 ","
+        "\"capabilities\":[\"command_ids\",\"stream_end\",\"twai_hardware_readback\",\"spard_information_query\",\"spard_query_quality_v1\",\"spard_tx_trace_v1\",\"isolated_twai_selftest_v1\",\"isolated_twai_selftest_v2\",\"isolated_gpio_voltmeter_v1\",\"spard_quiet_query_v1\",\"spard_rmt_trace_v1\",\"spard_tx_echo_v1\",\"spard_ecc_capture_v1\",\"spard_tx_hardware_check_v1\",\"ble_remote_v1\"],\"received_semantics\":\"application_dequeued\",\"error_counters_valid\":false,\"error_counters_reason\":\"%s\",\"uptime_us\":%" PRId64 ",\"can\":\"%s\",\"mode\":\"%s\",\"bitrate\":%" PRIu32 ",\"epoch\":%" PRIu32 ","
         "\"received\":%" PRIu64 ",\"frame_queue_drops\":%" PRIu64 ",\"usb_frame_drops\":%" PRIu64 ","
         "\"control_drops\":%" PRIu64 ",\"command_drops\":%" PRIu64 ",\"stop_discards\":%" PRIu64 ","
         "\"rx_missed\":%" PRIu64 ",\"rx_overrun\":%" PRIu64 ",\"bus_errors\":%" PRIu64 ","

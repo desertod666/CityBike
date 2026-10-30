@@ -1,14 +1,17 @@
-CURRENT ESP32 READER SOURCE: 0.6.7
+CURRENT ESP32 READER SOURCE: 0.6.8
 
-Adds one fixed 100 us GPIO4 LOW hold / GPIO5 readback to the isolated USB
-selftest, between pad self-echo and the external transceiver CAN echo stage.
-TWAI must be uninstalled. The test requires bike CAN physically detached;
-GPIO4 returns HIGH before leaving its critical section. Failed level readback
-prevents the external CAN echo stage. It does not identify a faulty component.
-The stage3 latest observed ECC event is saved before inhibition/STOP, so
-cleanup-induced error flags cannot overwrite the diagnostic snapshot.
+The isolated GPIO loopback now configures GPIO5 as an input with no pulls,
+checks the actual GPIO mux/enable bits and refuses before CTX LOW if setup
+fails. The normal isolated selftest still holds LOW for only 100 us.
 
-The portal build is 20261030-gpioprobe1. Normal CAN timing, modes, battery
-request policy and BLE controls are unchanged. No arbitrary transmit endpoint.
-Prefer GitHub-hosted reader-ci with pinned tools. Verify source hashes,
-native tests, exact ELF assets and image size before publication.
+SELFTEST VOLTMETER ISOLATED is a separate correlated-USB-only command. The
+owner must assert that bicycle CAN is physically disconnected. It adds one
+fixed eight-second LOW window for a multimeter, with TWAI uninstalled. The
+CAN owner yields and checks USB/STOP cancellation while waiting; both paths
+restore GPIO4 HIGH before returning. No arbitrary timing or pin API exists.
+It requires the isolated_gpio_voltmeter_v1 capability; Wi-Fi/RPC is denied.
+No battery-service request, battery write or motor command is sent.
+
+The portal build is 20261030-voltmeter1. Normal CAN timing, battery request
+policy and BLE controls are unchanged. Prefer GitHub-hosted reader-ci with
+pinned tools; verify native tests, ELF assets and partition size before use.

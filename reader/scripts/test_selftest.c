@@ -8,14 +8,29 @@
 
 static unsigned stage_number, sent, fail_stage, installs;
 static enum { PROBE_OK, RX_STUCK_HIGH, TX_STUCK_HIGH, LOW_SET_FAIL,
-    HIGH_SET_FAIL, CANCEL_WHILE_LOW, USB_LOST_WHILE_LOW, IDLE_LOW } probe_fault;
+    HIGH_SET_FAIL, CANCEL_WHILE_LOW, USB_LOST_WHILE_LOW, IDLE_LOW,
+    RX_CONFIG_FAIL, RX_CONFIG_WRONG_MUX, RX_CONFIG_OUTPUT, RX_CONFIG_PULLUP } probe_fault;
 static unsigned probe_lows, probe_delivered, probe_high_failed;
 static bool probe_usb_lost;
+static unsigned low_wait_ticks, cancel_after_ticks, usb_loss_after_ticks;
+static uint64_t probe_low_at, probe_high_at;
+int fake_probe_config(const gpio_config_t *c) {
+    assert(!installed && !fake_driver_installed && atomic_load(&battery_query_active));
+    assert(c->pin_bit_mask == BIT(5) && c->mode == GPIO_MODE_INPUT && !c->pull_up_en && !c->pull_down_en && !c->intr_type);
+    if (probe_fault == RX_CONFIG_FAIL) return ESP_FAIL;
+    fake_reg[4] = FUN_IE | (PIN_FUNC_GPIO << MCU_SEL_S); fake_reg[0] &= ~BIT(5);
+    if (probe_fault == RX_CONFIG_WRONG_MUX) fake_reg[4] &= ~MCU_SEL_M;
+    if (probe_fault == RX_CONFIG_OUTPUT) fake_reg[0] |= BIT(5);
+    if (probe_fault == RX_CONFIG_PULLUP) fake_reg[4] |= FUN_PU;
+    return ESP_OK;
+}
 int fake_probe_set(int pin, int level) {
     if (pin != 4) return ESP_OK;
     if (!level) {
         assert(!installed && !fake_driver_installed && atomic_load(&battery_query_active));
         assert(installs == 2 && sent == 2 && fake_pad == 1);
+        assert((fake_reg[4] & MCU_SEL_M) == (PIN_FUNC_GPIO << MCU_SEL_S) && !(fake_reg[0] & BIT(5)));
+        probe_low_at = fake_clock;
         probe_lows++;
         if (probe_fault == LOW_SET_FAIL) return ESP_FAIL;
         fake_reg[1] &= ~BIT(4); fake_pad = probe_fault == TX_STUCK_HIGH ? 1 : 0;
@@ -23,6 +38,7 @@ int fake_probe_set(int pin, int level) {
         if (probe_fault == USB_LOST_WHILE_LOW) probe_usb_lost = true;
         probe_delivered++;
     } else {
+        if (probe_delivered) probe_high_at = fake_clock;
         if (probe_fault == HIGH_SET_FAIL && probe_delivered && !probe_high_failed++) return ESP_FAIL;
         fake_reg[1] |= BIT(4); fake_pad = 1;
     }
@@ -88,7 +104,13 @@ bool fake_query_connected(void) {
 }
 void fake_query_route(int gpio, int signal) { assert(gpio == 4); fake_reg[2] = signal; }
 void fake_query_received(void) {}
-void fake_query_delay(unsigned ticks) { (void)ticks; }
+void fake_query_delay(unsigned ticks) {
+    if (probe_delivered && !fake_pad) {
+        low_wait_ticks += ticks;
+        if (cancel_after_ticks && low_wait_ticks >= cancel_after_ticks) atomic_store(&battery_query_cancel, true);
+        if (usb_loss_after_ticks && low_wait_ticks >= usb_loss_after_ticks) probe_usb_lost = true;
+    }
+}
 void fake_query_stopping(void) {
     assert(reader_ctx_guard().valid);
     if (stage_number == 3 && injected == BIT_ERROR) {
@@ -103,6 +125,8 @@ static void setup(void) {
     installed = false; fake_driver_installed = false; stats.running = false;
     stage_number = sent = fail_stage = installs = 0; injected = NOMINAL;
     probe_fault = PROBE_OK; probe_lows = probe_delivered = probe_high_failed = 0; probe_usb_lost = false;
+    probe_low_at = probe_high_at = 0; fake_reg[4] = FUN_IE; /* Boot/JTAG mux must be configured by actual probe. */
+    low_wait_ticks = cancel_after_ticks = usb_loss_after_ticks = 0;
     stats.received = 37; /* Existing real frames must stay untouched. */
 }
 static void run(void) {
@@ -142,14 +166,34 @@ int main(void) {
             } else assert(!installed && !atomic_load(&reader_selftest_driver));
         }
     }
-    for (unsigned fault = RX_STUCK_HIGH; fault <= IDLE_LOW; fault++) {
+    for (unsigned fault = RX_STUCK_HIGH; fault <= RX_CONFIG_PULLUP; fault++) {
         setup(); probe_fault = fault; run();
         assert(installs == 2 && sent == 2 && !installed && !fake_driver_installed);
         assert(!reader_gpio_probe.passed && reader_gpio_probe.ctx_restored && !reader_selftest_stages[2].attempted);
         assert(!strcmp(reader_selftest_stages[2].reason, "gpio_probe_failed"));
         assert(strstr(fake_wire, "\"state\":\"failed\""));
-        assert(probe_lows == (fault == IDLE_LOW ? 0 : 1));
+        assert(probe_lows == (fault >= IDLE_LOW ? 0 : 1));
     }
+    setup(); command_t meter = {.text="SELFTEST VOLTMETER ISOLATED", .id="meter-fixture"};
+    execute_command(&meter); flush_replies();
+    assert(reader_gpio_probe.passed && reader_gpio_probe.rx_config_valid && installs == 3 && probe_lows == 1);
+    assert(probe_high_at - probe_low_at >= 8000000 && probe_high_at - probe_low_at < 8010000);
+    assert(reader_ctx_guard().valid && !installed && !atomic_load(&battery_query_active));
+    for (unsigned fault = CANCEL_WHILE_LOW; fault <= USB_LOST_WHILE_LOW; fault++) {
+        setup(); probe_fault = fault; execute_command(&meter); flush_replies();
+        assert(!reader_gpio_probe.passed && reader_ctx_guard().valid && installs == 2 && !installed);
+        assert(probe_high_at - probe_low_at < 10000);
+    }
+    for (unsigned usb = 0; usb < 2; usb++) {
+        setup(); if (usb) usb_loss_after_ticks = 100; else cancel_after_ticks = 100;
+        execute_command(&meter); flush_replies();
+        assert(!reader_gpio_probe.passed && reader_ctx_guard().valid && installs == 2 && !installed);
+        assert(probe_high_at - probe_low_at >= 100000 && probe_high_at - probe_low_at < 1000000);
+    }
+    setup(); command_t meter_rpc = {.text="SELFTEST VOLTMETER ISOLATED", .id="meter-rpc", .token=1};
+    execute_command(&meter_rpc); flush_replies(); assert(!installs && !probe_lows);
+    setup(); command_t meter_legacy = {.text="SELFTEST VOLTMETER ISOLATED"};
+    execute_command(&meter_legacy); flush_replies(); assert(!installs && !probe_lows);
     setup(); command_t uncorrelated = {.text = "SELFTEST ISOLATED"}; execute_command(&uncorrelated); flush_replies(); assert(!installs);
     setup(); command_t rpc = {.text = "SELFTEST ISOLATED", .id = "rpc", .token = 1}; execute_command(&rpc); flush_replies(); assert(!installs);
     setup(); installed = true; fake_driver_installed = true;

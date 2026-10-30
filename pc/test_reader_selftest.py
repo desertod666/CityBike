@@ -97,6 +97,25 @@ class ReaderSelftestTests(unittest.TestCase):
             bad=copy.deepcopy(raw);bad.pop(field);self.assertIsNone(clean(bad))
         raw['stage3_ecc']['last']=None
         self.assertIsNotNone(clean(raw))
+        raw['gpio_probe'].update(low_hold_us=8000000,rx_config_rc=0,rx_config_valid=True)
+        self.assertIsNone(clean(raw))
+        d.update(version='0.6.8',capabilities=['isolated_gpio_voltmeter_v1'])
+        self.assertIsNotNone(clean(raw))
+        bad=copy.deepcopy(raw);bad['gpio_probe']['rx_config_valid']=False;self.assertIsNone(clean(bad))
+        bad=copy.deepcopy(raw);bad['gpio_probe']['rx_config_rc']=-1;self.assertIsNone(clean(bad))
+        bad=copy.deepcopy(raw);bad['gpio_probe'].pop('rx_config_rc');self.assertIsNone(clean(bad))
+
+    def test_voltmeter_job_is_isolated_and_capability_gated(self):
+        self.ready();body=self.body();body['action']='reader_voltmeter'
+        self.error('unsupported_client',lambda:self.enqueue(body))
+        self.report['device']['version']='0.6.8';self.report['device']['capabilities'].append('isolated_gpio_voltmeter_v1')
+        self.report['sequence']+=1;self.report['device']['uptime_us']+=1000;self.heartbeat()
+        for field in ('isolation_asserted','expected_mac','expected_boot'):
+            bad=dict(body);bad.pop(field);self.error('invalid_request',lambda:self.enqueue(bad))
+        bad=dict(body,isolation_asserted=False);self.error('invalid_request',lambda:self.enqueue(bad))
+        queued=self.enqueue(body);self.assertEqual(queued['job']['duration_s'],10)
+        self.report['sequence']+=1;self.report['device']['uptime_us']+=1000
+        delivered=self.heartbeat();self.assertEqual(delivered['kind'],'reader_selftest');self.assertTrue(delivered['voltmeter']);self.assertTrue(delivered['isolation_asserted'])
 
 
 if __name__=='__main__':

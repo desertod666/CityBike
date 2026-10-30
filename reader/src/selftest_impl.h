@@ -36,11 +36,16 @@ static bool reader_selftest_quiet_rx(void) {
 }
 
 static bool reader_is_selftest(const char *text) {
-    const char *fixed = "SELFTEST ISOLATED";
-    if (!text || strlen(text) != strlen(fixed)) return false;
-    for (unsigned i = 0; fixed[i]; i++)
-        if (toupper((unsigned char)text[i]) != fixed[i]) return false;
-    return true;
+    const char *fixed[] = {"SELFTEST ISOLATED", "SELFTEST VOLTMETER ISOLATED"};
+    if (!text) return false;
+    for (unsigned j = 0; j < 2; j++) {
+        if (strlen(text) != strlen(fixed[j])) continue;
+        bool same = true;
+        for (unsigned i = 0; fixed[j][i]; i++)
+            if (toupper((unsigned char)text[i]) != fixed[j][i]) { same = false; break; }
+        if (same) return true;
+    }
+    return false;
 }
 
 static bool reader_selftest_rx_route(unsigned pin) {
@@ -169,13 +174,16 @@ static void reader_selftest_result(const command_t *command, bool passed) {
         "\"isolation_asserted\":true,\"bitrate\":250000,\"sampling\":\"TRIPLE\",\"ack_required\":false,\"test_frame_dlc\":8,"
         "\"state\":\"%s\",\"ctx_restored\":%s,\"driver_retained\":%s,"
         "\"gpio_probe\":{\"attempted\":%s,\"passed\":%s,\"ctx_restored\":%s,\"reason\":\"%s\","
-        "\"driver_installed\":%s,\"low_hold_us\":100,\"tx\":[%d,%d,%d],\"rx\":[%d,%d,%d],\"low_rc\":%d,\"high_rc\":%d},"
+        "\"driver_installed\":%s,\"low_hold_us\":%u,\"rx_config_rc\":%d,\"rx_config_valid\":%s,"
+        "\"tx\":[%d,%d,%d],\"rx\":[%d,%d,%d],\"low_rc\":%d,\"high_rc\":%d},"
         "\"stage3_ecc\":%s,\"stages\":[",
         command->id, boot_text, (unsigned)stats.epoch, passed ? "complete" : "failed",
         reader_ctx_guard().valid ? "true" : "false", installed ? "true" : "false",
         reader_gpio_probe.attempted ? "true" : "false", reader_gpio_probe.passed ? "true" : "false",
         reader_gpio_probe.ctx_restored ? "true" : "false", reader_gpio_probe.reason,
         reader_gpio_probe.attempted ? "false" : "null",
+        (unsigned)reader_gpio_probe.low_hold_us, reader_gpio_probe.rx_config_rc,
+        reader_gpio_probe.rx_config_valid ? "true" : "false",
         reader_gpio_probe.tx[0], reader_gpio_probe.tx[1], reader_gpio_probe.tx[2],
         reader_gpio_probe.rx[0], reader_gpio_probe.rx[1], reader_gpio_probe.rx[2],
         reader_gpio_probe.low_rc, reader_gpio_probe.high_rc, reader_selftest_stage3_ecc);
@@ -223,6 +231,7 @@ static void reader_selftest_run(const command_t *command, command_outcome_t *out
     LOCK(); stats.epoch++; UNLOCK();
     memset(reader_selftest_stages, 0, sizeof(reader_selftest_stages));
     reader_gpio_probe_reset();
+    reader_gpio_probe.low_hold_us = strlen(command->text) == strlen("SELFTEST VOLTMETER ISOLATED") ? UINT32_C(8000000) : 100;
     strcpy(reader_selftest_stage3_ecc, "null");
     const char *names[] = {"peripheral_pad10", "ctx_pad4", "transceiver_rx5"};
     unsigned rx[] = {10, 4, 5};
@@ -232,7 +241,7 @@ static void reader_selftest_run(const command_t *command, command_outcome_t *out
         s->name = names[i]; s->rx_gpio = rx[i]; s->tx_gpio = i ? 4 : 10;
         s->reason = "not_run_after_failure";
         s->install_rc = s->start_rc = s->transmit_rc = s->status_rc = s->stop_rc = s->uninstall_rc = ESP_ERR_INVALID_STATE;
-        if (passed && i == 2 && !reader_gpio_probe_run()) { passed = false; s->reason = "gpio_probe_failed"; }
+        if (passed && i == 2 && !reader_gpio_probe_run(strlen(command->text) == strlen("SELFTEST VOLTMETER ISOLATED"))) { passed = false; s->reason = "gpio_probe_failed"; }
         if (passed) { reader_selftest_stage(s); passed = s->passed; }
     }
     atomic_store(&battery_query_active, false);

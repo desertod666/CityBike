@@ -6,7 +6,7 @@ import re
 def valid_gpio_probe(p):
     if (not isinstance(p, dict) or any(type(p.get(k)) is not bool for k in ('attempted', 'passed', 'ctx_restored'))
             or p.get('driver_installed') is not (False if p['attempted'] else None)
-            or type(p.get('low_hold_us')) is not int or p['low_hold_us'] != 100
+            or type(p.get('low_hold_us')) is not int or p['low_hold_us'] not in (100, 8000000)
             or not isinstance(p.get('reason'), str) or not re.fullmatch(r'[a-z_]{1,64}', p['reason'])):
         return False
     for key in ('tx', 'rx'):
@@ -16,6 +16,11 @@ def valid_gpio_probe(p):
         return False
     if not p['attempted'] and (p['passed'] or p['tx'] != [-1]*3 or p['rx'] != [-1]*3):
         return False
+    if 'rx_config_rc' in p or 'rx_config_valid' in p:
+        if (type(p.get('rx_config_rc')) is not int or not -2147483648 <= p['rx_config_rc'] <= 2147483647
+                or type(p.get('rx_config_valid')) is not bool or p['rx_config_valid'] and p['rx_config_rc'] != 0
+                or p['attempted'] and not p['rx_config_valid']):
+            return False
     return not p['passed'] or (p['attempted'] and p['ctx_restored'] and p['tx'] == p['rx'] == [1, 0, 1]
                               and p['low_rc'] == p['high_rc'] == 0 and p['reason'] == 'gpio_loopback_verified')
 
@@ -93,6 +98,10 @@ def sanitize_selftest(value, device):
                 or not stages[2]['attempted'] and raw.get('stage3_ecc') is not None
                 or p['attempted'] and not all(s['passed'] for s in stages[:2])):
             return result
+        if (p['low_hold_us'] == 8000000 and (not version_at_least(device.get('version'), '0.6.8')
+                or 'isolated_gpio_voltmeter_v1' not in device.get('capabilities', []))
+                or version_at_least(device.get('version'), '0.6.8') and 'rx_config_rc' not in p):
+            return result
     if (raw['state'] == 'complete') != (not failed and raw['ctx_restored'] and not raw['driver_retained']):
         return result
     result['result'] = {k: raw[k] for k in ('type', 'id', 'boot', 'epoch', 'state', 'isolation_asserted', 'bitrate', 'sampling', 'ack_required', 'ctx_restored', 'driver_retained')}
@@ -100,6 +109,8 @@ def sanitize_selftest(value, device):
     if 'gpio_probe' in raw:
         p = raw['gpio_probe']
         result['result']['gpio_probe'] = {k: p[k] for k in ('attempted', 'passed', 'ctx_restored', 'reason', 'driver_installed', 'low_hold_us', 'tx', 'rx', 'low_rc', 'high_rc')}
+        if 'rx_config_rc' in p:
+            result['result']['gpio_probe'].update(rx_config_rc=p['rx_config_rc'],rx_config_valid=p['rx_config_valid'])
         e = raw.get('stage3_ecc')
         result['result']['stage3_ecc'] = None if e is None else dict(after_event=e['after_event'], captured_before_cleanup=True,
             last={k: e['last'][k] for k in ('source','scope','event','t_us','raw','type','direction','segment','saturated')} if e.get('last') is not None else None)

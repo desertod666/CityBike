@@ -86,7 +86,7 @@
       if(job.kind==='reader_selftest'){
         if(this.active)throw Error('Ридер занят отдельным тестом');
         this.active=true;this.runningJob={id:job.id,kind:job.kind};this.last={id:job.id,kind:job.kind,state:'started'};
-        try{await r.readerSelftest.run({isolationAsserted:job.isolation_asserted,expectedMac:job.expected_mac,expectedBoot:job.expected_boot,beforeStep:()=>this.checkPermission(job)});this.last={id:job.id,kind:job.kind,state:'complete'};}
+        try{await r.readerSelftest.run({voltmeter:job.voltmeter===true,isolationAsserted:job.isolation_asserted,expectedMac:job.expected_mac,expectedBoot:job.expected_boot,beforeStep:()=>this.checkPermission(job)});this.last={id:job.id,kind:job.kind,state:'complete'};}
         finally{this.active=false;if(this.runningJob?.id===job.id)this.runningJob=null;}return;
       }
       if(job.kind==='battery_information'){
