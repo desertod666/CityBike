@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-set(PROJECT_VER "0.6.4")
+set(PROJECT_VER "0.6.5")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 set(COMPONENTS src __pio_env)
 project(bafang_usb_can_reader)

@@ -61,8 +61,8 @@
     const info=globalThis.ByEspBattery?.model(input.query,d,extra,input.connected),full=info?.decoded?.fields;
     if(full){const age=info.age_ms;for(const [key,value]of Object.entries({voltage:full.cell_sum_mv/1000,current:full.current_ma/1000,soc:full.soc_percent,soh:full.soh_percent,full:full.full_charge_capacity_mah,remaining:full.remaining_capacity_mah,temperature:full.temperatures_c[0]}))put(key,value,age,'ESP Information');}
     if(metrics.voltage&&metrics.current){const a=metrics.voltage,b=metrics.current;metrics.power={value:a.value*b.value,age_ms:Math.max(a.age_ms,b.age_ms),id:a.id+' / '+b.id,stale:a.stale||b.stale};}
-    const cells=globalThis.ByBafangBattery?.model(s,extra);let cellValues=[],cellAge=null,cellStale=true,cellComplete=false;
-    if(cells?.cells?.length){cellValues=cells.cells.map(c=>c.mv===65535?null:c.mv);cellAge=cells.age_ms;cellStale=cells.stale;cellComplete=cells.complete&&cells.coherent;}
+    const cells=globalThis.ByBafangBattery?.model({...s,stream_active:input.connected===true&&s.stream_active},extra);let cellValues=[],cellAge=null,cellStale=true,cellComplete=false;
+    if(cells?.cells?.length){cellValues=cells.cells.map(c=>c.mv>0&&c.mv<65535?c.mv:null);cellAge=cells.age_ms;cellStale=cells.stale;cellComplete=cells.usable;}
     if(full&&(!cellValues.length||info.age_ms<cellAge)){cellValues=[...full.cells_mv];cellAge=info.age_ms;cellStale=info.stale;cellComplete=true;}
     return {metrics,cellValues,cellAge,cellStale,cellComplete,full,used,hasValues:Object.keys(metrics).length>0||cellValues.length>0};
   }

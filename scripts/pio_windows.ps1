@@ -13,12 +13,16 @@ function Copy-Changed([string]$Source, [string]$Destination) {
         Copy-Item -LiteralPath $Source -Destination $Destination -Force
     }
 }
-$projectRoot = Split-Path $PSScriptRoot -Parent
+$workspaceRoot = Split-Path $PSScriptRoot -Parent
+$projectRoot = Join-Path $workspaceRoot 'reader'
+if (!(Test-Path -LiteralPath (Join-Path $projectRoot 'SOURCE_MANIFEST.json'))) { throw 'Canonical reader project is missing.' }
 $pioPython = Join-Path $env:USERPROFILE '.platformio\penv\Scripts\python.exe'
 if (!(Test-Path -LiteralPath $pioPython)) { throw 'Install PlatformIO Core/VS Code extension first.' }
+& $pioPython (Join-Path $workspaceRoot 'scripts\sync_reader_web.py') --check
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Action -eq 'upload') {
     if ($Port -notmatch '^COM[0-9]+$') { throw 'Explicit target required: flash.bat COM9' }
-    & $pioPython (Join-Path $projectRoot 'pc\check_port.py') $Port
+    & $pioPython (Join-Path $workspaceRoot 'pc\check_port.py') $Port
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 # ESP-IDF/PlatformIO canonicalize subst paths inconsistently. Copy only build
@@ -26,7 +30,7 @@ if ($Action -eq 'upload') {
 $hashAlgo = [System.Security.Cryptography.SHA256]::Create()
 $projectHash = ([BitConverter]::ToString($hashAlgo.ComputeHash([Text.Encoding]::UTF8.GetBytes($projectRoot)))).Replace('-','').Substring(0,12)
 $hashAlgo.Dispose()
-$stage = Join-Path $env:USERPROFILE ('.platformio\reader-builds\bafang-' + $projectHash)
+$stage = Join-Path $env:USERPROFILE ('.platformio\reader-builds\current-reader-' + $projectHash)
 if ($stage.Contains(' ')) { throw 'Build cache must have a path without spaces.' }
 New-Item -ItemType Directory -Force -Path $stage,(Join-Path $stage 'src') | Out-Null
 foreach ($file in @('platformio.ini','CMakeLists.txt','sdkconfig.defaults','partitions.csv')) {

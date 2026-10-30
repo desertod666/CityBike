@@ -21,9 +21,19 @@ def main():
     parser.add_argument('--skip-exe',action='store_true')
     parser.add_argument('--exe-only',action='store_true')
     args=parser.parse_args()
+    if not args.exe_only:
+        parser.error('Legacy combined release is retired. Build reader/ on GitHub and verify its ci-artifacts; --exe-only builds the legacy desktop app without firmware.')
     project=json.loads((ROOT/'project.json').read_text(encoding='utf-8'))
     sys.path.insert(0,str(ROOT/'pc'))
     from updates import VERSION,REPOSITORY
+    from sym_decoder import verify_tables, verify_bundled
+    references = (ROOT/'reference'/'BafangReader_Handoff'/'protocol', ROOT)
+    for reference in references:
+        if (reference/'SYSTEM TESTING_BAFANG SYSTEM_V1.sym').exists():
+            source = verify_tables(reference)
+            verify_bundled(ROOT/'pc'/'decoder_reference.json', source)
+            verify_bundled(ROOT/'web'/'decoder_reference.json', source)
+    assert (ROOT/'pc'/'decoder_reference.json').read_bytes() == (ROOT/'web'/'decoder_reference.json').read_bytes(), 'PC/web decoder mismatch'
     assert VERSION==project['version'] and REPOSITORY==project['repository']
     firmware_version=re.search(r'#define VERSION "([^"]+)"',(ROOT/'src/main.c').read_text(encoding='utf-8'))[1]
     cmake_version=re.search(r'set\(PROJECT_VER "([^"]+)"\)',(ROOT/'CMakeLists.txt').read_text(encoding='utf-8'))[1]
@@ -40,7 +50,7 @@ def main():
     program=out/project['asset']
     readme=(f"BafangReader {VERSION}\n\nRun BafangReader.exe. Open the local browser UI.\n"
             "Select the ESP32 USB COM port explicitly, connect, choose the known CAN bitrate and start listen-only capture.\n"
-            "All USB bytes and CAN frames are recorded under %LOCALAPPDATA%\\BafangReader\\logs.\n"
+            "Logs are stored in diag-logs beside BafangReader.exe, with a subfolder per recording.\n"
             "Updates need internet; capture does not. Firmware update is only for ESP32-C3, never Bafang.\n"
             f"Source and releases: https://github.com/{REPOSITORY}\n")
     with zipfile.ZipFile(program,'w',zipfile.ZIP_DEFLATED) as z:

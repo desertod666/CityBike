@@ -1,7 +1,7 @@
 /* A waiting worker may activate only after every open diagnostic tab is idle. */
 'use strict';
 (() => {
-  const PREFIX='citybike-update-',CHECK_MS=60000;
+  const PREFIX='citybike-update-',CHECK_MS=60000,RESUME_KEY='citybike-update-live-resume';
   let current=null;
   function busyReasons(runtime){
     const r=runtime||{},probe=globalThis.BySpardProbe;
@@ -26,7 +26,8 @@
       busy_reasons:busyReasons(this.runtime).slice(0,20)};}
     release(token){
       if(!this.hold||this.hold!==token)return;
-      if(this.committing){this.cancelAfterCommit=token;return;}
+      if(this.committing||this.preparing){this.cancelAfterCommit=token;return;}
+      if(this.resume){this.runtime.updateResume=this.resume;this.resume=null;try{globalThis.sessionStorage?.removeItem(RESUME_KEY);}catch{}}
       this.hold=null;this.runtime.updateHold=false;
       if(typeof document!=='undefined')document.body.inert=false;
     }
@@ -37,10 +38,26 @@
       if(m.type===PREFIX+'cancel'){this.release(m.token);return;}
       if(!reply||typeof m.token!=='string')return;
       if(m.type===PREFIX+'prepare'){
-        if(this.hold||this.busy()){reply.postMessage({ok:false,token:m.token});return;}
+        const reasons=busyReasons(this.runtime),r=this.runtime;
+        const passive=reasons.length===1&&reasons[0]==='can_active'&&r.liveViewing===true&&r.device?.can==='running'&&r.device?.rx_check?.state!=='running'&&typeof r.liveStop==='function';
+        if(this.hold||reasons.length&&!passive){reply.postMessage({ok:false,token:m.token});return;}
         this.hold=m.token;this.candidate=event.source;this.runtime.updateHold=true;
         if(typeof document!=='undefined')document.body.inert=true;
-        reply.postMessage({ok:true,token:m.token,reload_on_controllerchange:true});return;
+        this.preparing=true;
+        try{
+          // A different tab may have refused the previous barrier before the
+          // runtime had a chance to resume. Preserve that intent on retries.
+          const resume=passive?{boot:r.device.boot,mac:r.device.ap_mac,remote:r.liveRemote===true,expires_at_ms:Date.now()+120000}:r.updateResume;
+          if(resume){
+            if(!/^[A-F0-9]{8}$/.test(resume.boot)||typeof resume.mac!=='string'||!globalThis.sessionStorage)throw Error('Cannot preserve live view');
+            // Prove storage availability before interrupting the passive stream.
+            globalThis.sessionStorage.setItem(RESUME_KEY,JSON.stringify(resume));this.resume=resume;r.updateResume=null;
+            if(passive)await r.liveStop();
+          }
+          reply.postMessage({ok:!this.busy(),token:m.token,reload_on_controllerchange:true});
+        }catch(e){this.lastError=String(e?.message||e);reply.postMessage({ok:false,token:m.token});this.cancelAfterCommit=m.token;}
+        finally{this.preparing=false;if(this.cancelAfterCommit){const token=this.cancelAfterCommit;this.cancelAfterCommit=null;this.release(token);}}
+        return;
       }
       if(m.type===PREFIX+'commit'){
         if(this.hold!==m.token||this.busy()){reply.postMessage({ok:false,token:m.token});return;}
@@ -86,5 +103,5 @@
       await this.check();return this;
     }
   }
-  globalThis.ByAutoUpdate={AutoUpdate,get holding(){return !!current?.hold;},snapshot(){return current?.snapshot()||null;},async start(runtime,options){current=new AutoUpdate(runtime,options);try{return await current.start();}catch(e){current.lastError=String(e?.message||e).slice(0,160);throw e;}}};
+  globalThis.ByAutoUpdate={AutoUpdate,RESUME_KEY,get holding(){return !!current?.hold;},snapshot(){return current?.snapshot()||null;},async start(runtime,options){current=new AutoUpdate(runtime,options);try{return await current.start();}catch(e){current.lastError=String(e?.message||e).slice(0,160);throw e;}}};
 })();

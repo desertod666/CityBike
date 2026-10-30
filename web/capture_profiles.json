@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "vehicle": "BYS-BK-100",
+  "controller_reported": "CRS106C33615E, 36 V / 15 A / 250 W",
+  "standard_display": false,
+  "sym_compatibility": "unconfirmed",
+  "battery_reference": {
+    "brand": "Phylion",
+    "nominal_voltage_v": 36,
+    "nominal_capacity_ah": 11.6,
+    "nominal_energy_wh": 417.6,
+    "source": "owner_photo_2026-10-26",
+    "model_verified": false,
+    "note": "Паспортная маркировка с фотографии. Фактическая ёмкость, SOH и данные BMS ещё не подтверждены."
+  },
+  "profiles": [
+    {
+      "id": "unidentified",
+      "label": "Неизвестная линия — ручной выбор",
+      "candidate_bitrate": null,
+      "note": "Точка подключения и скорость ещё не определены. Сначала подтвердите CAN-H, CAN-L и сигнальную землю. Отсутствие HMI-кадров может быть нормальным: стандартного дисплея нет."
+    },
+    {
+      "id": "spard_battery_service",
+      "label": "Сервис батареи Spard, кандидат 250 кбит/с",
+      "candidate_bitrate": 250000,
+      "source": "BYS-BK-100 manual, printed page 38",
+      "note": "CAN 250000 показан для батарейного сервиса Spard. Это не скорость всех линий велосипеда и не распиновка Control Box. В Storage батарея может молчать; по одному молчанию скорость не определяется. SYM для этой батареи не подтверждён."
+    },
+    {
+      "id": "bike_pcb_m5_4",
+      "label": "M5.4/G5.4 по схеме — скорость неизвестна",
+      "candidate_bitrate": null,
+      "source": "User-supplied BYS Electrical system 2 image, 2026-10-25",
+      "note": "На схеме HMI/BIKE PCB ↔ BIKE PCB/CU: GN — CH, WT — CL, BK — GND; BN — 36 В, OG — On/off. Используйте профиль только после проверки соответствия кабеля этой паре. Скорость не указана; соответствие отдельному сервисному порту Control Box не доказано."
+    },
+    {
+      "id": "control_box_service",
+      "label": "Control Box / BESST — интерфейс не подтверждён",
+      "candidate_bitrate": null,
+      "source": "BYS-BK-100 manual, printed pages 43–46",
+      "note": "Зелёный сервисный разъём описан, но его режим CAN/UART, распиновка и скорость не установлены. Схема M5.4/G5.4 сама по себе не доказывает, что это тот же порт. 250000 из Spard сюда не переносится."
+    }
+  ],
+  "connector_reference": {
+    "designation": "M5.4 / G5.4, HMI/BIKE PCB ↔ BIKE PCB/CU",
+    "source": "User-supplied BYS Electrical system 2 image, 2026-10-25",
+    "colors": {"GN": "CH / CAN-H", "WT": "CL / CAN-L", "BK": "GND", "BN": "36 V", "OG": "On/off switch"},
+    "note": "Назначение цветов известно только для показанной пары. Соответствие вашему кабелю ещё нужно проверить. BN и OG к ридеру не подключаются; номера контактов и вид со стороны пайки здесь не установлены."
+  }
+}

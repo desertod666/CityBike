@@ -1,12 +1,14 @@
-CURRENT ESP32 READER BUILD
+CURRENT ESP32 READER SOURCE: 0.6.5
 
-Version 0.6.4 aligns the embedded portal with hosted build 20261029-battery1.
-The main battery card reads current ESP CAN posts immediately. Full Information
-and standard cell replies add detail when actually received; missing cells are
-explicit, measured voltage stays separate from the cell sum, and old adapter
-snapshots never replace current ESP readings. Local/remote USB and Wi-Fi share
-the same display. Native CAN and BLE behavior is unchanged from verified 0.6.2.
+Portal build 20261030-auditfix1 fixes remote input ordering and command age,
+telemetry freshness, cell validity/disconnection, capture context and passive
+CAN pause/resume during cooperative site updates. Native CAN/BLE behavior is
+unchanged from verified 0.6.4 apart from the application version.
 
-Build only on the GitHub-hosted reader-ci workflow with pinned tools. Source
-hashes, native tests, ELF assets and partition fit are checked before artifacts.
-CI has no production credentials, USB access, server deploy or flashing step.
+Hosted web/ is authoritative for portal edits. Run scripts/sync_reader_web.py
+from the repository root before compiling. CI verifies both trees and hashes.
+The current source is a candidate until compiled, verified and installed;
+editing these files does not update an existing ESP or hosted server.
+
+Prefer the GitHub-hosted reader-ci workflow with pinned tools. CI has no
+production credentials, USB access, server deployment or flashing step.

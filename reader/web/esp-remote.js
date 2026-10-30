@@ -139,10 +139,38 @@
   snapshot(){return {enabled:this.enabled,local_control:!!this.local?.enabled,error:this.error||this.holdNotice||null,log:this.log.snapshot()};}
  }
  class Input {
-  constructor({send,changed=()=>{}}){this.send=send;this.changed=changed;this.actor=random(16);this.seq=0;this.armed=false;this.held=null;this.tail=Promise.resolve();this.error='';}
-  request(action,extra={}){const value={actor:this.actor,seq:++this.seq,action,...extra};const task=this.tail.then(()=>this.send(value));this.tail=task.catch(()=>{});return task;}
-  async on(){this.actor=random(16);this.seq=0;await this.request('on');this.armed=true;this.error='';this.changed();}
-  async off(){this.armed=false;this.held=null;try{await this.request('off');}finally{this.changed();}}
+  constructor({send,changed=()=>{},clock=mono}){this.send=send;this.changed=changed;this.clock=clock;this.actor=random(16);this.seq=0;this.armed=false;this.held=null;this.tail=Promise.resolve();this.error='';this.serverClock=null;}
+  request(action,extra={}){
+   const actor=this.actor,created=this.clock();
+   // Anchor to receipt, so the estimate is a lower bound on server time.
+   // Network delay can shorten a lease, but can never make it newer.
+   const deadline=this.serverClock?this.serverClock.utc+created-this.serverClock.at+900:null;
+   const send=async()=>{
+    if(actor!==this.actor)return;
+    if(['down','keep'].includes(action)&&(!this.armed||this.held?.hold!==extra.hold||this.clock()-created>=900))return;
+    if(action==='ping'&&!this.armed)return;
+    this.pending=(this.pending||0)+1;let result;
+    try{result=await this.send({actor,seq:++this.seq,action,...extra,...(['down','keep'].includes(action)&&deadline!==null?{expires_at_ms:deadline}:{})});}
+    finally{this.pending--;}
+    const utc=result?.handset?.server_time_ms;if(actor===this.actor&&Number.isFinite(utc))this.serverClock={utc,at:this.clock()};
+    return result;
+   };
+   // Release must overtake queued heartbeats. Sequence numbers are assigned
+   // at dispatch; a delayed in-flight DOWN is rejected after a newer UP.
+   if(action==='up')return send();
+   const task=this.tail.then(send);this.tail=task.catch(()=>{});return task;
+  }
+  async on(){
+   if(this.enabling)return;this.enabling=true;this.actor=random(16);this.seq=0;const actor=this.actor;
+   try{await this.request('on');if(this.enabling&&this.actor===actor){this.armed=true;this.error='';}}
+   finally{if(this.actor===actor)this.enabling=false;this.changed();}
+  }
+  async off(){
+   // UP is immediate; OFF stays behind a pending ON so a late activation
+   // cannot undo the owner's choice to disable the transmitter.
+   const release=this.up();this.armed=false;this.enabling=false;
+   try{await Promise.all([release,this.request('off')]);}finally{this.changed();}
+  }
   async down(button,confirmed=false){
    if(!this.armed||this.held)throw Error('Сначала включите пульт');
    if(button===3&&!confirmed)throw Error('Подтвердите выключение');
@@ -157,14 +185,14 @@
   }
  }
  let executor=null,input=null;
- globalThis.ByEspRemote={Executor,Input,LocalControl,WindowLog,supported,get busy(){return !!executor?.enabled||!!executor?.log.active||!!input?.armed;},feed(message){executor?.log.feed(message);},snapshot(){return executor?.snapshot()||null;}};
+ globalThis.ByEspRemote={Executor,Input,LocalControl,WindowLog,supported,get busy(){return !!executor?.enabled||!!executor?.log.active||!!input?.armed||!!input?.enabling||!!input?.pending;},feed(message){executor?.log.feed(message);},snapshot(){return executor?.snapshot()||null;}};
  if(typeof document==='undefined')return;
  const $=id=>document.getElementById(id),panel=$('espRemotePanel');if(!panel)return;
  const t=s=>globalThis.ByI18n?.t?.(s)||s;
  function target(){const r=runtime();return r?.transport?.connected&&!r.wifi?{local:true,r,device:r.device,online:true}:Object.assign({local:false},globalThis.ByRemoteConsole?.snapshot?.()?.state||{});}
  function paint(){
   const a=target(),d=a.device||{},ble=d.ble_remote||{},valid=!!a.online&&supported(d),owned=input?.armed;
-  $('espRemoteOn').disabled=!valid||!!owned||!!a.control?.busy;
+  $('espRemoteOn').disabled=!valid||!!owned||!!input?.enabling||!!a.control?.busy;
   $('espRemoteOn').textContent=t(ble.enabled&&!owned?'Управлять пультом':'Включить пульт');
   $('espRemoteOff').disabled=!valid||(!ble.enabled&&!owned);
   const canPress=valid&&d.can==='running'&&ble.enabled&&ble.connected&&ble.subscribed&&!!owned;

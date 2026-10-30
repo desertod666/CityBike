@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='0.4.8',BUILD='20261029-battery1',CACHE='bysykkel-web-'+BUILD;
+const VERSION='0.4.8',BUILD='20261030-auditfix1',CACHE='bysykkel-web-'+BUILD;
 const ASSETS=['/esp-remote.js','/reader-selftest.js','/bafang-battery.js','/preferences.js','/i18n.js','/appearance.css','/','/style.css','/can-live.js','/can-live.css','/spard-can.js','/battery-query.js','/esp-battery.js','/app.js','/auto-update.js','/remote-console.js','/remote-console.css','/files.js','/adapter.js','/spard-probe.js','/spard-information.js','/spard-battery.js','/decoder.js','/metrics.js','/decoder_reference.json','/capture_profiles.json','/store.js','/transport.js','/tuning.js','/browser.js','/monitor.js','/support.js','/flash-core.js','/remote-flash.js','/archive-worker.js','/manifest.webmanifest','/icon.svg','/kolumbus-logo.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 const HANDOFF='/__citybike_committed_update__';

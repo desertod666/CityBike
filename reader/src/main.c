@@ -31,7 +31,7 @@
 #include "web_server.h"
 #include "ble_remote.h"
 
-#define VERSION "0.6.4"
+#define VERSION "0.6.5"
 #define FRAME_QUEUE_LEN 256
 #define PREVIEW_LEN 128
 #define LINE_SIZE (READER_STATUS_SIZE + 768)

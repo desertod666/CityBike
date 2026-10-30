@@ -6,3 +6,53 @@ nav{scrollbar-width:none}nav::-webkit-scrollbar{display:none}
 .capture-settings{margin:18px 0 22px}.capture-controls{display:flex;gap:14px;align-items:end;flex-wrap:wrap}.capture-controls label{font-size:10px;color:#77856b;min-width:150px}.capture-controls select{display:block;margin-top:6px;width:100%}.share-toggle{display:flex;gap:10px;align-items:center;margin-top:18px;font-size:12px;color:var(--ink);cursor:pointer}.share-toggle input{width:18px;height:18px;accent-color:#72934f}.capture-settings .subtle{line-height:1.8}.scan-results{white-space:pre-line;border-top:1px solid var(--line);padding-top:10px}.scan-results:empty{display:none}input[type=checkbox]{flex:none}
 
 .action-card{margin-bottom:20px}
+
+.profile-card{margin-bottom:20px}.profile-card label{margin:0;max-width:620px}.profile-card .subtle{line-height:1.8}.profile-card details{font-size:11px;line-height:1.8;color:#68795c}.profile-card summary{cursor:pointer}.share-toggle{flex-direction:row;justify-content:flex-start}
+
+.browser-only{display:none}body.browser .browser-only{display:block}body.browser .native-only{display:none!important}body.browser-wifi .desktop-connection{display:none!important}.profile-card>summary{font-size:12px;font-weight:600;padding:4px 0}.profile-card>label{margin-top:15px}.metric-chart{width:100%;height:40px;margin-top:12px}.metric-chart polyline{fill:none;stroke:#72934f;stroke-width:2}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.browser-storage{margin:22px 0}.session-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}.session-row>span{flex:1;min-width:200px;font-size:12px}.session-list{margin-bottom:16px}.browser-storage details{margin-top:20px;font-size:12px;line-height:1.8}.browser-storage summary{cursor:pointer}@media(max-width:900px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.metrics{grid-template-columns:1fr}}
+
+.flash-page{display:block}.flash-page main{margin:0 auto;max-width:960px;padding:24px}.flash-page progress{display:block;width:100%;margin:22px 0;accent-color:#72934f}.flash-page pre{white-space:pre-wrap;background:#17221d;color:#bbf68c;border-radius:12px;padding:18px;max-height:320px;overflow:auto}.flash-page .share-toggle{display:flex;align-items:center;gap:12px}.flash-page input[type=checkbox]{width:auto}
+
+.monitor-console{background:#17221d;color:#bbf68c;border-radius:12px;padding:16px;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;font:12px/1.7 Consolas,monospace}
+
+.monitor-card .card-heading{margin-bottom:12px}.monitor-card h2{font-size:17px}.monitor-card summary{cursor:pointer;font-size:12px;color:#68795c}.monitor-card details[open] summary{margin-bottom:16px}
+
+.signal-card h2{font-size:17px}.signal-card summary{cursor:pointer;font-size:12px;color:#68795c}.signal-card .card-heading{margin-bottom:12px}
+
+/* A single test workspace; technical tools stay available under Diagnostics. */
+.compact-ui main{margin:0 auto;max-width:1120px;padding:28px 32px 56px}
+.workspace-header{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:22px}
+.workspace-brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-size:19px;font-weight:650}
+.workspace-brand small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+.compact-ui .hero{padding:22px 0 18px}.compact-ui .hero h1{font-size:28px;letter-spacing:-.8px}.compact-ui .hero p{font-size:13px}
+.compact-ui .connection-bar{padding:15px 18px}.compact-ui .connection-bar label{min-width:240px;flex:1}.compact-ui .connection-bar .subtle{flex-basis:100%}
+.test-card{padding:26px;margin-bottom:26px}.test-card .card-heading{margin-bottom:5px}.test-card h2,.data-settings h2,.readings-heading h2{font-size:18px;margin:0;font-weight:650}
+.test-actions{display:flex;gap:10px;margin:20px 0 6px;flex-wrap:wrap}.test-actions .button{font-size:14px;min-height:46px;padding:11px 24px}
+.test-actions #stopButton{margin-left:auto}.test-countdown{display:flex;align-items:center;gap:25px;padding:6px 0 10px}
+#testTime{font-size:72px;line-height:1.25;font-weight:600;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+#testPhase{font-size:13px;color:var(--muted)}.test-countdown[data-phase=running] #testTime{color:var(--green)}.test-countdown[data-phase=finalizing] #testTime{color:var(--muted)}
+.test-progress{display:block;width:100%;height:9px;accent-color:#6f984e;margin:0 0 24px;border:0;border-radius:10px;overflow:hidden}
+.test-progress::-webkit-progress-bar{background:#edf0e7;border-radius:10px}.test-progress::-webkit-progress-value{background:#7eaa58;border-radius:10px}
+.test-card .mark-form input{min-height:44px}.test-card .marks-list{margin-top:12px}.readings-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 12px}
+.compact-ui>.metrics,.compact-ui main>section .metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.compact-ui .metric{padding:19px}.compact-ui .metric-value{font-size:36px}.compact-ui .metric-note{line-height:1.7}
+.data-settings{margin:24px 0;padding:23px}.data-settings .share-toggle{margin:14px 0;font-size:12px}.data-settings .share-toggle input{min-height:18px;width:18px;height:18px}.data-settings p{margin:7px 0}
+.diagnostics{margin-top:24px;background:#f8faf4}.diagnostics>summary{font-size:14px;font-weight:650;cursor:pointer}.diagnostics[open]>summary{margin-bottom:20px}.diagnostics .card{margin-top:18px}.diagnostics .profile-card{margin-top:18px}.diagnostics .control-bar{margin-top:18px}.diagnostics .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.diagnostic-section{border-top:1px solid var(--line);padding:17px 0}.diagnostic-section>summary{cursor:pointer;font-size:13px;font-weight:550}.diagnostic-section[open]>summary{margin-bottom:16px}.diagnostic-footer{padding-top:20px;font-size:10px;color:var(--muted)}
+.compact-ui .overview-grid{grid-template-columns:1.2fr 1fr}.compact-ui .capture-controls{margin-bottom:20px}.compact-ui .session-row{gap:7px}
+@media(max-width:760px){.compact-ui main{padding:18px 16px 36px}.workspace-header{align-items:flex-start;gap:12px}.workspace-brand{font-size:16px;gap:8px}.workspace-brand .brand-icon{width:36px;height:36px;font-size:27px;line-height:34px}.workspace-header .top-status{justify-content:flex-end}.compact-ui .hero h1{font-size:25px}.test-card{padding:20px}.test-actions .button{padding:10px 16px}.test-actions #stopButton{margin-left:0}#testTime{font-size:60px}.test-countdown{gap:18px}.compact-ui main>section .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.readings-heading{align-items:flex-start;flex-direction:column;gap:3px}.compact-ui .overview-grid{grid-template-columns:1fr}.compact-ui .metric-value{font-size:33px}.diagnostics{padding:19px}.compact-ui .connection-bar label{min-width:0}}
+@media(prefers-reduced-motion:reduce){.button,.toast{transition:none}.button:hover:not(:disabled){transform:none}}
+
+body.browser .connection-bar label,body.browser #refreshPorts{display:none!important}
+
+.browser-permission{display:none!important}body.browser .browser-permission{display:flex!important}
+
+.spard-battery-card .spard-metrics{margin:18px 0 14px}.spard-cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:7px;margin:14px 0}.spard-cell{background:#f1f5ed;border:1px solid var(--line);border-radius:9px;padding:9px;display:grid;gap:3px}.spard-cell span{font-size:11px;color:var(--muted)}.spard-cell strong{font-size:14px;white-space:nowrap}.spard-countdown{margin-left:auto;font-size:27px;font-variant-numeric:tabular-nums}.spard-battery-card[data-state="cached"] #spardBatteryBadge{background:#f2ead7;color:#785a22}.spard-battery-card[data-state="live"] #spardBatteryBadge{background:#e1f2ce;color:#345c26}.spard-battery-card details{margin-top:14px}.spard-battery-card .metric{min-width:0}.spard-battery-card .metric-value{font-size:32px}.spard-battery-card .details{overflow-wrap:anywhere}@media(max-width:760px){.spard-battery-card{padding:20px}.spard-battery-card .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.spard-battery-card .metric-value{font-size:28px}.spard-countdown{margin-left:0}.spard-battery-card .card-heading{gap:10px;align-items:flex-start}}
+
+/* The authenticated shared panel owns readings and test controls on every PC. */
+.bridge-connection{margin:16px 0}.bridge-connection>summary{cursor:pointer;font-size:12px;color:var(--muted)}
+body.operator-mode:not(.operator-bridge) .hero,body.operator-mode:not(.operator-bridge) #connectionAlert,body.operator-mode:not(.operator-bridge) .test-card,body.operator-mode:not(.operator-bridge) section[aria-labelledby="readingsHeading"]{display:none!important}
+body.operator-mode:not(.operator-bridge) .top-status{display:none}
+
+/* Keep manual USB setup available even when no reader is enrolled yet. */
+.workspace-header{flex-wrap:wrap}
+#manualFlashLink{margin-left:auto;max-width:100%;white-space:normal;text-align:center}

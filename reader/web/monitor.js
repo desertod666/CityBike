@@ -1,6 +1,7 @@
 /* A bounded diagnostic relay. Full CAN captures remain in the durable recorder. */
 'use strict';
 (() => {
+  const mono=()=>globalThis.performance?.now?.()??Date.now();
   class Monitor {
     constructor(store, endpoint, id) {
       this.store=store; this.endpoint=endpoint; this.id=id; this.enabled=false;
@@ -13,7 +14,7 @@
     }
     capture(event) {
       const device=event.device;
-      if (device?.type==='status') { this.device=device; return; }
+      if (device?.type==='status') { this.device=device;this.deviceAt=mono(); return; }
       if (device?.type==='frame') {
         if (this.frameSamples>=4) { this.sampled++; return; }
         this.frameSamples++;
@@ -34,7 +35,9 @@
       const relay=this.support?.relay?.();if(relay){source=relay.source;connected=relay.connected;}
       const device=relay?.device||this.device,control=this.support?.snapshot(),stock=source==='browser-stock';
       if(!this.enabled||this.sending||(stock?device?.product!=='StockCANAdapter':device?.product!=='BafangReader')||device.protocol!==1||(!stock&&!connected&&!this.queue.length&&!this.pending&&!this.support?.runtime?.flashBusy))return;
-      if(this.pending&&(this.pending.source!==source||this.pending.connected!==connected||this.pending.device?.boot!==device.boot||this.pending.device?.epoch!==device.epoch||this.pending.bridge?.boot!==relay?.bridge?.boot||this.pending.control?.local_permission?.manual_mode!==control?.local_permission?.manual_mode||this.pending.control?.local_permission?.remote_support_enabled!==control?.local_permission?.remote_support_enabled))this.pending=null;
+      if(this.pending&&(this.pending.source!==source||this.pending.device?.boot!==device.boot||this.pending.device?.epoch!==device.epoch||this.pending.bridge?.boot!==relay?.bridge?.boot))this.pending=null;
+      const identity=JSON.stringify([source,device.boot,device.epoch,relay?.bridge?.boot,relay?.bridge?.uptime_us??device.uptime_us]);
+      if(this.identity!==identity){this.identity=identity;this.stateAt=stock?mono():(this.deviceAt??mono());}
       this.sending=true;
       try {
         if(!this.pending) {
@@ -47,9 +50,17 @@
             if(size+length+1>budget)break;
             this.queue.shift();if(stock&&(next.type==='device'||next.original_type==='device'))continue;events.push(next);size+=length;
           }
-          this.pending={schema:1,source,sequence:++this.sequence,host_utc:new Date().toISOString(),device,control,...(relay?{bridge:relay.bridge}:{}),
+          this.pending={schema:1,source,sequence:this.sequence+1,host_utc:new Date().toISOString(),device,control,...(relay?{bridge:relay.bridge}:{}),
             events,dropped:this.dropped,sampled_out_frames:this.sampled,connected};
         }
+        // Retry events, but replace telemetry and permission with the latest
+        // sample. A lost ACK never turns an old device snapshot into "now".
+        this.pending={...this.pending,sequence:++this.sequence,host_utc:new Date().toISOString(),device,control,connected,
+          device_age_ms:Math.max(0,mono()-(this.stateAt??mono())),...(relay?{bridge:relay.bridge}:{})};
+        // A newer control snapshot can be larger than the failed envelope.
+        // Return its remaining events to the bounded queue before sending.
+        while(this.pending.events.length&&new TextEncoder().encode(JSON.stringify(this.pending)).length>30000)this.queue.unshift(this.pending.events.pop());
+        while(this.queue.length>40){this.queue.shift();this.dropped++;}
         if((await this.store.settings()).monitor_enabled!==true){this.enable(false);return;}
         const packet=this.pending;
         this.controller=new AbortController();

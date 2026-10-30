@@ -41,7 +41,7 @@
     const complete=!!count&&cells.every(c=>c.mv!==null),cohort=design?[design,...needed]:[],span=cohort.length?Math.max(...cohort.map(e=>e.frame.t_us))-Math.min(...cohort.map(e=>e.frame.t_us)):null;
     const coherent=complete&&span<=COHORT_US,usable=coherent&&cells.every(c=>c.mv>0&&c.mv<65535);
     const age=e=>Math.max(0,e.frame.age_ms)+Math.max(0,extraAge),ageMs=cohort.length?Math.max(...cohort.map(age)):Math.max(...selected.map(age));
-    return {boot:snapshot.boot,epoch:snapshot.epoch,destination:selected[0].decoded.destination,design,charging,cells,entries:selected,complete,coherent,span_us:span,age_ms:ageMs,
+    return {boot:snapshot.boot,epoch:snapshot.epoch,destination:selected[0].decoded.destination,design,charging,cells,entries:selected,complete,coherent,usable,span_us:span,age_ms:ageMs,
       stale:snapshot.stream_active!==true||ageMs>FRESH_MS,sum_mv:usable?cells.reduce((n,c)=>n+c.mv,0):null,delta_mv:usable?Math.max(...cells.map(c=>c.mv))-Math.min(...cells.map(c=>c.mv)):null};
   }
   function cards(snapshot,extraAge=0){
@@ -58,7 +58,7 @@
     ]));}
     if(m.design?.decoded.series_valid)for(const e of m.entries.filter(e=>e.decoded.kind==='cells')){
       const fields=[];for(let k=0;k<4;k++){const index=e.decoded.first_cell+k;if(index>m.cells.length)break;const raw=e.decoded.raw_cells_mv[k];
-        const f=field('Cell_'+index+'_V','Ячейка '+index,raw===undefined||raw===65535?null:raw/1000,'В');if(raw===65535)f.note='raw 0xFFFF · значение не подтверждено';fields.push(f);
+        const f=field('Cell_'+index+'_V','Ячейка '+index,raw===undefined||raw===0||raw===65535?null:raw/1000,'В');if(raw===0||raw===65535)f.note='raw 0x'+raw.toString(16).toUpperCase().padStart(4,'0');fields.push(f);
       }
       if(fields.length)rows.push(card(e,'Батарея · напряжения ячеек',fields));
     }

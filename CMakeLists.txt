@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
-set(PROJECT_VER "0.3.0")
+message(FATAL_ERROR "Archived firmware project: build reader/ instead (build.bat or platformio run -d reader).")
+set(PROJECT_VER "0.4.9")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 set(COMPONENTS src __pio_env)
 project(bafang_usb_can_reader)
