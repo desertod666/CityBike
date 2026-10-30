@@ -59,7 +59,7 @@ class ReaderSelftestTests(unittest.TestCase):
         self.error('reader_busy', lambda: self.enqueue(self.body()))
 
     def test_bounded_results_and_boot_separation(self):
-        fixtures=json.loads((Path(__file__).resolve().parents[1]/'qa/esp-bms-reader-candidate-055/selftest-result-fixtures.json').read_text())['results']
+        fixtures=json.loads((Path(__file__).resolve().parents[1]/'pc/fixtures/reader-selftest-055.json').read_text())['results']
         for raw in fixtures:
             device=dict(product='BafangReader', boot=raw['boot'], epoch=raw['epoch'])
             value=dict(phase='complete' if raw['state']=='complete' else 'failed', error=None, result=raw)
@@ -68,7 +68,7 @@ class ReaderSelftestTests(unittest.TestCase):
             self.assertIsNone(sanitize_selftest(bad, device)['result'])
             bad=copy.deepcopy(value);bad['result']['stages'][0]['bus_errors']=True
             self.assertIsNone(sanitize_selftest(bad, device)['result'])
-        modern=json.loads((Path(__file__).resolve().parents[1]/'qa/esp-bms-reader-candidate-056/selftest-result-fixtures.json').read_text())['results']
+        modern=json.loads((Path(__file__).resolve().parents[1]/'pc/fixtures/reader-selftest-056.json').read_text())['results']
         for raw in modern:
             device=dict(product='BafangReader', version='0.5.6', boot=raw['boot'], epoch=raw['epoch'])
             value=dict(phase=raw['state'] if raw['state']=='complete' else 'failed', result=raw)
@@ -80,7 +80,7 @@ class ReaderSelftestTests(unittest.TestCase):
         self.assertIsNone(sanitize_selftest(dict(phase='complete', result=raw), device)['result'])
 
     def test_gpio_probe_and_pre_cleanup_error_preserved(self):
-        raw=json.loads((Path(__file__).resolve().parents[1]/'qa/esp-bms-reader-candidate-056/selftest-result-fixtures.json').read_text())['results'][0]
+        raw=json.loads((Path(__file__).resolve().parents[1]/'pc/fixtures/reader-selftest-056.json').read_text())['results'][0]
         raw['gpio_probe']=dict(attempted=True, passed=True, ctx_restored=True, reason='gpio_loopback_verified',
             driver_installed=False, low_hold_us=100, tx=[1,0,1], rx=[1,0,1], low_rc=0, high_rc=0)
         raw['stage3_ecc']=dict(after_event=5, captured_before_cleanup=True, last=dict(source='single_HAL_ECC_read',

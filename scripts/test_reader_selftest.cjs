@@ -2,7 +2,7 @@
 require('../web/battery-query.js');
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const {Test,validate}=require('../web/reader-selftest.js');
-const fixtureFile=process.env.CITYBIKE_SELFTEST_FIXTURE||'qa/esp-bms-reader-candidate-055/selftest-result-fixtures.json',fixture=JSON.parse(fs.readFileSync(fixtureFile)),fixtures=fixture.results;
+const fixtureFile=process.env.CITYBIKE_SELFTEST_FIXTURE||'pc/fixtures/reader-selftest-055.json',fixture=JSON.parse(fs.readFileSync(fixtureFile)),fixtures=fixture.results;
 function scenario(options={}){
  const native=structuredClone(fixtures[options.retained?2:options.failed?1:0]);
  let d={type:'status',product:'BafangReader',protocol:1,version:fixture.version||'0.5.5',boot:native.boot,ap_mac:'02:13:24:35:46:58',can:options.live?'running':'stopped',epoch:native.epoch-1,received:37,rx_sampling_250k:'TRIPLE',capabilities:['command_ids','isolated_twai_selftest_v1'],ctx_guard:{policy:'fixed_recessive',valid:true,level:1}};
@@ -36,7 +36,7 @@ function scenario(options={}){
  for(const mutate of [v=>v.stages[0].bus_errors=1,v=>v.stages[2].passed=false,v=>v.stages[0].transmit_rc=-1,v=>v.stages[0].echo_received=false,v=>v.ctx_restored=false,v=>v.stages.pop(),v=>v.ack_required=true]){
   const v=structuredClone(fixtures[0]);mutate(v);assert.equal(validate(v,base.d,v.id),null);
  }
- const modern=JSON.parse(fs.readFileSync('qa/esp-bms-reader-candidate-056/selftest-result-fixtures.json')).results[0],d={...base.d,version:'0.6.7',boot:modern.boot,epoch:modern.epoch-1};
+ const modern=JSON.parse(fs.readFileSync('pc/fixtures/reader-selftest-056.json')).results[0],d={...base.d,version:'0.6.7',boot:modern.boot,epoch:modern.epoch-1};
  modern.gpio_probe={attempted:true,passed:true,ctx_restored:true,reason:'gpio_loopback_verified',driver_installed:false,low_hold_us:100,tx:[1,0,1],rx:[1,0,1],low_rc:0,high_rc:0};
  modern.stage3_ecc={after_event:5,captured_before_cleanup:true,last:{source:'single_HAL_ECC_read',scope:'boot_history',event:6,t_us:123,raw:129,type:2,direction:0,segment:1,saturated:false}};
  assert(validate(modern,d,modern.id));
