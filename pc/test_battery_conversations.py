@@ -1,4 +1,8 @@
 import unittest
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from battery_conversations import correlate
 
 
@@ -8,6 +12,60 @@ def frame(seq, stamp, identifier, data='', **changes):
 
 
 class BatteryConversations(unittest.TestCase):
+    def test_explicit_error_reply_is_not_a_success_or_missing_response(self):
+        s = correlate([frame(1, 1000, '03216400'),
+                       frame(2, 1100, '041B6400', '06020001')])
+        self.assertFalse(s['transactions'])
+        self.assertFalse(s['coherent_cell_reads'])
+        self.assertEqual(len(s['error_transactions']), 1)
+        tx = s['error_transactions'][0]
+        self.assertEqual(tx['abort_data_hex'], '06020001')
+        self.assertTrue(tx['abort_code_length_valid'])
+        self.assertEqual(tx['outcome'], 'error_reply')
+        self.assertTrue(s['requests'][0]['matched'])
+        self.assertNotIn('unmatched_reason', s['requests'][0])
+        self.assertEqual(s['error_response_counts'], {'041B6400': 1})
+        self.assertFalse(s['response_counts'])
+
+    def test_error_reply_keeps_scope_address_expiry_and_ambiguity_guards(self):
+        rows = [frame(1, 1000, '03216400'), frame(2, 1100, '041B6400', '06020001')]
+        cases = [
+            [rows[0], {**rows[1], 'id': '042B6400'}],
+            [rows[0], {**rows[1], 'seq': 3}],
+            [rows[0], {**rows[1], 'epoch': 2}],
+            [rows[0], {**rows[1], 'boot': 'ABCD1234'}],
+            [rows[0], {**rows[1], 't_us': 101001}],
+            [rows[0], frame(2, 1050, '03216400'), {**rows[1], 'seq': 3}],
+            [rows[0], {'type': 'gap'}, rows[1]],
+        ]
+        for records in cases:
+            with self.subTest(records=records):
+                s = correlate(records)
+                self.assertFalse(s['transactions'])
+                self.assertFalse(s['error_transactions'])
+                self.assertTrue(s['orphan_replies'])
+
+    def test_short_error_is_preserved_without_inventing_a_stop_code(self):
+        s = correlate([frame(1, 1000, '05216400'), frame(2, 1100, '042B6400', 'FF')])
+        self.assertEqual(s['error_transactions'][0]['abort_data_hex'], 'FF')
+        self.assertFalse(s['error_transactions'][0]['abort_code_length_valid'])
+        self.assertFalse(s['transactions'])
+
+    def test_conflicting_date_history_objects_stay_raw_and_do_not_become_cells(self):
+        rows = []
+        for obj, payload in [('6415', '414243'), ('6416', '1A0A1E'), ('6417', '0800000000000000')]:
+            i = len(rows)
+            rows.extend([frame(i + 1, 1000 + i * 1000, '0321' + obj),
+                         frame(i + 2, 1200 + i * 1000, '041A' + obj, payload)])
+        s = correlate(rows)
+        self.assertEqual(len(s['transactions']), 3)
+        self.assertFalse(s['coherent_cell_reads'])
+        for tx in s['transactions'][1:]:
+            self.assertEqual(tx['layout_status'], 'ambiguous_reference_assignment_raw_only')
+            self.assertNotIn('production_date', tx)
+            self.assertNotIn('recent_error_codes', tx)
+        self.assertEqual(s['layout_conflicts'][0]['objects'], ['6416', '6417'])
+
     def test_reverse_address_only_and_unrelated_traffic(self):
         rows=[frame(10,1000,'03216400'),frame(11,1100,'04F83401','0000000000'),
               frame(12,1200,'04226400','0A036C39'),frame(13,1300,'041A6400','0A036C39')]

@@ -17,3 +17,9 @@ USB-browser job whitelist for the voltmeter flag. Installed local0.6.8 from
 commit16d3dad0 still embeds portal1; the hosted site can update independently. Normal CAN timing, battery request
 policy and BLE controls are unchanged. Prefer GitHub-hosted reader-ci with
 pinned tools; verify native tests, ELF assets and partition size before use.
+
+Offline Spard identity encoding is checked by the default host C tests and
+C/Python parity tests. It is not included by main.c, exposes no command and
+changes no running firmware behavior. Python readback comparisons check exact
+slot contents without claiming sender identity, freshness or persistence.
+These local source additions are absent from the installed frozen 0.6.8 image.

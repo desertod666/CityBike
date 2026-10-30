@@ -12,7 +12,7 @@ if not compiler:
     raise SystemExit("A host C compiler is required for offline firmware tests.")
 
 with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
-    for name in ("remote_policy", "ecc_observer", "command_protocol", "tx_trace", "tx_policy", "ctx_guard", "rx_readback", "firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace"):
+    for name in ("remote_policy", "ecc_observer", "command_protocol", "tx_trace", "tx_policy", "ctx_guard", "rx_readback", "firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace", "spard_identity_codec"):
         output = Path(temporary) / (name + (".exe" if os.name == "nt" else ""))
         args = [compiler, "-std=c11", "-Wall", "-Wextra", "-Werror"]
         if name == "ecc_observer":

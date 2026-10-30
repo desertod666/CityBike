@@ -6,8 +6,18 @@ exchange, not proof of causality or complete reception of the physical bus.
 """
 from collections import Counter
 
-OBJECTS = range(0x6400, 0x640A)
+CELL_OBJECTS = range(0x6402, 0x640A)
+OBJECTS = frozenset((0x6400, 0x6401, *CELL_OBJECTS, 0x6415, 0x6416, 0x6417))
 MAX_REPLY_US = 100_000
+
+# V2.5 revision history p3 and dictionary p29 reverse these two assignments.
+# Preserve both as raw bytes until a device-specific source resolves the conflict.
+LAYOUT_CONFLICT = {
+    'objects': ['6416', '6417'],
+    'revision_history_p3': {'6416': 'recent_error_codes', '6417': 'production_date'},
+    'dictionary_p29': {'6416': 'production_date', '6417': 'recent_error_codes'},
+    'interpretation': 'raw_only; supplied V2.5 reference contradicts itself',
+}
 
 
 def address(identifier):
@@ -39,8 +49,8 @@ def correlate(records):
     Repeated unanswered requests are ambiguous: never choose one silently.
     """
     pending = {}; previous = None; segment = 0
-    transactions = []; requests = []; orphan_replies = []; rejected = Counter()
-    request_counts = Counter(); response_counts = Counter()
+    transactions = []; error_transactions = []; requests = []; orphan_replies = []; rejected = Counter()
+    request_counts = Counter(); response_counts = Counter(); error_response_counts = Counter()
 
     def boundary(reason):
         nonlocal segment
@@ -86,29 +96,44 @@ def correlate(records):
                 else:
                     prior.setdefault('unmatched_reason', 'no_reply_within_window')
             pending[key] = item
-        elif src == 4 and operation == 2:
-            response_counts[f['id']] += 1
+        elif src == 4 and operation in (2, 3):
+            is_error = operation == 3
+            (error_response_counts if is_error else response_counts)[f['id']] += 1
             expected = 4 if obj == 0x6400 else 6 if obj == 0x6401 else None
-            if (expected is not None and f['dlc'] != expected
-                    or expected is None and (f['dlc'] < 2 or f['dlc'] % 2)):
+            if not is_error and (expected is not None and f['dlc'] != expected
+                    or obj in CELL_OBJECTS and (f['dlc'] < 2 or f['dlc'] % 2)):
                 rejected['invalid_reply_length'] += 1; continue
             item = pending.pop((dst, obj), None)
             reason = ('no_observed_request' if item is None else
                       item.get('unmatched_reason') or
                       ('no_reply_within_window' if f['t_us'] - item['request']['t_us'] > MAX_REPLY_US else None))
             if reason:
-                orphan_replies.append({'segment': segment, 'reply': evidence(f), 'reason': reason})
+                orphan_replies.append({'segment': segment, 'reply': evidence(f), 'reason': reason,
+                                       'response_type': 'error_reply' if is_error else 'normal_reply'})
                 if item is not None:item.setdefault('unmatched_reason', reason)
             else:
                 item['matched'] = True
-                transactions.append({**item, 'reply': evidence(f),
-                                     'reply_delay_us': f['t_us'] - item['request']['t_us']})
+                item['outcome'] = 'error_reply' if is_error else 'normal_reply'
+                tx = {**item, 'reply': evidence(f),
+                      'reply_delay_us': f['t_us'] - item['request']['t_us']}
+                if is_error:
+                    # Stop codes are independent of controller/battery fault flags.
+                    # No guessed byte order or causal interpretation is applied.
+                    tx['abort_data_hex'] = f['data'].upper()
+                    tx['abort_code_length_valid'] = f['dlc'] == 4
+                    error_transactions.append(tx)
+                else:
+                    if obj in (0x6416, 0x6417):
+                        tx['layout_status'] = 'ambiguous_reference_assignment_raw_only'
+                    transactions.append(tx)
     boundary('end_of_capture')
     for item in requests:
         if not item.get('matched'):item.setdefault('unmatched_reason', 'no_observed_reply')
     return {'requests': requests, 'transactions': transactions,
+            'error_transactions': error_transactions,
             'orphan_replies': orphan_replies, 'request_counts': dict(request_counts),
-            'response_counts': dict(response_counts), 'rejected': dict(rejected),
+            'response_counts': dict(response_counts), 'error_response_counts': dict(error_response_counts),
+            'layout_conflicts': [LAYOUT_CONFLICT], 'rejected': dict(rejected),
             'coherent_cell_reads': coherent_cells(transactions)}
 
 

@@ -1,11 +1,11 @@
 {
   "version": "0.6.8",
   "web_build": "20261030-voltmeter2",
-  "native_baseline": "0.6.8 native behavior; hosted voltmeter2 job-receipt hotfix, installed local068 source16d3dad0 retains embedded portal1",
+  "native_baseline": "0.6.8 native behavior unchanged; hosted voltmeter2; offline identity codec not linked by main.c. Installed local068 source16d3dad0 retains embedded portal1.",
   "files": {
     "BUILD.txt": {
-      "size": 1193,
-      "sha256": "c5ae86231a8cdfc447711dcfccc9630f18d22cc124204beaf9d45594131c8064"
+      "size": 1576,
+      "sha256": "a0388ca944eabd59f412b90b135d713ead6376f07bc89469f925b3de980a19c6"
     },
     "CMakeLists.txt": {
       "size": 173,
@@ -98,6 +98,10 @@
     "scripts/firmware-stubs/esp_rom_gpio.h": {
       "size": 278,
       "sha256": "5701902affa75e5da08874575f4c515c4d5f01c9060e767774af92d8636276dc"
+    },
+    "scripts/firmware-stubs/esp_rom_sys.h": {
+      "size": 106,
+      "sha256": "40dc2a4621dd2db794bdf72e71187998f5adb3262bdfa5127e4a43b7842c22ef"
     },
     "scripts/firmware-stubs/esp_system.h": {
       "size": 22,
@@ -196,8 +200,8 @@
       "sha256": "eb8bbe317a0aa91d7662d3c8e57482cbfd5143c5c74885c4f62826d353a45f95"
     },
     "scripts/test_firmware_native.py": {
-      "size": 4539,
-      "sha256": "2c9e33ead7ac45e2a48b1f00bbeb234b2167b1027f6cee89974e74e09edbce4b"
+      "size": 4563,
+      "sha256": "0870d2dfde36e02252b9c00819de8957a5a2100127e4514d704e2c534d3cb16c"
     },
     "scripts/test_fixed_receive.c": {
       "size": 1170,
@@ -230,6 +234,10 @@
     "scripts/test_selftest.c": {
       "size": 12680,
       "sha256": "5b18eb5a408ce1e19509c876f445887f1f8c9577664e220d43502391d6cdd48e"
+    },
+    "scripts/test_spard_identity_codec.c": {
+      "size": 3715,
+      "sha256": "41fb78abb5b8a562abcb2884c2312f4169e4dbcbb8396e9a94b7098efb513004"
     },
     "scripts/test_tx_policy.c": {
       "size": 3707,
@@ -287,6 +295,10 @@
       "size": 1061,
       "sha256": "2330849645d2c57e182e592ff0456c4f8fac8a3302a24a8e22f9901244544ca5"
     },
+    "src/isolated_gpio_probe.h": {
+      "size": 4030,
+      "sha256": "ba83c00cd3ecbaf9b353dd2b121b6e7fd8467c85b159b21b353ab44c08bd8b99"
+    },
     "src/main.c": {
       "size": 40158,
       "sha256": "f247db55da959a04a4d04b27e83f9ca54f9c5cce1334d0033947c14ae7a25eda"
@@ -322,6 +334,10 @@
     "src/selftest_impl.h": {
       "size": 14226,
       "sha256": "969c1df86fc6b4d1b3e1a8dcbf64a0e3adff37fdb8e681175b184b63978369bf"
+    },
+    "src/spard_identity_codec.h": {
+      "size": 3783,
+      "sha256": "37935e2dd96df0856a97e9c0dc41bb63d4350746797f882a647a8e9c391bb151"
     },
     "src/spard_query_impl.h": {
       "size": 16439,
@@ -530,14 +546,6 @@
     "web/tuning.js": {
       "size": 7730,
       "sha256": "a44b286c161e681ce95ca569fddcfb922ac2a4a45186c55d5efb7c2e9dbec701"
-    },
-    "src/isolated_gpio_probe.h": {
-      "size": 4030,
-      "sha256": "ba83c00cd3ecbaf9b353dd2b121b6e7fd8467c85b159b21b353ab44c08bd8b99"
-    },
-    "scripts/firmware-stubs/esp_rom_sys.h": {
-      "size": 106,
-      "sha256": "40dc2a4621dd2db794bdf72e71187998f5adb3262bdfa5127e4a43b7842c22ef"
     }
   }
 }
