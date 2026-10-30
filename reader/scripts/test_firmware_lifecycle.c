@@ -6,7 +6,8 @@ fake_gpio_t GPIO;fake_twai_t fake_twai_regs;bool fake_twai_access_allowed=true;u
 void fake_during_clock_read(void){}
 int fake_driver_installed,fake_driver_state,fake_status_calls,fake_status_fail_on;uint64_t fake_clock,fake_usb_fail_until;bool fake_usb_always_fail;char fake_wire[200000];size_t fake_wire_size;QueueHandle_t fake_rx;
 error_probe_t reader_error_probe(void){return (error_probe_t){0};}
-error_ecc_history_t reader_error_ecc_history(void){return (error_ecc_history_t){0};}
+static error_ecc_history_t fake_ecc;
+error_ecc_history_t reader_error_ecc_history(void){return fake_ecc;}
 int web_config_init(void){return 0;}int web_start(void){return 0;}int web_save_ap(const char*s,int c){(void)s;(void)c;return 0;}int web_save_led(int l){(void)l;return 0;}
 void web_network_snapshot(reader_network_t*out){memset(out,0,sizeof(*out));strcpy(out->ssid,"Reader");strcpy(out->mac,"e0:72:a1:72:25:0d");}
 static void reset_test(void){
@@ -14,6 +15,7 @@ static void reset_test(void){
     frames=xQueueCreate(FRAME_QUEUE_LEN,sizeof(frame_t));replies=xQueueCreate(8,sizeof(reply_t));commands=xQueueCreate(8,sizeof(command_t));completion_failures=xQueueCreate(2,sizeof(reply_t));rpc_replies=xQueueCreate(1,sizeof(rpc_reply_t));fake_rx=xQueueCreate(128,sizeof(twai_message_t));
     memset(&stats,0,sizeof(stats));stats.sampling=RX_SAMPLE_TRIPLE;memset(&rx_check,0,sizeof(rx_check));memset(fake_reg,0,sizeof(fake_reg));
     memset(&hardware_readback,0,sizeof(hardware_readback));memset(&GPIO,0,sizeof(GPIO));memset(&fake_twai_regs,0,sizeof(fake_twai_regs));
+    memset(&fake_ecc,0,sizeof(fake_ecc));
     fake_twai_reads=fake_clock_reads=0;fake_clock_error=0;fake_apb_hz=80000000;
     fake_twai_regs.mode_reg.val=2;fake_twai_regs.bus_timing_0_reg.val=0x4009;fake_twai_regs.bus_timing_1_reg.val=0x3a;
     fake_reg[4]=FUN_IE|(PIN_FUNC_GPIO<<MCU_SEL_S);GPIO.func_in_sel_cfg[TWAI_RX_IDX].in_sel=5;GPIO.func_in_sel_cfg[TWAI_RX_IDX].sig_in_sel=1;
@@ -58,15 +60,18 @@ int main(void){
     reset_test();command_t status={.text="STATUS",.id="hardware-status"};execute_command(&status);
     assert(hardware_readback.driver_installed&&!hardware_readback.mismatch_bits);
     unsigned reads=fake_twai_reads;fake_twai_access_allowed=false;
+    fake_ecc.count=1;fake_ecc.events[0]=(error_ecc_event_t){.event=1,.t_us=50,.capture=0xe8};
     struct {char text[READER_STATUS_SIZE];unsigned char canary[8];} bounded;
     memset(&bounded,0xa5,sizeof(bounded));reader_status_json(bounded.text,sizeof(bounded.text));
     assert(fake_twai_reads==reads&&strstr(bounded.text,"\"btr0_raw\":16393")&&bounded.text[strlen(bounded.text)-1]=='\n');
+    assert(strstr(bounded.text,"\"last_bus_error\":{\"source\":\"single_HAL_ECC_read\"")&&strstr(bounded.text,"\"raw\":232,\"type\":3,\"direction\":1,\"segment\":8"));
     for(unsigned i=0;i<sizeof(bounded.canary);i++)assert(bounded.canary[i]==0xa5);
     fake_twai_access_allowed=true;
     // Long-lived counters and fully escaped envelopes must fit both STATUS and USB records.
     stats.received=stats.queue_drops=stats.usb_drops=stats.control_drops=stats.stop_drops=stats.command_drops=UINT64_MAX;
     stats.missed=stats.overruns=stats.bus_errors=stats.arb_lost=stats.tx_failed=UINT64_MAX;
     stats.rec=stats.tec=stats.rx_pending=stats.state=stats.epoch=UINT32_MAX;fake_clock=1234567890123456;
+    fake_ecc.saturated=true;fake_ecc.events[0].event=UINT32_MAX;fake_ecc.events[0].t_us=UINT64_MAX;
     refresh_hardware_readback();reader_status_json(bounded.text,sizeof(bounded.text));
     assert(strlen(bounded.text)<READER_STATUS_SIZE-1&&bounded.text[strlen(bounded.text)-1]=='\n');
     for(unsigned i=0;i<sizeof(bounded.canary);i++)assert(bounded.canary[i]==0xa5);

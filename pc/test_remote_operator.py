@@ -33,6 +33,11 @@ class RemoteOperatorTests(unittest.TestCase):
         state=self.store.operator.state(self.auth);self.assertTrue(state['online']);self.assertTrue(state['bridge_authenticated']);self.assertEqual(state['session'],self.uid)
         text=json.dumps(state);self.assertNotIn(self.key,text);self.assertNotIn('key_sha256',text);self.assertNotIn('token_sha256',text)
         self.now+=5;state=self.store.operator.state(self.auth);self.assertEqual(state['control']['countdown']['remaining_ms'],25000)
+    def test_last_observed_bus_error_survives_device_relay(self):
+        self.report['sequence']+=1;self.report['device']['uptime_us']+=1000
+        event=dict(source='single_HAL_ECC_read',scope='boot_history',event=1,t_us=100,raw=0xE8,type=3,direction=1,segment=8,saturated=False)
+        self.report['device']['last_bus_error']=event;self.heartbeat()
+        self.assertEqual(self.store.operator.state(self.auth)['device']['last_bus_error'],event)
     def test_known_uid_cannot_be_poisoned_and_replays_cannot_refresh(self):
         bad=copy.deepcopy(self.report);bad['sequence']=1000000
         self.error('bridge_key_required',lambda:self.store.monitor(self.uid,bad))

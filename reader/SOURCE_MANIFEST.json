@@ -1,15 +1,15 @@
 {
-  "version": "0.6.5",
+  "version": "0.6.6",
   "web_build": "20261030-auditfix1",
   "native_baseline": "0.6.4 CAN/BLE behavior preserved; 0.6.5 source candidate with audit-fixed portal",
   "files": {
     "BUILD.txt": {
-      "size": 781,
-      "sha256": "b1831b1a956b2dbebf05ec42450ca7e5b2614aeaf47dfaec19f9aa6e937ccdad"
+      "size": 602,
+      "sha256": "6cce2258adadaa94d67937b1177b86bb8da078c1aa8e6fbe738b52d331185d79"
     },
     "CMakeLists.txt": {
       "size": 173,
-      "sha256": "d0d561b1eb4a3972d2c0d2cd348025789c890576abd0b71002afd9d410a76bfc"
+      "sha256": "b47453d90e8ddd57aad6cb3df9a554e54a3dd9f2349130a68673210548b6e94d"
     },
     "partitions.csv": {
       "size": 132,
@@ -184,16 +184,16 @@
       "sha256": "d11486a4598e26a588b0f321c63f95cd7e46ebbf2d3b8e17124f6d2c98d92261"
     },
     "scripts/test_ecc_observer.c": {
-      "size": 2965,
-      "sha256": "0a366513d8fc729a454d6e103991960093842ce91dccec8bd1fdbc316413807a"
+      "size": 3841,
+      "sha256": "5791bc242db42b9a87de8357f1a6be222d13f7ce885c3d1be2e6f8232d218cbc"
     },
     "scripts/test_error_probe.c": {
       "size": 647,
       "sha256": "edfb82e1e388b7a13b63898956dcc2ca1a5c0b244fdbc0fe6b206f27fc139be7"
     },
     "scripts/test_firmware_lifecycle.c": {
-      "size": 9558,
-      "sha256": "f108472180eb33f6fbae1cbb14a5b1a47ed0b232e51f5b03ea0de072904e8a6f"
+      "size": 9983,
+      "sha256": "eb8bbe317a0aa91d7662d3c8e57482cbfd5143c5c74885c4f62826d353a45f95"
     },
     "scripts/test_firmware_native.py": {
       "size": 4387,
@@ -276,8 +276,8 @@
       "sha256": "e9e6accadc6df5ef5d6acdcad2fd6782757d29cd72a6e1a8c3627fc595f1a038"
     },
     "src/ecc_capture_json.h": {
-      "size": 1402,
-      "sha256": "2fced45b5cc62f7a8736a0a6e3ed80b512c5c7ebfc1433d2b531c23d66172d24"
+      "size": 2261,
+      "sha256": "2196fbf7ded9774ba3d05456273d1c4742ffc0a499ab99bcedaf65f9f50d6ba2"
     },
     "src/error_probe.c": {
       "size": 2211,
@@ -288,8 +288,8 @@
       "sha256": "2330849645d2c57e182e592ff0456c4f8fac8a3302a24a8e22f9901244544ca5"
     },
     "src/main.c": {
-      "size": 39928,
-      "sha256": "d29f2d916702ac72c841b6cc85faf89c620ba766ac9b80fbdaa1429ecef091da"
+      "size": 40127,
+      "sha256": "0f9fa451426fdb6702d0214d381a28854a3e1252846674089ecaeecfef7284f6"
     },
     "src/reader.h": {
       "size": 583,

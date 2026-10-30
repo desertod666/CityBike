@@ -19,6 +19,7 @@
 #include "reader.h"
 #include "rx_probe.h"
 #include "error_probe.h"
+#include "ecc_capture_json.h"
 #include "ctx_guard.h"
 #include "rx_sampling.h"
 #include "rx_readback.h"
@@ -31,7 +32,7 @@
 #include "web_server.h"
 #include "ble_remote.h"
 
-#define VERSION "0.6.5"
+#define VERSION "0.6.6"
 #define FRAME_QUEUE_LEN 256
 #define PREVIEW_LEN 128
 #define LINE_SIZE (READER_STATUS_SIZE + 768)
@@ -220,6 +221,8 @@ void reader_status_json(char *buffer, size_t capacity) {
     reader_network_t net; web_network_snapshot(&net);
     rx_check_t rx = rx_snapshot();
     error_probe_t errors = reader_error_probe();
+    char last_ecc[256];
+    if (!reader_last_ecc_json(reader_error_ecc_history(), last_ecc, sizeof(last_ecc))) strcpy(last_ecc, "null");
     ctx_guard_t ctx = reader_ctx_guard();
     const char *query_mode = atomic_load(&battery_normal_driver) ? (atomic_load(&battery_query_active) ? "battery_information_query" : "diagnostic_driver_retained") : "listen_only";
     bool routed_query = atomic_load(&battery_query_active) && atomic_load(&battery_normal_driver) && battery_tx_route_valid();
@@ -234,7 +237,7 @@ void reader_status_json(char *buffer, size_t capacity) {
         "\"received\":%" PRIu64 ",\"frame_queue_drops\":%" PRIu64 ",\"usb_frame_drops\":%" PRIu64 ","
         "\"control_drops\":%" PRIu64 ",\"command_drops\":%" PRIu64 ",\"stop_discards\":%" PRIu64 ","
         "\"rx_missed\":%" PRIu64 ",\"rx_overrun\":%" PRIu64 ",\"bus_errors\":%" PRIu64 ","
-        "\"bus_error_types\":{\"total\":%" PRIu32 ",\"bit\":%" PRIu32 ",\"form\":%" PRIu32 ",\"stuff\":%" PRIu32 ",\"ack\":%" PRIu32 ",\"other\":%" PRIu32 ",\"last_flags\":%" PRIu32 ",\"saturated\":%s},"
+        "\"bus_error_types\":{\"total\":%" PRIu32 ",\"bit\":%" PRIu32 ",\"form\":%" PRIu32 ",\"stuff\":%" PRIu32 ",\"ack\":%" PRIu32 ",\"other\":%" PRIu32 ",\"last_flags\":%" PRIu32 ",\"saturated\":%s},\"last_bus_error\":%s,"
         "\"arb_lost\":%" PRIu64 ",\"tx_failed\":%" PRIu64 ",\"rec\":%" PRIu32 ",\"tec\":%" PRIu32 ","
         "\"twai_state\":%" PRIu32 ",\"rx_pending\":%" PRIu32 ",\"frame_queue_pending\":%u,"
         "\"usb_connected\":%s,\"tx_gpio\":4,\"rx_gpio\":5,\"led_gpio\":8,\"led_active_level\":%d,\"led_override\":%d,"
@@ -249,7 +252,7 @@ void reader_status_json(char *buffer, size_t capacity) {
         VERSION, boot_id, reset_reason, counter_reason, esp_timer_get_time(), s.running ? "running" : "stopped", query_mode, s.bitrate, s.epoch,
         s.received, s.queue_drops, s.usb_drops, s.control_drops, s.command_drops, s.stop_drops,
         s.missed, s.overruns, s.bus_errors,
-        errors.total, errors.bit, errors.form, errors.stuff, errors.ack, errors.other, errors.last_flags, errors.saturated ? "true" : "false",
+        errors.total, errors.bit, errors.form, errors.stuff, errors.ack, errors.other, errors.last_flags, errors.saturated ? "true" : "false", last_ecc,
         s.arb_lost, s.tx_failed, s.rec, s.tec, s.state, s.rx_pending,
         (unsigned)uxQueueMessagesWaiting(frames), usb_serial_jtag_is_connected() ? "true" : "false",
         net.led_level, s.led_override,

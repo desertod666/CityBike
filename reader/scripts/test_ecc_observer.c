@@ -36,6 +36,15 @@ int main(void) {
     assert(!reader_ecc_json(h,0,json,2));assert(!reader_ecc_json(h,0,NULL,0));
     h.saturated=true;assert(reader_ecc_json(h,h.total,json,sizeof(json)));assert(strstr(json,"\"incomplete\":true"));
     h=reader_error_ecc_history();assert(reader_ecc_json(h,h.total+1,json,sizeof(json)));assert(strstr(json,"\"incomplete\":true"));
+    char latest[256];assert(reader_last_ecc_json((error_ecc_history_t){0},latest,sizeof(latest)));assert(!strcmp(latest,"null"));
+    assert(!reader_last_ecc_json(h,NULL,0));assert(!reader_last_ecc_json(h,latest,1));
+    error_ecc_history_t invalid={.count=READER_ECC_HISTORY+1};assert(!reader_last_ecc_json(invalid,latest,sizeof(latest)));
+    for(unsigned raw=0;raw<256;raw++){
+        error_ecc_history_t sample={.count=1,.saturated=true};sample.events[0]=(error_ecc_event_t){.event=UINT32_MAX,.t_us=UINT64_MAX,.capture=(uint8_t)raw};
+        assert(reader_last_ecc_json(sample,latest,sizeof(latest)));char expect[80];
+        snprintf(expect,sizeof(expect),"\"raw\":%u,\"type\":%u,\"direction\":%u,\"segment\":%u",raw,raw>>6,(raw>>5)&1,raw&31);
+        assert(strstr(latest,expect)&&strstr(latest,"\"scope\":\"boot_history\"")&&strstr(latest,"\"saturated\":true"));
+    }
     for(unsigned irq=0;irq<256;irq++)for(unsigned status=0;status<256;status++) {
         uint32_t tec=irq&1?128:127,rec=status&1?255:0,flags=(irq^status)&63;
         compare(irq,status,tec,rec,flags,(uint8_t)(irq+status));
