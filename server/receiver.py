@@ -509,9 +509,10 @@ class Storage:
                 return None
             if job['kind']=='spard_probe':
                 if (type(job.get('duration')) is not int or job['duration'] not in (30,120)
-                        or job.get('mode') not in ('information','listen')
+                        or job.get('mode') not in ('information','listen','identity','parameters')
+                        or job.get('mode') in ('identity','parameters') and ('spard_service_reads_v1' not in control['capabilities'] or job['duration']!=30)
                         or record.get('duration_s')!=job['duration']
-                        or record.get('action')!=('spard_information' if job['mode']=='information' else 'spard_listen')
+                        or record.get('action')!='spard_'+job['mode']
                         or control.get('updating') is True or control.get('busy') is True or control.get('recording') is True
                         or not isinstance(control.get('stock_adapter',{}),dict) or control.get('stock_adapter',{}).get('active') is True
                         or (last or {}).get('state') in ('accepted','started')):
@@ -632,7 +633,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     web_root = None
     origins = {'https://134.98.158.132:18443', 'http://192.168.4.1'}
-    assets = {'kolumbus-logo.svg','esp-remote.js','ble-remote.js','reader-selftest.js','bafang-battery.js','preferences.js','i18n.js','appearance.css','index.html','style.css','can-live.js','can-live.css','spard-can.js','battery-query.js','esp-battery.js','app.js','files.js','adapter.js','spard-probe.js','spard-information.js','spard-battery.js','auto-update.js','remote-console.js','remote-console.css','decoder.js','decoder_reference.json','capture_profiles.json','store.js','transport.js','tuning.js','browser.js','archive-worker.js','sw.js','manifest.webmanifest','icon.svg','flash.html','flash-core.js','monitor.js','metrics.js','support.js','remote-flash.js','flash-page.js','esp-flasher.js','THIRD_PARTY_LICENSES.txt'}
+    assets = {'kolumbus-logo.svg','esp-remote.js','ble-remote.js','reader-selftest.js','bafang-battery.js','preferences.js','i18n.js','appearance.css','index.html','style.css','can-live.js','can-live.css','spard-can.js','battery-query.js','esp-battery.js','app.js','files.js','adapter.js','spard-probe.js','spard-information.js','spard-service.js','spard-battery.js','auto-update.js','remote-console.js','remote-console.css','decoder.js','decoder_reference.json','capture_profiles.json','store.js','transport.js','tuning.js','browser.js','archive-worker.js','sw.js','manifest.webmanifest','icon.svg','flash.html','flash-core.js','monitor.js','metrics.js','support.js','remote-flash.js','flash-page.js','esp-flasher.js','THIRD_PARTY_LICENSES.txt'}
 
     def log_message(self, *_):
         pass # No credentials, payloads or device identifiers in access logs.

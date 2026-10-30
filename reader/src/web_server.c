@@ -97,6 +97,8 @@ extern const char adapter_start[] asm("_binary_adapter_js_start");
 extern const char adapter_end[] asm("_binary_adapter_js_end");
 extern const char spard_probe_start[] asm("_binary_spard_probe_js_start");
 extern const char spard_probe_end[] asm("_binary_spard_probe_js_end");
+extern const char spard_service_start[] asm("_binary_spard_service_js_start");
+extern const char spard_service_end[] asm("_binary_spard_service_js_end");
 extern const char spard_information_start[] asm("_binary_spard_information_js_start");
 extern const char spard_information_end[] asm("_binary_spard_information_js_end");
 extern const char spard_battery_start[] asm("_binary_spard_battery_js_start");
@@ -383,6 +385,7 @@ static esp_err_t asset_handler(httpd_req_t *req) {
     if (!strcmp(req->uri, "/files.js")) { start = files_start; end = files_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/adapter.js")) { start = adapter_start; end = adapter_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/spard-probe.js")) { start = spard_probe_start; end = spard_probe_end; type = "application/javascript"; }
+    if (!strcmp(req->uri, "/spard-service.js")) { start = spard_service_start; end = spard_service_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/spard-information.js")) { start = spard_information_start; end = spard_information_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/spard-battery.js")) { start = spard_battery_start; end = spard_battery_end; type = "application/javascript"; }
     if (!strcmp(req->uri, "/remote-console.js")) { start = remote_console_js_start; end = remote_console_js_end; type = "application/javascript"; }
@@ -452,7 +455,7 @@ esp_err_t web_start(void) {
     http.max_uri_handlers = 52; http.max_open_sockets = 5; http.lru_purge_enable = true;
     http.recv_wait_timeout = 2; http.send_wait_timeout = 2;
     httpd_handle_t server = NULL; r = httpd_start(&server, &http); if (r != ESP_OK) return r;
-    const char *paths[] = { "/esp-remote.js", "/reader-selftest.js", "/preferences.js", "/i18n.js", "/appearance.css", "/bafang-battery.js","/spard-can.js","/battery-query.js","/esp-battery.js","/can-live.js","/can-live.css","/remote-console.js","/remote-console.css","/auto-update.js","/files.js","/adapter.js","/spard-probe.js","/spard-information.js","/spard-battery.js","/", "/style.css", "/app.js", "/decoder.js", "/decoder_reference.json", "/capture_profiles.json","/store.js","/transport.js","/monitor.js","/tuning.js","/metrics.js","/support.js","/flash-core.js","/remote-flash.js","/browser.js","/archive-worker.js","/sw.js","/manifest.webmanifest","/icon.svg", "/kolumbus-logo.svg"};
+    const char *paths[] = { "/esp-remote.js", "/reader-selftest.js", "/preferences.js", "/i18n.js", "/appearance.css", "/bafang-battery.js","/spard-can.js","/battery-query.js","/esp-battery.js","/can-live.js","/can-live.css","/remote-console.js","/remote-console.css","/auto-update.js","/files.js","/adapter.js","/spard-probe.js","/spard-information.js","/spard-service.js","/spard-battery.js","/", "/style.css", "/app.js", "/decoder.js", "/decoder_reference.json", "/capture_profiles.json","/store.js","/transport.js","/monitor.js","/tuning.js","/metrics.js","/support.js","/flash-core.js","/remote-flash.js","/browser.js","/archive-worker.js","/sw.js","/manifest.webmanifest","/icon.svg", "/kolumbus-logo.svg"};
     for (int i = 0; i < sizeof(paths)/sizeof(paths[0]); i++) {
         httpd_uri_t uri = {.uri = paths[i], .method = HTTP_GET, .handler = asset_handler};
         ESP_ERROR_CHECK(httpd_register_uri_handler(server, &uri));

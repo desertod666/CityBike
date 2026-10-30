@@ -14,7 +14,7 @@
     const card=$('spardBatteryCard');if(!card)return;
     const state=globalThis.BySpardProbe?.snapshot?.()||{},active=state.active===true;
     const listen=$('listenSpardAdapter');if(listen)listen.disabled=active;
-    const stop=$('stopSpardProbe');if(stop)stop.disabled=!active;
+    const stop=$('stopSpardProbe');if(stop)stop.disabled=!active;const select=$('spardReadMode');if(select)select.disabled=active;
     const start=$('probeSpardAdapter');if(start)start.disabled=active||(typeof browserRuntime!=='undefined'&&!!(browserRuntime?.recorder||browserRuntime?.tuner?.active||browserRuntime?.flashBusy));
     card.dataset.source='stock';const f=reading?.result.fields;text('spardBatterySource',f?'SPARD · USB':'ESP32 · CAN');
     const currentSession=reading?.session&&reading.session===state.started_utc;

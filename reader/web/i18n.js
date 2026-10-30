@@ -1,7 +1,18 @@
 /* UI text only. Protocol payloads, passwords and user-entered values are excluded. */
 'use strict';
 (() => {
-  const rows=String.raw`Пульт доступен при подключении ESP32 по USB	The remote is available when ESP32 is connected by USB	Fjernkontrollen er tilgjengelig når ESP32 er koblet til via USB
+  const rows=String.raw`Данные для чтения	Data to read	Data som skal leses
+Текущие данные батареи	Current battery data	Gjeldende batteridata
+Модель и серийный номер	Model and serial number	Modell og serienummer
+Параметры батареи	Battery parameters	Batteriparametere
+Ответ адаптера	Adapter response	Svar fra adapteren
+Обновите страницу для дополнительного чтения Spard	Refresh the page for additional Spard reads	Oppdater siden for ekstra Spard-lesing
+Обычный ответ батареи не получен; дополнительный запрос не отправлен	No normal battery reply; additional request was not sent	Ingen vanlig batterirespons; ekstra forespørsel ble ikke sendt
+Незавершённый ответ адаптера; дополнительный запрос не отправлен	Incomplete adapter response; additional request was not sent	Ufullstendig adaptersvar; ekstra forespørsel ble ikke sendt
+Полный ответ на дополнительный запрос Spard не получен	No complete reply to the additional Spard request	Ingen fullstendig respons på ekstra Spard-forespørsel
+Выберите штатный адаптер Spard в окне последовательных портов. Определение получает только USB VID/PID. Для чтения выберите данные и нажмите кнопку чтения.	Select the stock Spard adapter in the serial port dialog. Identification obtains only USB VID/PID. To read, select the data and press the read button.	Velg original Spard-adapter i dialogen for serieporter. Identifisering henter bare USB VID/PID. Velg data og trykk på leseknappen for å lese.
+Перед чтением закройте порт в программе Spard. Дополнительное чтение сначала проверяет обычный ответ батареи и затем отправляет один запрос выбранных данных. Настройки батареи не изменяются.	Close the port in the Spard application before reading. Additional reads first check a normal battery reply and then send one request for the selected data. Battery settings are unchanged.	Lukk porten i Spard-programmet før lesing. Ekstra avlesning kontrollerer først et vanlig batterisvar og sender deretter én forespørsel om valgte data. Batteriinnstillingene endres ikke.
+Пульт доступен при подключении ESP32 по USB	The remote is available when ESP32 is connected by USB	Fjernkontrollen er tilgjengelig når ESP32 er koblet til via USB
 Файл получен сервером.	File received by the server.	Filen er mottatt av serveren.
 Чтение через адаптер Spard	Reading through the Spard adapter	Avlesning via Spard-adapteren
 Полные данные батареи ещё не получены. Последние показания CAN доступны выше.	Detailed battery data has not been received yet. The latest CAN readings are shown above.	Detaljerte batteridata er ikke mottatt ennå. De siste CAN-avlesningene vises ovenfor.

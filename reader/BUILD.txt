@@ -12,7 +12,7 @@ restore GPIO4 HIGH before returning. No arbitrary timing or pin API exists.
 It requires the isolated_gpio_voltmeter_v1 capability; Wi-Fi/RPC is denied.
 No battery-service request, battery write or motor command is sent.
 
-The working portal build is 20261030-voltmeter2. This fixes the incoming
+The working portal build is 20261030-stockreads1. The prior voltmeter2 fixed the incoming
 USB-browser job whitelist for the voltmeter flag. Installed local0.6.8 from
 commit16d3dad0 still embeds portal1; the hosted site can update independently. Normal CAN timing, battery request
 policy and BLE controls are unchanged. Prefer GitHub-hosted reader-ci with
@@ -23,3 +23,10 @@ C/Python parity tests. It is not included by main.c, exposes no command and
 changes no running firmware behavior. Python readback comparisons check exact
 slot contents without claiming sender identity, freshness or persistence.
 These local source additions are absent from the installed frozen 0.6.8 image.
+
+The portal also supports fixed stock-adapter normal Identity30/Parameters06
+reads after a fresh normal Information00 response. It sends one selected read
+and does not expose writes, update or arbitrary CAN transmission. New remote
+reads require the separate stock capability spard_service_reads_v1. The source
+embeds40 assets including the normal-service decoder; this portal change does
+not add a native ESP battery command and has not been installed on the reader.

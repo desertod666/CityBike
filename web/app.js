@@ -94,6 +94,7 @@ function renderRecording(s){
  const finalizing=countdownModel.view().phase==='finalizing',blocked=!c.connected||recording||(d.can==='running'&&!a.live_view?.active)||!!a.busy||!!scan.active||d.rx_check?.state==='running'||testStartPending;
  if($('stopSpardProbe'))$('stopSpardProbe').disabled=globalThis.BySpardProbe?.active!==true;
  if($('probeSpardAdapter'))$('probeSpardAdapter').disabled=recording||!!a.busy||globalThis.BySpardProbe?.active===true||!navigator.serial;
+ if($('spardReadMode'))$('spardReadMode').disabled=recording||!!a.busy||globalThis.BySpardProbe?.active===true||!navigator.serial;
  if($('inspectSpardAdapter'))$('inspectSpardAdapter').disabled=recording||!!a.tuning?.active||!!a.busy||globalThis.ByAdapter?.busy===true||!navigator.serial;
  if(recording&&$('testCountdown').hidden)$('recordingPanel').open=true;
  $('testCountdown').hidden=!recording&&!finalizing;$('testProgress').hidden=!recording&&!finalizing;

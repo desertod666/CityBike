@@ -38,3 +38,4 @@ code{background:var(--surface-inset);color:var(--ink)}pre,.monitor-console,.flas
 #spardBatteryCard[data-state=empty] .spard-metrics,#spardBatteryCard[data-state=empty] #spardCells,#spardBatteryCard[data-state=empty] details{display:none}#spardBatteryCard[data-state=cached] .spard-metrics{opacity:.75}#spardBatteryCard{margin:18px 0}
 
 #spardBatteryCard .metric.is-stale .metric-value,#spardBatteryCard .spard-cell.is-stale strong{color:var(--text-faint)}#spardBatteryCard .spard-temperature{margin:12px 0;max-width:240px}#spardBatteryCard[data-state=empty] .spard-temperature{display:none}
+#spardServiceResult{white-space:pre-wrap;overflow-wrap:anywhere;min-width:0;max-width:100%;max-height:420px;overflow:auto;padding:12px;border-radius:8px;font:12px/1.6 Consolas,monospace}

@@ -1,11 +1,11 @@
 {
   "version": "0.6.8",
-  "web_build": "20261030-voltmeter2",
-  "native_baseline": "0.6.8 native behavior unchanged; hosted voltmeter2; offline identity codec not linked by main.c. Installed local068 source16d3dad0 retains embedded portal1.",
+  "web_build": "20261030-stockreads1",
+  "native_baseline": "0.6.8 native command behavior unchanged; portal stockreads1 adds fixed normal stock USB service reads, no native writes. Installed local068 source16d3dad0 retains portal1.",
   "files": {
     "BUILD.txt": {
-      "size": 1576,
-      "sha256": "a0388ca944eabd59f412b90b135d713ead6376f07bc89469f925b3de980a19c6"
+      "size": 2061,
+      "sha256": "368f70317cb35715b5a90f44f60b8569078a053a70561876a7c5344d87adc9e2"
     },
     "CMakeLists.txt": {
       "size": 173,
@@ -16,8 +16,8 @@
       "sha256": "8555b094067798f52d3ee9c2435a974c19cf7306f96e325fc0b87d7f2709dbd1"
     },
     "platformio.ini": {
-      "size": 1292,
-      "sha256": "cb6177f9db88064a9f72d61a6cc6926a087d5316ed020372b010b423718f00d9"
+      "size": 1317,
+      "sha256": "472754bdef4272b0094412db4296bcb5ef6b7cfd76d3a8d5bc30fcb3c2e08034"
     },
     "requirements-ci.txt": {
       "size": 36,
@@ -260,8 +260,8 @@
       "sha256": "ce4315eb385727848828f1cfb0a8642fed84a82609cc659ebece82400d35a6c5"
     },
     "src/CMakeLists.txt": {
-      "size": 1673,
-      "sha256": "39046ce771d1752d5212247bf7c419e2fcf948afb2fea8dce7a0a3f012301ec2"
+      "size": 1699,
+      "sha256": "d4d33d31d546b9281e6cc446f6372e80b51d901141c968a273c80b97ea107073"
     },
     "src/ESPRESSIF_HAL_LICENSE.txt": {
       "size": 11358,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 30775,
-      "sha256": "f48e6d71b1b66fe9febebc35318ad4b4020f5c2c0c5fdb75050e04395486d58c"
+      "size": 31088,
+      "sha256": "1378e8669eae8e5335fef8b71abf74b11ae609bffa522df80e731e52718330e3"
     },
     "src/web_server.h": {
       "size": 421,
@@ -380,12 +380,12 @@
       "sha256": "a0c683e13d9bb0fef59a73da93b419ad551b2f6de39c0290454f97d90e645d06"
     },
     "web/app.js": {
-      "size": 41173,
-      "sha256": "c39c9c36935c47ef01ecf2d6d957fe6a183a4a7eb6aee5c5ca2ee5dde2cc3410"
+      "size": 41304,
+      "sha256": "028d743289885216c58fd944f75d789c2c16f0c3b4476d3106eb028810ce7d64"
     },
     "web/appearance.css": {
-      "size": 11398,
-      "sha256": "a48ade85ce5dda641d593235d8719db6197df4fb18600235486f43df121bd634"
+      "size": 11585,
+      "sha256": "173dc2042d31548afd1cf2bd50f5e171196c826e2769cef4a42fc3f6dc0ef143"
     },
     "web/archive-worker.js": {
       "size": 442,
@@ -408,8 +408,8 @@
       "sha256": "af3bad7cb38e46dc6e0db37d383349b9c467d0fa3765c32bb22d5f4269079b8b"
     },
     "web/browser.js": {
-      "size": 38792,
-      "sha256": "95d59e11d8213f6eb2aa1e6b542891f9ea774fc0c1af66b5eb168d8f40d561ac"
+      "size": 38793,
+      "sha256": "ef608693a713fab39b49cec5be8574be273710bd0160dc704cbeb6b0714e528f"
     },
     "web/can-live.css": {
       "size": 3356,
@@ -460,16 +460,16 @@
       "sha256": "2e12e3a7aa288a4dba262b09ec4b7e4592e8b716175a39c9f184cc903311cf47"
     },
     "web/i18n.js": {
-      "size": 146596,
-      "sha256": "ddeca86bcf314d66a4dd69e1bccd6cf5ec4315a21e6be9aa5db6d48fcebc184f"
+      "size": 149139,
+      "sha256": "47b92b57990718e894b18be903dcac2559dfee903cbdb73e26338536cdb86aae"
     },
     "web/icon.svg": {
       "size": 549,
       "sha256": "6002bf4015040f8f414ca7295489ed75cbc6f37c55c3cf44d65e84e03477971a"
     },
     "web/index.html": {
-      "size": 39208,
-      "sha256": "4245cb4905eb38d89e4fee0400332987aa24162908fb3be83c00c9a1805ad25d"
+      "size": 39732,
+      "sha256": "866b313b22172bb0933f6463adc0281922cbe9f5e64aa1e730c521ef88105b47"
     },
     "web/kolumbus-logo.svg": {
       "size": 2565,
@@ -500,16 +500,16 @@
       "sha256": "78d6aaaf7b68ec19ec74dd5b06ee6e5793cd33adb091609c811765306f558585"
     },
     "web/remote-console.js": {
-      "size": 29317,
-      "sha256": "ef71506445ae37f51c3877a58817cffedeac5443df9518bdf405c2d01ee19daa"
+      "size": 29943,
+      "sha256": "7c8212eb413fa94126e157739542ea3a408f5662e54eabf2a90d62dcb9a6f2c6"
     },
     "web/remote-flash.js": {
       "size": 5609,
       "sha256": "9dcf6f8f96c53f54e962bb4a6e18913317c70cec84c10d491fa8bda3f80c2ac5"
     },
     "web/spard-battery.js": {
-      "size": 12142,
-      "sha256": "5ea47dd89fd028b96e95c94d4cdc6304a41146ec32bb41bb78b52cf26d4ad062"
+      "size": 12207,
+      "sha256": "8abda3c79c9388b86d616a3a20f52a6ccd40681c5ac6e765e33d0cbfce8a4f97"
     },
     "web/spard-can.js": {
       "size": 3992,
@@ -520,8 +520,12 @@
       "sha256": "304270103fc86d1a9e1da66a1135894d7fe25c9dd9b326f65ffc3bd3a460d59c"
     },
     "web/spard-probe.js": {
-      "size": 11403,
-      "sha256": "deb4c7f6d68e46d311950a1c65c4d5e367d8f77f80295fc272d639ffac7d37f5"
+      "size": 15534,
+      "sha256": "6757fd8b850bbaf5a46297e742a9b5ee292a0ccd35b9cc1cc637f8142fe09e80"
+    },
+    "web/spard-service.js": {
+      "size": 6555,
+      "sha256": "427458eb5c8f06c533baa7d24b8fd0880d8688d9eff9037a54340b12bee5c22e"
     },
     "web/store.js": {
       "size": 11171,
@@ -532,12 +536,12 @@
       "sha256": "dc561c9eb30a371bedc66043c560c94fda157c6c5bd404f6ab803b325bbf4cb9"
     },
     "web/support.js": {
-      "size": 23372,
-      "sha256": "a60c9c6db5aa63053412033d034f245a942e7c4fe197fcc957384bb75bef08ed"
+      "size": 23697,
+      "sha256": "0f000924722b9b560131209bfd0f0098ca37bdbceb84ffccef8c5a4100ff4e3a"
     },
     "web/sw.js": {
-      "size": 4887,
-      "sha256": "2179ea71a404defa96ffffdcdbd8a9b3ed8402a35ac3eeff6df5ae9cba9cad20"
+      "size": 4908,
+      "sha256": "764f3db0a263758e491df8a0196d63a0dd0b0fb2fefcc0069f23aa68c5aaaabe"
     },
     "web/transport.js": {
       "size": 14126,

@@ -21,11 +21,12 @@ def esp_identity(device):
     return (isinstance(device,dict) and device.get('product')=='BafangReader' and type(device.get('protocol')) is int and device['protocol']==1 and isinstance(device.get('ap_mac'),str) and MAC_ADDRESS.fullmatch(device['ap_mac'].lower()) is not None and device['ap_mac'].lower()!='00:00:00:00:00:00')
 AUTH_LIMIT=5;AUTH_WINDOW=60;AUTH_COOLDOWN=60;AUTH_IP_CAP=1024
 ACTIVE={'queued','accepted','started'}
-LISTEN_BUILDS={'20261030-voltmeter2','20261030-voltmeter1','20261030-gpioprobe1','20261030-auditfix1','20261029-battery1','20261029-clean2','20261029-clean1','20261029-remote6','20261029-remote5','20261029-remote4','20261029-remote3','20261029-remote2','20261029-remote1','20261029-ble3','20261029-ble2','20261029-layout1','20261029-ble1','20261029-recording1','20261028-simple1','20261028-faults1','20261028-identity2','20261028-identity1','20261028-protocol1','20261028-errors1','20261028-rmt3','20261028-rmt2','20261028-rmt1','20261028-quiet1','20261028-selftest2','20261028-selftest1','20261028-cells1','20261028-view1','20261028-bms-txtrace1','20261028-spard-access1','20261028-bms-quality1','20261028-esp-battery1','20261028-open-readers1','20261028-reader2','20261028-manual-flash1','20261027-bus-listen1','20261027-auto-update1','20261027-single-device1','20261027-single-device2','20261027-paired-probe1','20261027-stock-bridge1','20261027-live-can1','20261027-live-can2'}
+LISTEN_BUILDS={'20261030-stockreads1','20261030-voltmeter2','20261030-voltmeter1','20261030-gpioprobe1','20261030-auditfix1','20261029-battery1','20261029-clean2','20261029-clean1','20261029-remote6','20261029-remote5','20261029-remote4','20261029-remote3','20261029-remote2','20261029-remote1','20261029-ble3','20261029-ble2','20261029-layout1','20261029-ble1','20261029-recording1','20261028-simple1','20261028-faults1','20261028-identity2','20261028-identity1','20261028-protocol1','20261028-errors1','20261028-rmt3','20261028-rmt2','20261028-rmt1','20261028-quiet1','20261028-selftest2','20261028-selftest1','20261028-cells1','20261028-view1','20261028-bms-txtrace1','20261028-spard-access1','20261028-bms-quality1','20261028-esp-battery1','20261028-open-readers1','20261028-reader2','20261028-manual-flash1','20261027-bus-listen1','20261027-auto-update1','20261027-single-device1','20261027-single-device2','20261027-paired-probe1','20261027-stock-bridge1','20261027-live-can1','20261027-live-can2'}
 ACTIONS={'reader_voltmeter':('reader_selftest',10),'battery_information_quiet':('battery_information',12),'reader_selftest':('reader_selftest',2),'battery_information':('battery_information',45),'live_start':('live_view',0),'live_stop':('live_view',0),'capture30':('capture',30),'capture60':('capture',60),'rx_check':('rx_check',10),'spard_information':('spard_probe',30),'spard_listen':('spard_probe',30),'stop':('stop',0)}
 DEVICE_FIELDS=('type','product','protocol','version','boot','can','received','bus_errors','bus_error_types','last_bus_error','rx_missed','rx_overrun','frame_queue_drops','usb_frame_drops','uptime_us','ap_mac','tx_gpio','rx_gpio','twai_tx_gpio','ctx_guard','rx_sampling_250k','sampling_profiles','timing','rx_check','bitrate','epoch','heap_free','hardware_readback','can_stack_free','usb_stack_free','capabilities','mode','ble_remote')
 STOCK_DEVICE_FIELDS=('product','protocol','usb_vid','usb_pid')
-STOCK_CAPABILITIES={'spard_probe','stop'}
+STOCK_CAPABILITIES={'spard_probe','stop','spard_service_reads_v1'}
+ACTIONS.update(spard_identity=('spard_probe',30),spard_parameters=('spard_probe',30))
 CONTROL_FIELDS=('version','web_build','recorder_version','ready','updating','capabilities','last','stock_adapter','local_permission','lease_expires_at','countdown','busy','recording','site_update','can_live','live_view','battery_information','reader_selftest','ble_remote','handset_log')
 SECRET=re.compile(r'(^key$)|token|key_sha256|raw_key|credential|authorization|password|secret',re.I)
 
@@ -57,7 +58,7 @@ def stock_identity(report):
             and type(b.get('port_count')) is int and 0<=b['port_count']<=128
             and (report['connected'] is False or b['port_count']==1)
             and isinstance(c,dict) and type(c.get('version')) is int and c['version']==2 and isinstance(c.get('capabilities'),list)
-            and len(c['capabilities'])<=2 and all(isinstance(x,str) and x in STOCK_CAPABILITIES for x in c['capabilities'])
+            and len(c['capabilities'])<=3 and all(isinstance(x,str) and x in STOCK_CAPABILITIES for x in c['capabilities'])
             and len(set(c['capabilities']))==len(c['capabilities']))
 
 def identity_boot(item):
@@ -355,7 +356,8 @@ class RemoteOperator:
             d,c=b['device'],b['control'];kind,duration=ACTIONS[action];caps=c.get('capabilities',[]);last=c.get('last') or {};pending_file=self.store.root/'control'/uid/'pending.json'
             if kind not in caps:raise OperatorError('unsupported_client','Вкладка USB-моста не поддерживает действие')
             is_stock=b.get('bridge',{}).get('kind')=='stock'
-            if is_stock and action not in ('spard_information','spard_listen','stop'):raise OperatorError('unsupported_client','Штатный адаптер поддерживает только чтение Spard')
+            if is_stock and action not in ('spard_information','spard_listen','spard_identity','spard_parameters','stop'):raise OperatorError('unsupported_client','Штатный адаптер поддерживает только чтение Spard')
+            if action in ('spard_identity','spard_parameters') and (not is_stock or 'spard_service_reads_v1' not in caps):raise OperatorError('unsupported_client','Обновите страницу для дополнительного чтения Spard')
             job=dict(id=body['id'],kind=kind,key_sha256=b['key_sha256'],expires_at=time.time()+60)
             if is_stock:job.update(expected_bridge_boot=identity_boot(b),adapter_vid='1A86',adapter_pid='7523')
             else:job.update(expected_mac=d['ap_mac'],expected_boot=d['boot'])
@@ -405,7 +407,7 @@ class RemoteOperator:
                     job.update(duration=30,bitrate=250000);duration=270
                 elif kind=='spard_probe':
                     if action=='spard_listen' and b.get('bridge',{}).get('kind')!='stock' and c.get('web_build') not in LISTEN_BUILDS:raise OperatorError('unsupported_client','Обновите вкладку для режима наблюдения')
-                    job.update(duration=30,mode='listen' if action=='spard_listen' else 'information',adapter_vid='1A86',adapter_pid='7523')
+                    job.update(duration=30,mode=action.removeprefix('spard_'),adapter_vid='1A86',adapter_pid='7523')
             if pending_file.exists():
                 pending=json.loads(pending_file.read_text());ack=last.get('id')==pending.get('id')
                 if pending.get('expires_at',0)>time.time() and not ack:raise OperatorError('job_pending','Есть неподтверждённое задание')
