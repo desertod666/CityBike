@@ -61,7 +61,8 @@ int main(int argc,char **argv){
  int result=state_handler(&request);
  if(mode==0){assert(!result&&calls==4&&!status_code);puts(output);}
  else if(mode<=4){assert(result==77&&calls==mode);}
- else {assert(result==-1&&status_code==500&&calls==0);}
+ else if(mode==5){assert(result==-1&&status_code==500&&calls==0);}
+ else {assert(result==-1&&!status_code&&calls==2);}
 }
 '''
 compiler = os.environ.get('CC') or shutil.which('cc')

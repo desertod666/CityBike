@@ -252,12 +252,12 @@
       "sha256": "a4906cb058abef6f8c5d83d8f5eb8484a26aeb013e6cd7342a0a1193dc3bf1d9"
     },
     "sdkconfig.defaults": {
-      "size": 1351,
-      "sha256": "8b9212c5879922ca1ba6fc746222b39a83739019bedb4a2760b99b1c73c4857b"
+      "size": 1407,
+      "sha256": "e9b5d4857a6bee741a6fa3b456e5bab4955553815204f5affb3023d8a03232e1"
     },
     "sdkconfig.esp32c3": {
       "size": 67382,
-      "sha256": "e2b01184a63145c8233c911eec4431322b44d292cd23b8a7cebcae412dec3e83"
+      "sha256": "04772a3d82afc13042e5ca3d11e17c55b700c8b95a83b9b5de5b88a6acf100b7"
     },
     "src/CMakeLists.txt": {
       "size": 1699,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 32694,
-      "sha256": "366b5b297bc8f234e6ea6bddc26bd4991e97d1d4e9d9066cecc35f3401d26f24"
+      "size": 32848,
+      "sha256": "b4e9c4700dbbf1f933bbcb47bd4bbea09837166cfa6e0c72161b3fae852a61df"
     },
     "src/web_server.h": {
       "size": 421,
@@ -560,8 +560,8 @@
       "sha256": "3afffe150b8a197fa88de64c9008412b310495d43aaa9208c97ffa7f18c5d7cb"
     },
     "scripts/test_web_status.py": {
-      "size": 4295,
-      "sha256": "54f8402fffc6010e5e3069e6e7eefe2ecd0428c4cec484cf55505486b93bb971"
+      "size": 4358,
+      "sha256": "03c6a7465dfc0eb1bc3bc99bb96fae620fc4c8e7b534dfac490bd5a58f848ed5"
     }
   }
 }
