@@ -34,6 +34,7 @@ static int last_gap_event=-1,adv_stage;
 static size_t init_free,init_largest,failed_allocation;
 static void allocation_failed(size_t requested,uint32_t caps,const char *function){failed_allocation=requested;}
 static int64_t session_deadline;
+static bool session_requires_usb=true,pending_requires_usb=true,published_requires_usb=true;
 extern void reader_remote_notification(unsigned button,unsigned pressed,int error,int64_t t_us);
 static struct ble_npl_callout watchdog;
 static struct ble_npl_event command_event;
@@ -43,7 +44,7 @@ static int command_result;
 static int64_t command_expires;
 static volatile bool command_pending;
 static int gap_event(struct ble_gap_event *event,void *arg);
-static void publish(void){portENTER_CRITICAL(&snapshot_lock);published=state;published_ready=ready;published_advertising=advertising;portEXIT_CRITICAL(&snapshot_lock);}
+static void publish(void){portENTER_CRITICAL(&snapshot_lock);published=state;published_ready=ready;published_advertising=advertising;published_requires_usb=session_requires_usb;portEXIT_CRITICAL(&snapshot_lock);}
 static int send_key(uint8_t button,uint8_t pressed,void *unused){
  if(connection==BLE_HS_CONN_HANDLE_NONE||!state.subscribed)return BLE_HS_ENOTCONN;
  uint8_t bytes[2]={button,pressed};struct os_mbuf *packet=ble_hs_mbuf_from_flat(bytes,2);
@@ -95,12 +96,15 @@ static int access_key(uint16_t conn,uint16_t attr,struct ble_gatt_access_ctxt *c
 static const struct ble_gatt_svc_def services[]={
  {.type=BLE_GATT_SVC_TYPE_PRIMARY,.uuid=&service_uuid.u,.characteristics=(struct ble_gatt_chr_def[]){
  {.uuid=&key_uuid.u,.access_cb=access_key,.flags=BLE_GATT_CHR_F_NOTIFY,.val_handle=&value_handle},{0}}},{0}};
-static void tick(struct ble_npl_event *event){reconcile_link();int64_t now=esp_timer_get_time();remote_expire(&state,now,send_key,NULL);if(state.enabled&&(now>=session_deadline||!usb_serial_jtag_is_connected())){remote_release(&state,send_key,NULL);state.enabled=false;if(ble_gap_adv_active()){ble_gap_adv_stop();}
+static void tick(struct ble_npl_event *event){reconcile_link();int64_t now=esp_timer_get_time();remote_expire(&state,now,send_key,NULL);if(state.enabled&&(now>=session_deadline||(session_requires_usb&&!usb_serial_jtag_is_connected()))){remote_release(&state,send_key,NULL);state.enabled=false;if(ble_gap_adv_active()){ble_gap_adv_stop();}
   advertising=false;if(connection!=BLE_HS_CONN_HANDLE_NONE)ble_gap_terminate(connection,BLE_ERR_REM_USER_CONN_TERM);}publish();ble_npl_callout_reset(&watchdog,ble_npl_time_ms_to_ticks32(50));}
 static bool hex_text(const char *s,size_t len){if(strlen(s)!=len)return false;for(size_t i=0;i<len;i++)if(!isxdigit((unsigned char)s[i]))return false;return true;}
 static void execute(struct ble_npl_event *event){
  command_result=-10;
  if(esp_timer_get_time()>command_expires)goto done;
+ // A USB supervisor must never switch off or replay a Wi-Fi controller's keys.
+ // Both transports keep the same independent button and session deadlines.
+ if(state.enabled&&session_requires_usb!=pending_requires_usb){command_result=-12;goto done;}
  if(!strcmp(pending,"REMOTE OFF")){
   remote_release(&state,send_key,NULL);state.enabled=false;
   if(ble_gap_adv_active()){ble_gap_adv_stop();}
@@ -112,6 +116,7 @@ static void execute(struct ble_npl_event *event){
  if(sscanf(pending,"REMOTE ON %16s %c",session,&extra)==1&&hex_text(session,16)){
   if(state.enabled&&strcmp(state.session,session)){command_result=-11;goto done;}
   session_deadline=esp_timer_get_time()+3000000;
+  session_requires_usb=pending_requires_usb;
   if(!state.enabled){reconcile_link();bool linked=state.connected,subscribed=state.subscribed;memset(&state,0,sizeof(state));state.connected=linked;state.subscribed=subscribed;state.enabled=true;strcpy(state.session,session);advertise();}
   command_result=state.last_error;goto done;
  }
@@ -145,20 +150,22 @@ esp_err_t ble_remote_init(void){
  ble_npl_event_init(&command_event,execute,NULL);ble_npl_callout_init(&watchdog,nimble_port_get_dflt_eventq(),tick,NULL);ble_npl_callout_reset(&watchdog,ble_npl_time_ms_to_ticks32(50));
  started=true;nimble_port_freertos_init(host_task);return ESP_OK;
 }
-bool ble_remote_command(const char *cmd,char *error,size_t capacity){
+static bool command_from(const char *cmd,char *error,size_t capacity,bool require_usb){
  if(!started||!published_ready){snprintf(error,capacity,"BLE not ready (%d)",init_error);return false;}
  if(xSemaphoreTake(command_mutex,pdMS_TO_TICKS(20))!=pdTRUE){snprintf(error,capacity,"BLE command busy");return false;}
  bool ok=false;
  if(command_pending){snprintf(error,capacity,"Previous BLE command pending");goto done;}
- xSemaphoreTake(completed,0);snprintf(pending,sizeof(pending),"%s",cmd);command_expires=esp_timer_get_time()+500000;command_pending=true;
+ xSemaphoreTake(completed,0);snprintf(pending,sizeof(pending),"%s",cmd);pending_requires_usb=require_usb;command_expires=esp_timer_get_time()+500000;command_pending=true;
  ble_npl_eventq_put(nimble_port_get_dflt_eventq(),&command_event);
  if(xSemaphoreTake(completed,pdMS_TO_TICKS(600))!=pdTRUE){snprintf(error,capacity,"BLE command timeout");goto done;}
  ok=command_result==0;if(!ok)snprintf(error,capacity,"BLE command rejected (%d)",command_result);
  done:xSemaphoreGive(command_mutex);return ok;
 }
+bool ble_remote_command(const char *cmd,char *error,size_t capacity){return command_from(cmd,error,capacity,true);}
+bool ble_remote_wifi_command(const char *cmd,char *error,size_t capacity){return command_from(cmd,error,capacity,false);}
 bool ble_remote_enabled(void){portENTER_CRITICAL(&snapshot_lock);bool value=published.enabled;portEXIT_CRITICAL(&snapshot_lock);return value;}
 size_t ble_remote_json(char *buffer,size_t capacity){
- portENTER_CRITICAL(&snapshot_lock);remote_policy_t s=published;bool r=published_ready,a=published_advertising;portEXIT_CRITICAL(&snapshot_lock);
- int n=snprintf(buffer,capacity,"{\"ready\":%s,\"enabled\":%s,\"advertising\":%s,\"connected\":%s,\"subscribed\":%s,\"session\":\"%s\",\"button\":%u,\"sequence\":%" PRIu32 ",\"notifications\":%" PRIu32 ",\"releases\":%" PRIu32 ",\"last_error\":%d,\"lease_ms\":1200,\"max_hold_ms\":30000,\"init_heap_free\":%u,\"init_largest_block\":%u,\"failed_allocation\":%u,\"connection_handle\":%u,\"subscribed_handle\":%u,\"connect_events\":%u,\"disconnect_events\":%u,\"subscribe_events\":%u,\"last_gap_event\":%d,\"adv_error_stage\":%d}",r?"true":"false",s.enabled?"true":"false",a?"true":"false",s.connected?"true":"false",s.subscribed?"true":"false",s.session,s.button,s.sequence,s.notifications,s.releases,init_error?init_error:s.last_error,(unsigned)init_free,(unsigned)init_largest,(unsigned)failed_allocation,(unsigned)connection,(unsigned)subscribed_connection,connect_events,disconnect_events,subscribe_events,last_gap_event,adv_stage);
+ portENTER_CRITICAL(&snapshot_lock);remote_policy_t s=published;bool r=published_ready,a=published_advertising,usb=published_requires_usb;portEXIT_CRITICAL(&snapshot_lock);
+ int n=snprintf(buffer,capacity,"{\"transport\":\"%s\",\"ready\":%s,\"enabled\":%s,\"advertising\":%s,\"connected\":%s,\"subscribed\":%s,\"session\":\"%s\",\"button\":%u,\"sequence\":%" PRIu32 ",\"notifications\":%" PRIu32 ",\"releases\":%" PRIu32 ",\"last_error\":%d,\"lease_ms\":1200,\"max_hold_ms\":30000,\"init_heap_free\":%u,\"init_largest_block\":%u,\"failed_allocation\":%u,\"connection_handle\":%u,\"subscribed_handle\":%u,\"connect_events\":%u,\"disconnect_events\":%u,\"subscribe_events\":%u,\"last_gap_event\":%d,\"adv_error_stage\":%d}",usb?"usb":"wifi",r?"true":"false",s.enabled?"true":"false",a?"true":"false",s.connected?"true":"false",s.subscribed?"true":"false",s.session,s.button,s.sequence,s.notifications,s.releases,init_error?init_error:s.last_error,(unsigned)init_free,(unsigned)init_largest,(unsigned)failed_allocation,(unsigned)connection,(unsigned)subscribed_connection,connect_events,disconnect_events,subscribe_events,last_gap_event,adv_stage);
  return n<0?capacity:(size_t)n;
 }

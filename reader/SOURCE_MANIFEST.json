@@ -1,5 +1,5 @@
 {
-  "version": "0.6.10",
+  "version": "0.6.11",
   "web_build": "20261030-stockreads1",
   "native_baseline": "0.6.8 native command behavior unchanged; portal stockreads1 adds fixed normal stock USB service reads, no native writes. Installed local068 source16d3dad0 retains portal1.",
   "files": {
@@ -9,7 +9,7 @@
     },
     "CMakeLists.txt": {
       "size": 174,
-      "sha256": "815ec52eed48303e1c1f9ccccfad43ae5dad538b79c7c3566b2901e2bfd4244d"
+      "sha256": "613f655cc3734048ff0a6b9c5186e60c71e34796bedc3a0ec7b3e96bbdb4fb05"
     },
     "partitions.csv": {
       "size": 132,
@@ -200,8 +200,8 @@
       "sha256": "eb8bbe317a0aa91d7662d3c8e57482cbfd5143c5c74885c4f62826d353a45f95"
     },
     "scripts/test_firmware_native.py": {
-      "size": 5153,
-      "sha256": "621dabd9f3c44a73f3b21426416873f27449bc3f1332d69b095d78232d10051f"
+      "size": 5409,
+      "sha256": "3c9e1f4e0d38c56af2b5ba1dd7b14cc59dc464dafea59255d8c2dc369ecd68fc"
     },
     "scripts/test_fixed_receive.c": {
       "size": 1170,
@@ -268,12 +268,12 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     "src/ble_remote.c": {
-      "size": 12403,
-      "sha256": "4edc229af5a11915ce6d02ae0bef11d61f30ba1ee6b350128b7adfcded2b38ba"
+      "size": 13213,
+      "sha256": "43708780f2c47bba5fd08068047775957ff694d62a53273a6849b7e23875e6fe"
     },
     "src/ble_remote.h": {
-      "size": 263,
-      "sha256": "c892366d5ff96a2908482de7ffd0a9457f4fd20f9ec15cd41ef6bba64d01d74a"
+      "size": 338,
+      "sha256": "030c2ed0e93d90c6a9cd4c607a247babf8bdfdbc17854c78a9060111b3c01819"
     },
     "src/command_protocol.h": {
       "size": 1592,
@@ -300,12 +300,12 @@
       "sha256": "ba83c00cd3ecbaf9b353dd2b121b6e7fd8467c85b159b21b353ab44c08bd8b99"
     },
     "src/main.c": {
-      "size": 40159,
-      "sha256": "bf0646765204ef8a1cdc7eac32bad0d575c5a2dc6fc39d6ffa714cbe7d594534"
+      "size": 40279,
+      "sha256": "5f352f0c72f5a68315cfd9ba1a5be05e11d621c9b73a1c5f9b3d233f49f2234a"
     },
     "src/reader.h": {
-      "size": 583,
-      "sha256": "8b76dac367fff5da05771a177aea7602b69220061f85dabfed85657fc381becc"
+      "size": 614,
+      "sha256": "d7f3680363621f47707e7f86860570291e45804ce607b4df7b9c44b93763664b"
     },
     "src/remote_policy.h": {
       "size": 1748,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 22813,
-      "sha256": "d47a4f731e75db5d78e9daf472639f00d7deed5b185097e9d3f34a1e47898eb3"
+      "size": 28473,
+      "sha256": "8191439c741f519ac03b48e81ce8ceab6510f7e9ee1fe6015ef4dd0cfc8042b6"
     },
     "src/web_server.h": {
       "size": 421,
@@ -564,36 +564,52 @@
       "sha256": "03c6a7465dfc0eb1bc3bc99bb96fae620fc4c8e7b534dfac490bd5a58f848ed5"
     },
     "web/offline-index.html": {
-      "size": 4926,
-      "sha256": "6f7d103733da2884dd09fde4a253e33c8a1525e104d82b31a6e3211c5989ea1e"
+      "size": 6352,
+      "sha256": "83152d061aa53abff08396a71fa7daa7bcf68a8d477cd663c6962fc2d90303bc"
     },
     "web/offline.css": {
-      "size": 3216,
-      "sha256": "139b61d07231d252bd361a154a90ae76234ad38689c6d32b90f1bcad6f905837"
+      "size": 3856,
+      "sha256": "d33c82555d1a97f731c133b3046bdd55159ad7959be86a3d6adb0ca99eadeb2e"
     },
     "web/offline.js": {
-      "size": 12791,
-      "sha256": "202b7c4f967c5ed3c0b5f3fb7941d205e71289019ec6e7ad4a040c327bee71d3"
+      "size": 13983,
+      "sha256": "8302efcbceb58879c032d281ebc3341030ab51e0b2b64b4a3f46890f416021fc"
     },
     "web/offline-i18n.js": {
-      "size": 22359,
-      "sha256": "0f20100d490e1c36c2df13c185393afb8d44c62ef0dc39b89c075d17b89074f2"
+      "size": 25108,
+      "sha256": "d33eea48216105cd34cfbd06466f41084c771f2f83d4b371cf12b52c7f016f18"
     },
     "portal-translations.tsv": {
-      "size": 2258,
-      "sha256": "d968bcc6ee1fe396619e8e3035eae9bb1141ab52950c2fa145bb044c0cb80f49"
+      "size": 3941,
+      "sha256": "50f6a1286dd97e7769bb7beaaa2d57e24b0baefe14e1355345ebd5bcc5f9aca2"
     },
     "scripts/test_offline_portal.cjs": {
       "size": 4699,
       "sha256": "edaca5e43af880093230a51674493409fe0398db60093b8ebfd64841cca1f778"
     },
     "scripts/test_offline_portal_browser.cjs": {
-      "size": 8929,
-      "sha256": "b046935b305d84cba93135059b83b1c240f22120ba75fb9499040861c77a6419"
+      "size": 11886,
+      "sha256": "94c45cf7ddaec39c55eb5ab87ecdd5721a3d268dd55684458f344c1b3965c428"
     },
     "web/offline-bundle.js": {
-      "size": 95905,
-      "sha256": "05dea77ad1727ea028bb330b926e1cab7eda59c238e2f3e7298ed4a670fcbd24"
+      "size": 110303,
+      "sha256": "cf534d4017d8ee3d1502a97ae63dc8104d1ea8b68eed8b72cabb384fdb755452"
+    },
+    "web/offline-remote.js": {
+      "size": 10454,
+      "sha256": "2bb6a813a1018b25cd37f747c798579a938a2835f74dd3c3bbb5d587114da3a0"
+    },
+    "scripts/test_ble_wifi.py": {
+      "size": 3340,
+      "sha256": "c04681cdcd5c76c27e43ee059cfe897082c2afe1bafd5f78e2bec3a41385e713"
+    },
+    "scripts/test_web_remote.py": {
+      "size": 4483,
+      "sha256": "036b762233f6ddd364b76701462f71c24144c2a19928f5d0a4360ff12b869133"
+    },
+    "scripts/test_offline_remote.cjs": {
+      "size": 3895,
+      "sha256": "f1bc13f235bf611ec87958cdce310a95c1db46f86823c9e7ab858d88f513dd70"
     }
   }
 }

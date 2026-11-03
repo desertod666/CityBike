@@ -22,3 +22,18 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.
 Повторить загрузку	Retry loading	Prøv å laste på nytt
 Текущие данные	Live readings	Gjeldende måleverdier
+Пульт Bluetooth	Bluetooth remote	Bluetooth-fjernkontroll
+Пульт недоступен	Remote unavailable	Fjernkontroll utilgjengelig
+Обновите прошивку для пульта по Wi-Fi	Update firmware for Wi-Fi remote control	Oppdater fastvaren for fjernkontroll via Wi-Fi
+Пульт не включился	Remote did not start	Fjernkontrollen startet ikke
+Дождитесь подключения велосипеда	Wait for the bike to connect	Vent til sykkelen kobler til
+Walk Assist · удерживать	Walk Assist · hold	Trilleassistanse · hold inne
+Разблокировать	Unlock	Lås opp
+Точно выключить питание велосипеда?	Are you sure you want to power off the bike?	Er du sikker på at du vil slå av sykkelen?
+Удерживайте кнопку для отправки, затем отпустите.	Hold the button to send, then release.	Hold knappen inne for å sende, og slipp deretter.
+Подтвердить Power off	Confirm Power off	Bekreft Power off
+Скачать CAN-лог	Download CAN log	Last ned CAN-logg
+CAN-лог сохраняется на этом устройстве	CAN log is saved on this device	CAN-loggen lagres på denne enheten
+CAN-лог сохраняется в браузере. Его можно скачать после действия.	The CAN log is saved in the browser. You can download it after the action.	CAN-loggen lagres i nettleseren. Du kan laste den ned etter handlingen.
+CAN-запись: записываю действие	CAN log: recording action	CAN-logg: registrerer handling
+Неполная запись	Incomplete recording	Ufullstendig opptak

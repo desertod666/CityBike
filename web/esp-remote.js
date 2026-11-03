@@ -126,7 +126,7 @@
    if(mono()-this.lastAlive>500){await this.call(`REMOTE ALIVE ${this.nativeSession} ${this.next()}`);this.lastAlive=mono();}
   }
   async tick(){
-   if(this.polling||!supported(this.r.device)||!this.r.transport?.connected||this.r.wifi||this.r.flashBusy||this.r.updateHold)return;
+   if(this.polling||!supported(this.r.device)||!this.r.transport?.connected||this.r.wifi||this.r.flashBusy||this.r.updateHold||(this.r.device.ble_remote?.enabled&&this.r.device.ble_remote.transport==='wifi'))return;
    this.polling=true;const began=mono();
    try{
     if(this.local){const local=this.local;if(local.boot!==this.r.device.boot){this.local=null;this.nativeSession=null;this.hold=null;this.onLocalRevoked?.(local.actor);return;}local.sync();if(local.takeover){this.local=null;this.onLocalRevoked?.(local.actor);await this.apply(local.takeover);}else await this.apply(local.snapshot());}
@@ -191,14 +191,14 @@
  const t=s=>globalThis.ByI18n?.t?.(s)||s;
  function target(){const r=runtime();return r?.transport?.connected&&!r.wifi?{local:true,r,device:r.device,online:true}:Object.assign({local:false},globalThis.ByRemoteConsole?.snapshot?.()?.state||{});}
  function paint(){
-  const a=target(),d=a.device||{},ble=d.ble_remote||{},valid=!!a.online&&supported(d),owned=input?.armed;
-  $('espRemoteOn').disabled=!valid||!!owned||!!input?.enabling||!!a.control?.busy;
+  const a=target(),d=a.device||{},ble=d.ble_remote||{},valid=!!a.online&&supported(d),owned=input?.armed,foreignWifi=ble.enabled&&ble.transport==='wifi';
+  $('espRemoteOn').disabled=foreignWifi||!valid||!!owned||!!input?.enabling||!!a.control?.busy;
   $('espRemoteOn').textContent=t(ble.enabled&&!owned?'Управлять пультом':'Включить пульт');
-  $('espRemoteOff').disabled=!valid||(!ble.enabled&&!owned);
-  const canPress=valid&&d.can==='running'&&ble.enabled&&ble.connected&&ble.subscribed&&!!owned;
+  $('espRemoteOff').disabled=foreignWifi||!valid||(!ble.enabled&&!owned);
+  const canPress=!foreignWifi&&valid&&d.can==='running'&&ble.enabled&&ble.connected&&ble.subscribed&&!!owned;
   for(const b of panel.querySelectorAll('[data-remote-key]')){b.disabled=!canPress||(!!input.held&&input.held.button!==Number(b.dataset.remoteKey));b.classList.toggle('is-held',input?.held?.button===Number(b.dataset.remoteKey));b.setAttribute('aria-pressed',input?.held?.button===Number(b.dataset.remoteKey)?'true':'false');}
   $('espRemotePower').disabled=!canPress;
-  $('espRemoteStatus').textContent=t(runtime()?.wifi?'Пульт доступен при подключении ESP32 по USB':!valid?'Для пульта нужна новая прошивка ESP32':!ble.enabled?'Пульт выключен':ble.subscribed?'BLE подключён · кнопки готовы':ble.connected?'BLE подключён · ожидаю подписку':ble.advertising?'Пульт включён · ожидаю велосипед':'Запускаю пульт…');
+  $('espRemoteStatus').textContent=t(foreignWifi?'Управление пультом передано другой странице':runtime()?.wifi?'Пульт доступен при подключении ESP32 по USB':!valid?'Для пульта нужна новая прошивка ESP32':!ble.enabled?'Пульт выключен':ble.subscribed?'BLE подключён · кнопки готовы':ble.connected?'BLE подключён · ожидаю подписку':ble.advertising?'Пульт включён · ожидаю велосипед':'Запускаю пульт…');
   const log=a.local?executor?.snapshot():a.control?.handset_log;
   $('espRemoteLog').textContent=t('CAN-запись:')+' '+(log?.log?.recording?t('записываю действие'):log?.log?.last?.receipt?t('отправлена')+' · '+log.log.last.receipt:t('автоматически при нажатии'));
   $('espRemoteError').textContent=t(input?.error||log?.error||log?.log?.error||'');

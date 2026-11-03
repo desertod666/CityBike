@@ -23,6 +23,7 @@
 #include "reader.h"
 #include "web_server.h"
 #include "web_stream_payload.h"
+#include "ble_remote.h"
 
 #define REPO "desertod666/CityBike"
 #define DOWNLOAD "https://github.com/" REPO "/releases/latest/download/BafangReader-Windows-x64.zip"
@@ -31,6 +32,11 @@ static reader_network_t net;
 static portMUX_TYPE net_lock = portMUX_INITIALIZER_UNLOCKED;
 static char control_owner[33];
 static int64_t control_until;
+static char remote_owner[33];
+static int64_t remote_until;
+/* Keep recent OFF sequence fences so a delayed ON cannot undo a release. */
+static struct { char token[33]; uint32_t sequence; } remote_fences[8];
+static unsigned remote_fence_next;
 
 #define PORTAL_ASSETS(X) \
     X("/", offline_index_html, "text/html; charset=utf-8") \
@@ -248,6 +254,61 @@ static esp_err_t command_handler(httpd_req_t *req) {
     cJSON_Delete(body); return result_send(req, ok, error);
 }
 
+/* Only this endpoint grants a Wi-Fi BLE session. Raw RPC REMOTE stays denied. */
+static bool remote_hex(const char *text,size_t length) {
+    if (!text || strlen(text)!=length) return false;
+    for (size_t i=0;i<length;i++) if (!((text[i]>='0'&&text[i]<='9')||(text[i]>='a'&&text[i]<='f'))) return false;
+    return true;
+}
+static bool remote_sequence_valid(const char *token,uint32_t seq) {
+    for(unsigned i=0;i<8;i++)if(!strcmp(remote_fences[i].token,token))return seq>remote_fences[i].sequence;
+    return true;
+}
+static void remote_sequence_save(const char *token,uint32_t seq) {
+    unsigned i=0;for(;i<8;i++)if(!strcmp(remote_fences[i].token,token))break;
+    if(i==8)i=remote_fence_next++%8;
+    snprintf(remote_fences[i].token,33,"%s",token);remote_fences[i].sequence=seq;
+}
+static esp_err_t remote_handler(httpd_req_t *req) {
+    cJSON *body=read_body(req);char error[120]={0},token[33]={0},identity[18]={0},command[80]={0};bool ok=false;
+    cJSON *action=body?cJSON_GetObjectItemCaseSensitive(body,"action"):NULL;
+    cJSON *boot=body?cJSON_GetObjectItemCaseSensitive(body,"boot"):NULL;
+    cJSON *sequence=body?cJSON_GetObjectItemCaseSensitive(body,"seq"):NULL;
+    cJSON *hold=body?cJSON_GetObjectItemCaseSensitive(body,"hold"):NULL;
+    cJSON *button=body?cJSON_GetObjectItemCaseSensitive(body,"button"):NULL;
+    cJSON *confirmed=body?cJSON_GetObjectItemCaseSensitive(body,"confirmed"):NULL;
+    httpd_req_get_hdr_value_str(req,"X-Reader-Session",token,sizeof(token));
+    httpd_req_get_hdr_value_str(req,"X-Reader-Identity",identity,sizeof(identity));
+    if (!remote_hex(token,32)||strcmp(identity,net.mac)||!cJSON_IsString(boot)||strcmp(boot->valuestring,reader_boot())||!cJSON_IsString(action)||!cJSON_IsNumber(sequence)||sequence->valuedouble<1||sequence->valuedouble>UINT32_MAX||sequence->valuedouble!=(uint32_t)sequence->valuedouble) {
+        snprintf(error,sizeof(error),"invalid controller identity or sequence");goto done;
+    }
+    uint32_t seq=(uint32_t)sequence->valuedouble;const char *a=action->valuestring;char session[17];memcpy(session,token,16);session[16]=0;
+    bool on=!strcmp(a,"on"),off=!strcmp(a,"off"),alive=!strcmp(a,"alive"),down=!strcmp(a,"down"),keep=!strcmp(a,"keep"),up=!strcmp(a,"up");
+    if (!on&&!off&&!alive&&!down&&!keep&&!up) {snprintf(error,sizeof(error),"invalid remote action");goto done;}
+    int64_t now=esp_timer_get_time();
+    portENTER_CRITICAL(&net_lock);
+    if (remote_owner[0]&&now>remote_until) remote_owner[0]=0;
+    bool owned=remote_owner[0]&&!strcmp(remote_owner,token),busy=remote_owner[0]&&!owned;
+    portEXIT_CRITICAL(&net_lock);
+    if (busy||(!on&&!owned)) {snprintf(error,sizeof(error),"remote is owned by another browser session");goto done;}
+    if(!remote_sequence_valid(token,seq)){snprintf(error,sizeof(error),"stale remote sequence");goto done;}
+    if ((down||keep||up)&&(!cJSON_IsString(hold)||!remote_hex(hold->valuestring,8))) {snprintf(error,sizeof(error),"invalid button hold");goto done;}
+    if (down&&(!cJSON_IsNumber(button)||button->valuedouble<1||button->valuedouble>3||button->valuedouble!=(unsigned)button->valuedouble)) {snprintf(error,sizeof(error),"invalid button");goto done;}
+    if (down&&button->valuedouble==3&&!cJSON_IsTrue(confirmed)) {snprintf(error,sizeof(error),"power off confirmation required");goto done;}
+    if ((on||down)&&!reader_can_running()) {snprintf(error,sizeof(error),"start CAN reading before remote control");goto done;}
+    if (on) snprintf(command,sizeof(command),"REMOTE ON %s",session);
+    else if (off) snprintf(command,sizeof(command),"REMOTE OFF");
+    else if (alive) snprintf(command,sizeof(command),"REMOTE ALIVE %s %" PRIu32,session,seq);
+    else if (down) snprintf(command,sizeof(command),"REMOTE DOWN %s %s %" PRIu32 " %u",session,hold->valuestring,seq,(unsigned)button->valuedouble);
+    else snprintf(command,sizeof(command),"REMOTE %s %s %s %" PRIu32,keep?"KEEP":"UP",session,hold->valuestring,seq);
+    ok=ble_remote_wifi_command(command,error,sizeof(error));
+    if (ok) {remote_sequence_save(token,seq);portENTER_CRITICAL(&net_lock);snprintf(remote_owner,sizeof(remote_owner),"%s",off?"":token);remote_until=esp_timer_get_time()+3000000;portEXIT_CRITICAL(&net_lock);}
+ done:cJSON_Delete(body);
+    char response[256];int length=snprintf(response,sizeof(response),"{\"ok\":%s,\"error\":\"%s\",\"boot\":\"%s\",\"t_us\":%" PRId64 "}",ok?"true":"false",error,reader_boot(),esp_timer_get_time());
+    if(length<0||(size_t)length>=sizeof(response))return ESP_FAIL;
+    httpd_resp_set_type(req,"application/json");httpd_resp_set_hdr(req,"Cache-Control","no-store");return httpd_resp_send(req,response,length);
+}
+
 static esp_err_t lease_handler(httpd_req_t *req) {
     cJSON *body = read_body(req);
     cJSON *token = body ? cJSON_GetObjectItem(body, "token") : NULL;
@@ -268,11 +329,14 @@ static esp_err_t release_handler(httpd_req_t *req) {
     while (got < req->content_len) { int n = httpd_req_recv(req, data + got, req->content_len - got); if (n <= 0) return ESP_FAIL; got += n; }
     data[got] = 0;
     cJSON *body = cJSON_Parse(data), *token = body ? cJSON_GetObjectItem(body, "token") : NULL;
-    bool own = false;
-    if (cJSON_IsString(token)) { portENTER_CRITICAL(&net_lock); own = control_owner[0] && !strcmp(control_owner, token->valuestring); if (own) control_owner[0] = 0; portEXIT_CRITICAL(&net_lock); }
+    cJSON *sequence=body?cJSON_GetObjectItemCaseSensitive(body,"remote_seq"):NULL;
+    if(cJSON_IsString(token)&&remote_hex(token->valuestring,32)&&cJSON_IsNumber(sequence)&&sequence->valuedouble>=1&&sequence->valuedouble<=UINT32_MAX&&sequence->valuedouble==(uint32_t)sequence->valuedouble&&remote_sequence_valid(token->valuestring,(uint32_t)sequence->valuedouble))remote_sequence_save(token->valuestring,(uint32_t)sequence->valuedouble);
+    bool own = false,remote_own=false;
+    if (cJSON_IsString(token)) { portENTER_CRITICAL(&net_lock); own = control_owner[0] && !strcmp(control_owner, token->valuestring); if (own) control_owner[0] = 0; remote_own=remote_owner[0]&&!strcmp(remote_owner,token->valuestring);if(remote_own)remote_owner[0]=0;portEXIT_CRITICAL(&net_lock); }
     cJSON_Delete(body); char error[120] = {0};
+    if (remote_own) ble_remote_wifi_command("REMOTE OFF",error,sizeof(error));
     if (own) reader_command("STOP", error, sizeof(error));
-    return result_send(req, own, own ? error : "not the capture owner");
+    return result_send(req, own||remote_own, own||remote_own ? error : "not the capture owner");
 }
 
 static void lease_guard_task(void *arg) {
@@ -406,7 +470,8 @@ esp_err_t web_start(void) {
         {.uri="/api/info", .method=HTTP_GET, .handler=state_handler},
         {.uri="/api/frames", .method=HTTP_GET, .handler=frames_handler},
         {.uri="/api/command", .method=HTTP_POST, .handler=command_handler},
-        {.uri="/api/mark", .method=HTTP_POST, .handler=mark_handler}
+        {.uri="/api/mark", .method=HTTP_POST, .handler=mark_handler},
+        {.uri="/api/remote", .method=HTTP_POST, .handler=remote_handler}
     };
     for (int i = 0; i < sizeof(endpoints)/sizeof(endpoints[0]); i++) ESP_ERROR_CHECK(httpd_register_uri_handler(server, &endpoints[i]));
     const httpd_uri_t stream = {.uri="/api/stream",.method=HTTP_GET,.handler=stream_handler,.is_websocket=true};

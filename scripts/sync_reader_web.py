@@ -2,9 +2,9 @@
 import argparse,hashlib,json,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-LOCAL_ASSETS={'offline-index.html','offline.css','offline.js'}
+LOCAL_ASSETS={'offline-index.html','offline.css','offline.js','offline-remote.js'}
 SHARED_SOURCES=('preferences.js','decoder.js','decoder_reference.json','bafang-battery.js','can-live.js','spard-can.js','spard-information.js','kolumbus-logo.svg','icon.svg')
-BUNDLE_SOURCES=('offline-i18n.js','decoder.js','bafang-battery.js','can-live.js','spard-can.js','spard-information.js','offline.js')
+BUNDLE_SOURCES=('offline-i18n.js','decoder.js','bafang-battery.js','can-live.js','spard-can.js','spard-information.js','offline-remote.js','offline.js')
 
 def offline_i18n(reader):
     source=(ROOT/'web/i18n.js').read_text()

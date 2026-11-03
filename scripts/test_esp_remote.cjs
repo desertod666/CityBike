@@ -73,5 +73,7 @@ const {Input,Executor}=ByEspRemote;
  cancelLocal.accept({actor:cancelLocal.actor,seq:2,expected_boot:cancelLocal.boot,action:'down',hold:'9'.repeat(8),button:2});
  cancelExec.log={begin:async()=>cancelLocal.accept({actor:cancelLocal.actor,seq:3,expected_boot:cancelLocal.boot,action:'up',hold:'9'.repeat(8)}),released(){},mark:async()=>{}};
  await cancelExec.apply(cancelLocal.snapshot());assert(!cancelCommands.some(c=>c.startsWith('REMOTE DOWN')),'Released local input cannot become delayed DOWN');
+ const previousFetch=globalThis.fetch;let interference=0;globalThis.fetch=async()=>{interference++;throw Error('Unexpected remote supervision');};
+ const wifi=new Executor({device:{product:'BafangReader',capabilities:['ble_remote_v1'],ble_remote:{enabled:true,transport:'wifi'}},transport:{connected:true,call:async()=>{interference++;throw Error('USB must not stop Wi-Fi remote');}}});await wifi.tick();assert.equal(interference,0);globalThis.fetch=previousFetch;
  console.log('PASS handset input: momentary edges/power confirmation; no replay after release; local USB hold survives server outage, releases without network, expires without renewal, retains 30s bound and respects ownership transfer/boot change');
 })().catch(e=>{console.error(e);process.exit(1);});

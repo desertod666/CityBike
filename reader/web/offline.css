@@ -12,3 +12,7 @@ header img{background:#17221d;border-radius:6px;padding:5px;box-sizing:content-b
 @media(max-width:580px){.can-live-grid{grid-template-columns:1fr}}
 
 .can-live-message-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}.can-live-message-heading h3{margin:0}.can-live-message-heading>span{color:var(--muted);font-size:11px;text-align:right}
+
+.remote-keys{margin-top:12px}.remote-keys button,[data-offline-key]{touch-action:none;user-select:none;-webkit-user-select:none}button[aria-pressed=true]{outline:2px solid var(--ink)}dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;max-width:calc(100vw - 32px)}dialog::backdrop{background:#0009}#offlineRemoteError{color:#c85b51}#canFaultEvents p{border-top:1px solid var(--line);padding:9px 0;overflow-wrap:anywhere}
+
+.can-live-message .can-live-field.is-text{grid-template-columns:minmax(0,1fr)}.can-live-field.is-text dd{text-align:left;font-weight:500}.can-live-field dt>span{min-width:0}

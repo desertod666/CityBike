@@ -7,6 +7,7 @@
 Объект колеса V2.5 требует 6 байт	The V2.5 wheel object requires 6 bytes	Hjulobjektet i V2.5 krever 6 byte
 Длина / флаги SYM	SYM length / flags	SYM-lengde / flagg
 Неподдерживаемое поле SYM; сырые данные сохранены	Unsupported SYM field; raw data retained	SYM-feltet støttes ikke; rådata er beholdt
+Подтвердите выключение	Confirm shutdown	Bekreft avslåing
 В текущем сообщении нет предупреждения	No current warning reported	Ingen aktuell advarsel rapportert
 Тормоз уже нажат	Brake already applied	Bremsen er aktivert
 Ошибка ручки газа	Throttle fault	Feil på gasshendel
@@ -44,6 +45,15 @@ SOC батареи слишком низкий	Battery SOC too low	Batteriets SO
 контроллер	controller	kontroller
 датчик	sensor	sensor
 Русский	Russian	Russisk
+Включить пульт\tTurn remote on\tSlå på fjernkontroll
+Выключить пульт\tTurn remote off\tSlå av fjernkontroll
+CAN-запись:\tCAN recording:\tCAN-opptak:
+записываю действие\trecording action\ttar opp handlingen
+Пульт выключен\tRemote is off\tFjernkontroll er av
+BLE подключён · кнопки готовы\tBLE connected · buttons ready\tBLE tilkoblet · knappene er klare
+BLE подключён · ожидаю подписку\tBLE connected · waiting for subscription\tBLE tilkoblet · venter på abonnement
+Пульт включён · ожидаю велосипед\tRemote is on · waiting for bike\tFjernkontroll er på · venter på sykkelen
+Удержание прервано. Отпустите кнопку и нажмите снова.\tHold interrupted. Release the button and press again.\tHoldet ble avbrutt. Slipp knappen og trykk igjen.
 Ожидание	Waiting	Venter
 Нет показания	No reading	Ingen måleverdi
 Ошибки, замеченные ридером	Faults observed by the reader	Feil registrert av leseren
@@ -151,6 +161,7 @@ CAN · живые данные	CAN · live data	CAN · sanntidsdata
 Ошибка	Error	Feil
 Остановить	Stop	Stopp
 Начать	Start	Start
+Отмена	Cancel	Avbryt
 Настройки	Settings	Innstillinger
 Сохранить	Save	Lagre
 Ошибки	Errors	Feil
@@ -173,6 +184,7 @@ CAN · живые данные	CAN · live data	CAN · sanntidsdata
 по контроллеру	reported by controller	fra kontroller
 Сохранено	Saved	Lagret
 не подтверждено	unconfirmed	ubekreftet
+Скачать	Download	Last ned
 км/ч	km/h	km/t
 об/мин	rpm	o/min
 мА·ч	mAh	mAh
@@ -240,6 +252,21 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.
 Повторить загрузку	Retry loading	Prøv å laste på nytt
 Текущие данные	Live readings	Gjeldende måleverdier
+Пульт Bluetooth	Bluetooth remote	Bluetooth-fjernkontroll
+Пульт недоступен	Remote unavailable	Fjernkontroll utilgjengelig
+Обновите прошивку для пульта по Wi-Fi	Update firmware for Wi-Fi remote control	Oppdater fastvaren for fjernkontroll via Wi-Fi
+Пульт не включился	Remote did not start	Fjernkontrollen startet ikke
+Дождитесь подключения велосипеда	Wait for the bike to connect	Vent til sykkelen kobler til
+Walk Assist · удерживать	Walk Assist · hold	Trilleassistanse · hold inne
+Разблокировать	Unlock	Lås opp
+Точно выключить питание велосипеда?	Are you sure you want to power off the bike?	Er du sikker på at du vil slå av sykkelen?
+Удерживайте кнопку для отправки, затем отпустите.	Hold the button to send, then release.	Hold knappen inne for å sende, og slipp deretter.
+Подтвердить Power off	Confirm Power off	Bekreft Power off
+Скачать CAN-лог	Download CAN log	Last ned CAN-logg
+CAN-лог сохраняется на этом устройстве	CAN log is saved on this device	CAN-loggen lagres på denne enheten
+CAN-лог сохраняется в браузере. Его можно скачать после действия.	The CAN log is saved in the browser. You can download it after the action.	CAN-loggen lagres i nettleseren. Du kan laste den ned etter handlingen.
+CAN-запись: записываю действие	CAN log: recording action	CAN-logg: registrerer handling
+Неполная запись	Incomplete recording	Ufullstendig opptak
 `.split('\n').filter(Boolean).map(line=>line.split(/\t|\\t/));
   const catalog=new Map();for(const [ru,en,nb]of rows){if(en&&nb)catalog.set(ru,{en,nb});}
   const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');

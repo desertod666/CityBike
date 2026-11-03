@@ -8,6 +8,7 @@
 Объект колеса V2.5 требует 6 байт	The V2.5 wheel object requires 6 bytes	Hjulobjektet i V2.5 krever 6 byte
 Длина / флаги SYM	SYM length / flags	SYM-lengde / flagg
 Неподдерживаемое поле SYM; сырые данные сохранены	Unsupported SYM field; raw data retained	SYM-feltet støttes ikke; rådata er beholdt
+Подтвердите выключение	Confirm shutdown	Bekreft avslåing
 В текущем сообщении нет предупреждения	No current warning reported	Ingen aktuell advarsel rapportert
 Тормоз уже нажат	Brake already applied	Bremsen er aktivert
 Ошибка ручки газа	Throttle fault	Feil på gasshendel
@@ -45,6 +46,15 @@ SOC батареи слишком низкий	Battery SOC too low	Batteriets SO
 контроллер	controller	kontroller
 датчик	sensor	sensor
 Русский	Russian	Russisk
+Включить пульт\tTurn remote on\tSlå på fjernkontroll
+Выключить пульт\tTurn remote off\tSlå av fjernkontroll
+CAN-запись:\tCAN recording:\tCAN-opptak:
+записываю действие\trecording action\ttar opp handlingen
+Пульт выключен\tRemote is off\tFjernkontroll er av
+BLE подключён · кнопки готовы\tBLE connected · buttons ready\tBLE tilkoblet · knappene er klare
+BLE подключён · ожидаю подписку\tBLE connected · waiting for subscription\tBLE tilkoblet · venter på abonnement
+Пульт включён · ожидаю велосипед\tRemote is on · waiting for bike\tFjernkontroll er på · venter på sykkelen
+Удержание прервано. Отпустите кнопку и нажмите снова.\tHold interrupted. Release the button and press again.\tHoldet ble avbrutt. Slipp knappen og trykk igjen.
 Ожидание	Waiting	Venter
 Нет показания	No reading	Ingen måleverdi
 Ошибки, замеченные ридером	Faults observed by the reader	Feil registrert av leseren
@@ -152,6 +162,7 @@ CAN · живые данные	CAN · live data	CAN · sanntidsdata
 Ошибка	Error	Feil
 Остановить	Stop	Stopp
 Начать	Start	Start
+Отмена	Cancel	Avbryt
 Настройки	Settings	Innstillinger
 Сохранить	Save	Lagre
 Ошибки	Errors	Feil
@@ -174,6 +185,7 @@ CAN · живые данные	CAN · live data	CAN · sanntidsdata
 по контроллеру	reported by controller	fra kontroller
 Сохранено	Saved	Lagret
 не подтверждено	unconfirmed	ubekreftet
+Скачать	Download	Last ned
 км/ч	km/h	km/t
 об/мин	rpm	o/min
 мА·ч	mAh	mAh
@@ -241,6 +253,21 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.
 Повторить загрузку	Retry loading	Prøv å laste på nytt
 Текущие данные	Live readings	Gjeldende måleverdier
+Пульт Bluetooth	Bluetooth remote	Bluetooth-fjernkontroll
+Пульт недоступен	Remote unavailable	Fjernkontroll utilgjengelig
+Обновите прошивку для пульта по Wi-Fi	Update firmware for Wi-Fi remote control	Oppdater fastvaren for fjernkontroll via Wi-Fi
+Пульт не включился	Remote did not start	Fjernkontrollen startet ikke
+Дождитесь подключения велосипеда	Wait for the bike to connect	Vent til sykkelen kobler til
+Walk Assist · удерживать	Walk Assist · hold	Trilleassistanse · hold inne
+Разблокировать	Unlock	Lås opp
+Точно выключить питание велосипеда?	Are you sure you want to power off the bike?	Er du sikker på at du vil slå av sykkelen?
+Удерживайте кнопку для отправки, затем отпустите.	Hold the button to send, then release.	Hold knappen inne for å sende, og slipp deretter.
+Подтвердить Power off	Confirm Power off	Bekreft Power off
+Скачать CAN-лог	Download CAN log	Last ned CAN-logg
+CAN-лог сохраняется на этом устройстве	CAN log is saved on this device	CAN-loggen lagres på denne enheten
+CAN-лог сохраняется в браузере. Его можно скачать после действия.	The CAN log is saved in the browser. You can download it after the action.	CAN-loggen lagres i nettleseren. Du kan laste den ned etter handlingen.
+CAN-запись: записываю действие	CAN log: recording action	CAN-logg: registrerer handling
+Неполная запись	Incomplete recording	Ufullstendig opptak
 `.split('\n').filter(Boolean).map(line=>line.split(/\t|\\t/));
   const catalog=new Map();for(const [ru,en,nb]of rows){if(en&&nb)catalog.set(ru,{en,nb});}
   const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -810,7 +837,86 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 ;
-/* Local reader only: bounded live preview, no USB, cloud, uploads or motor commands. */
+/* Local BLE controls. Browser persistence and downloads never use ESP heap. */
+'use strict';
+(() => {
+ const tr=s=>globalThis.ByI18n?.t(s)||s,stamp=()=>new Date().toISOString();
+ class ActionLog {
+  constructor(clock=()=>performance.now()){this.clock=clock;this.ring=[];this.rows=[];this.active=false;this.dropped=0;this.until=0;this.dirty=false;this.error='';}
+  async database(){if(!this.db)this.db=await new Promise((resolve,reject)=>{const request=indexedDB.open('citybike-offline-actions-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('recordings');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});return this.db;}
+  async restore(){const db=await this.database();const data=await new Promise((resolve,reject)=>{const r=db.transaction('recordings').objectStore('recordings').get('latest');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});if(!this.active&&!this.rows.length&&Array.isArray(data?.rows)&&data.rows.length<=8192){this.rows=data.rows;this.dropped=data.dropped||0;}}
+  add(row){if(this.rows.length<8192)this.rows.push(row);else this.dropped++;this.dirty=true;}
+  feed(frame){const at=this.clock();this.ring.push({at,frame});while(this.ring.length>512||this.ring[0]?.at<at-3000)this.ring.shift();if(this.active)this.add(frame);}
+  mark(action,data={}){this.add({type:'remote_action',action,host_utc:stamp(),...data});}
+  async begin(button,boot){if(!this.active){this.rows=[{type:'metadata',kind:'offline_ble_can_window',boot,pre_trigger_ms:3000,button,timestamps:'CAN t_us is native uptime; action host_utc is browser time; ack_t_us is native command completion, not bike execution'} ,...this.ring.filter(x=>this.clock()-x.at<=3000).map(x=>x.frame)];this.dropped=0;this.active=true;}this.until=Infinity;this.mark('press_requested',{button,boot});await this.flush();}
+  released(button){if(this.active)this.until=this.clock()+(button===3?30000:3000);}
+  async flush(){if(this.writing)await this.writing;if(!this.dirty)return;this.dirty=false;this.writing=(async()=>{const db=await this.database();await new Promise((resolve,reject)=>{const tx=db.transaction('recordings','readwrite');tx.objectStore('recordings').put({rows:this.rows,dropped:this.dropped},'latest');tx.oncomplete=resolve;tx.onabort=tx.onerror=()=>reject(tx.error||Error('CAN log storage failed'));});})();try{await this.writing;}catch(e){this.error=String(e.message||e);this.dirty=true;throw e;}finally{this.writing=null;}}
+  async tick(){if(this.active&&this.clock()>=this.until){this.mark('window_end');this.active=false;}await this.flush();}
+  download(){const data=this.rows.concat({type:'summary',dropped_rows:this.dropped,incomplete:this.dropped>0,active:this.active});return new Blob([data.map(row=>JSON.stringify(row)).join('\n')+'\n'],{type:'application/x-ndjson'});}
+ }
+ class Remote {
+  constructor(reader,{log=new ActionLog(reader.clock)}={}){this.r=reader;this.log=log;this.seq=0;this.armed=false;this.held=null;this.error='';this.lastAlive=-Infinity;this.busy=false;this.generation=0;}
+  supported(){return this.r.device.capabilities?.includes('ble_remote_wifi_v1');}
+  async call(action,extra={},valid=()=>true){const boot=this.r.device.boot,session=this.r.session,created=this.r.clock();return this.r.serial(async()=>{
+   if(!valid()||this.r.device.boot!==boot||this.r.session!==session||(['down','keep','alive'].includes(action)&&this.r.clock()-created>650))return {skipped:true};
+   return this.r.rawRequest('/api/remote',{action,boot,seq:++this.seq,...extra},{timeout:800});
+  });}
+  async on(){if(this.enabling||this.armed)return;this.enabling=true;const generation=this.generation,valid=()=>generation===this.generation&&!this.r.closed&&!globalThis.document?.hidden;
+   try{await this.r.refresh();if(!valid())return;if(!this.supported())throw Error('Обновите прошивку для пульта по Wi-Fi');if(this.r.device.can!=='running')await this.r.api('/api/live/start');if(!valid()){this.r.release();return;}
+    const result=await this.call('on',{},valid);if(result.skipped)return;await this.r.refresh();if(!valid()){this.r.release();return;}if(!this.r.device.ble_remote?.enabled)throw Error('Пульт не включился');this.armed=true;this.lastAlive=this.r.clock();this.error='';
+   }finally{this.enabling=false;}}
+  async off(){this.generation++;const h=this.held;this.held=null;const was=this.armed;this.armed=false;if(h){this.log.mark('release_requested',{button:h.button});this.log.released(h.button);}if(was||this.enabling)await this.call('off');await this.r.refresh();}
+  async down(button,confirmed=false){
+   const ble=this.r.device.ble_remote;if(!this.armed||this.held||!ble?.connected||!ble?.subscribed||this.r.device.can!=='running')throw Error('Дождитесь подключения велосипеда');
+   if(button===3&&!confirmed)throw Error('Подтвердите выключение');
+   const h=this.held={button,hold:this.r.newToken().slice(0,8),at:this.r.clock(),sent:false};
+   try{await this.log.begin(button,this.r.device.boot);const result=await this.call('down',{hold:h.hold,button,...(button===3?{confirmed:true}:{})},()=>this.armed&&this.held===h&&this.r.clock()-h.at<650);
+    if(result.skipped){if(this.held===h)this.held=null;this.log.released(button);throw Error('Удержание прервано. Отпустите кнопку и нажмите снова.');}else{h.sent=true;this.log.mark('press_ack',{button,ack_t_us:result.t_us,boot:this.r.device.boot});}
+   }catch(e){if(this.held===h)this.held=null;this.log.released(button);throw e;}
+  }
+  async up(){const h=this.held;this.held=null;if(!h)return;this.log.mark('release_requested',{button:h.button});this.log.released(h.button);await this.call('up',{hold:h.hold});}
+  revoke(){this.generation++;const h=this.held;this.armed=false;this.held=null;if(h){this.log.mark('release_requested',{button:h.button,reason:'controller_released'});this.log.released(h.button);}}
+  async tick(){if(this.busy)return;this.busy=true;try{
+   if(this.armed){const b=this.r.device.ble_remote;
+    if(!this.r.transport.connected||this.r.device.can!=='running'||!b?.enabled||b.transport!=='wifi'||b.session!==this.r.session.slice(0,16)){await this.off();throw Error('Пульт остановлен. Включите его снова.');}
+    if(this.held){const h=this.held;if(this.r.clock()-h.at>=30000||(h.sent&&b.button===0&&this.r.clock()-h.at>1300)){await this.up();this.error='Удержание прервано. Отпустите кнопку и нажмите снова.';}
+     else if(h.sent)await this.call('keep',{hold:h.hold},()=>this.armed&&this.held===h);
+    }
+    if(this.armed&&this.r.clock()-this.lastAlive>=500){const result=await this.call('alive',{},()=>this.armed);if(!result.skipped)this.lastAlive=this.r.clock();}
+   }
+   this.log.tick().catch(e=>{this.error=String(e.message||e);if(this.armed)this.off().catch(()=>{});});
+  }catch(e){this.error=String(e.message||e);this.r.release();}finally{this.busy=false;}}
+ }
+ function mount(r,paint){
+  const get=id=>document.getElementById(id),remote=new Remote(r);r.remote=remote;remote.log.restore().catch(e=>{remote.error=String(e.message||e);paint();});
+  const run=f=>Promise.resolve().then(f).catch(e=>{remote.error=String(e.message||e);}).finally(paint);
+  get('offlineRemoteOn').onclick=()=>run(()=>remote.on());get('offlineRemoteOff').onclick=()=>run(()=>remote.off());
+  const dialog=get('offlineRemoteConfirm');get('offlineRemotePower').onclick=()=>dialog.showModal();get('offlineRemoteCancel').onclick=()=>dialog.close();
+  for(const button of document.querySelectorAll('[data-offline-key]')){
+   const down=()=>run(()=>remote.down(Number(button.dataset.offlineKey),button.id==='offlineRemoteConfirmed'));
+   button.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();button.setPointerCapture(e.pointerId);down();};
+   button.onpointerup=button.onpointercancel=button.onlostpointercapture=()=>run(()=>remote.up());
+   button.onkeydown=e=>{if([' ','Enter'].includes(e.key)&&!e.repeat){e.preventDefault();down();}};
+   button.onkeyup=e=>{if([' ','Enter'].includes(e.key)){e.preventDefault();run(()=>remote.up());}};
+   button.oncontextmenu=e=>e.preventDefault();
+  }
+  const release=()=>run(()=>remote.up());addEventListener('pointerup',release);addEventListener('pointercancel',release);addEventListener('blur',release);dialog.addEventListener('close',release);
+  get('offlineRemoteDownload').onclick=()=>run(async()=>{await remote.log.flush();const url=URL.createObjectURL(remote.log.download()),a=document.createElement('a');a.href=url;a.download='CityBike-BLE-CAN-'+Date.now()+'.jsonl';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+  const timer=setInterval(()=>remote.tick().finally(paint),200);addEventListener('pagehide',()=>{clearInterval(timer);remote.revoke();});return remote;
+ }
+ function paint(r){const get=id=>document.getElementById(id),remote=r.remote,b=r.device.ble_remote||{},valid=r.transport.connected&&remote?.supported();
+  get('offlineRemoteOn').disabled=!valid||!!remote.armed||!!remote.enabling;get('offlineRemoteOff').disabled=!valid||!remote?.armed;
+  const can=valid&&remote.armed&&b.connected&&b.subscribed&&r.device.can==='running';
+  for(const button of document.querySelectorAll('[data-offline-key],#offlineRemotePower')){button.disabled=!can||(!!remote.held&&Number(button.dataset.offlineKey)!==remote.held.button);button.setAttribute('aria-pressed',String(!!remote.held&&Number(button.dataset.offlineKey)===remote.held.button));}
+  get('offlineRemoteStatus').textContent=tr(!valid?'Пульт недоступен':!b.enabled?'Пульт выключен':b.subscribed?'BLE подключён · кнопки готовы':b.connected?'BLE подключён · ожидаю подписку':'Пульт включён · ожидаю велосипед');
+  get('offlineRemoteError').textContent=tr(remote?.error||remote?.log.error||'');get('offlineRemoteDownload').disabled=!remote?.log.rows.length;
+  get('offlineRemoteLog').textContent=tr(remote?.log.active?'CAN-запись: записываю действие':'CAN-лог сохраняется на этом устройстве')+(remote?.log.dropped?' · '+tr('Неполная запись')+': '+remote.log.dropped:'');
+ }
+ globalThis.ByOfflineRemote={ActionLog,Remote,mount,paint};if(typeof module!=='undefined')module.exports=globalThis.ByOfflineRemote;
+})();
+
+;
+/* Local reader only: bounded live preview, no USB, cloud or uploads; BLE buttons use their dedicated leased endpoint. */
 'use strict';
 (() => {
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -820,14 +926,15 @@ CAN уже читается	CAN is already being read	CAN leses allerede
   class OfflineReader {
     constructor(schema,{request,clock=now,newToken=token}={}){
       this.schema=schema;this.clock=clock;this.newToken=newToken;this.session=newToken();
-      const rawRequest=request||this.http.bind(this);this.tail=Promise.resolve();
-      this.request=(...args)=>{const next=this.tail.then(()=>rawRequest(...args));this.tail=next.catch(()=>{});return next;};
+      this.rawRequest=request||this.http.bind(this);this.tail=Promise.resolve();
+      this.request=(...args)=>this.serial(()=>this.rawRequest(...args));
       this.transport={connected:false};this.device={};this.liveData=new ByCanLive.Cache(schema,clock);this.spard=new BySpardCan.Assembler();
       this.cursor=0;this.owns=false;this.mayOwn=false;this.liveViewing=false;this.operation=false;this.lastState=-Infinity;this.lastLease=0;
       this.lost=0;this.error='';this.battery=null;this.closed=false;
     }
-    async http(path,body){
-      const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),4000);
+    serial(work){const next=this.tail.then(work);this.tail=next.catch(()=>{});return next;}
+    async http(path,body,{timeout=4000}={}){
+      const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),timeout);
       try{
         const response=await fetch(path,{method:body===undefined?'GET':'POST',cache:'no-store',signal:abort.signal,
           headers:body===undefined?{}:{'Content-Type':'application/json','X-Reader-UI':'1','X-Reader-Session':this.session,'X-Reader-Identity':this.device.ap_mac||''},
@@ -840,7 +947,7 @@ CAN уже читается	CAN is already being read	CAN leses allerede
       const d=data?.device;
       if(d?.product!=='BafangReader'||d.protocol!==1||!Number.isSafeInteger(d.epoch)||!/^[A-F0-9]{8}$/.test(d.boot||'')||! /^(?:[a-f0-9]{2}:){5}[a-f0-9]{2}$/i.test(d.ap_mac||''))throw Error('Неверный ответ ридера');
       const changed=this.device.boot!==d.boot||this.device.ap_mac!==d.ap_mac;
-      if(changed){this.owns=false;this.mayOwn=false;this.session=this.newToken();this.cursor=0;this.battery=null;this.spard=new BySpardCan.Assembler();this.liveData.reset(d.boot,d.epoch);}
+      if(changed){this.remote?.revoke();this.owns=false;this.mayOwn=false;this.session=this.newToken();this.cursor=0;this.battery=null;this.spard=new BySpardCan.Assembler();this.liveData.reset(d.boot,d.epoch);}
       else if(this.device.epoch!==d.epoch){this.cursor=0;this.battery=null;this.spard=new BySpardCan.Assembler();this.liveData.reset(d.boot,d.epoch);}
       this.device=d;this.network=data.network;this.transport.connected=true;this.lastState=this.clock();this.liveViewing=this.owns&&d.can==='running';
       if(d.can!=='running'){this.owns=false;this.mayOwn=false;this.liveViewing=false;}
@@ -849,10 +956,10 @@ CAN уже читается	CAN is already being read	CAN leses allerede
     async refresh(){return this.setState(await this.request('/api/state'));}
     feed(data){
       if(data.boot!==this.device.boot||!Array.isArray(data.frames)||data.frames.length>64)return;
-      this.lost+=Number.isSafeInteger(data.missed)&&data.missed>0?data.missed:0;
+      this.lost+=Number.isSafeInteger(data.missed)&&data.missed>0?data.missed:0;if(data.missed&&this.remote?.log.active)this.remote.log.mark('CAN_gap',{missed:data.missed,incomplete:true});
       for(const f of data.frames){
         if(!ByCanLive.valid(f)||f.boot!==this.device.boot||f.epoch!==this.device.epoch||f.seq<=this.cursor)continue;
-        this.cursor=f.seq;this.liveData.ingest(f);
+        this.cursor=f.seq;this.liveData.ingest(f);this.remote?.log.feed(f);
         for(const packet of this.spard.feed(f)){
           if(packet.status!=='checksum_valid'||packet.command!==0||packet.declared_length!==90)continue;
           const decoded=BySpardInformation.decode(packet.raw_hex);
@@ -880,6 +987,7 @@ CAN уже читается	CAN is already being read	CAN leses allerede
           this.owns=true;this.lastLease=this.clock();await this.refresh();
         }else if(path==='/api/live/stop'){
           if(!this.mayOwn)throw Error('Чтение запущено другим подключением');
+          if(this.remote?.armed)await this.remote.off();
           await this.request('/api/command',{command:'STOP'});this.owns=this.mayOwn=this.liveViewing=false;await this.refresh();
         }else throw Error('Недоступная операция');
       }finally{this.operation=false;}
@@ -890,7 +998,8 @@ CAN уже читается	CAN is already being read	CAN leses allerede
       await this.request('/api/command',{command:'WIFI '+channel+' '+ssid});
     }
     release(){
-      if(this.mayOwn)globalThis.navigator?.sendBeacon?.('/api/release',new Blob([JSON.stringify({token:this.session})],{type:'text/plain'}));
+      const remoteOwned=this.remote?.armed||this.remote?.enabling;this.remote?.revoke();
+      if(this.mayOwn||remoteOwned)globalThis.navigator?.sendBeacon?.('/api/release',new Blob([JSON.stringify({token:this.session,...(remoteOwned?{remote_seq:++this.remote.seq}:{})})],{type:'text/plain'}));
       this.owns=this.mayOwn=this.liveViewing=false;
     }
   }
@@ -908,6 +1017,7 @@ CAN уже читается	CAN is already being read	CAN leses allerede
     get('offlineWifiSave').disabled=!connected||d.can!=='stopped'||!!runtime?.operation;
     if(runtime?.network&&!get('offlineSsid').dataset.initialized){get('offlineSsid').value=runtime.network.saved_ssid;get('offlineChannel').value=runtime.network.saved_channel;get('offlineSsid').dataset.initialized='1';}
     text('offlineLoss','Пропуски просмотра: '+(runtime?.lost||0));
+    if(runtime?.remote)ByOfflineRemote.paint(runtime);
     const b=runtime?.battery;get('offlineSpard').hidden=!b;
     if(b){
       const age=runtime.clock()-b.seen,stale=!connected||d.can!=='running'||age>5000,f=b.fields;
@@ -928,13 +1038,15 @@ CAN уже читается	CAN is already being read	CAN leses allerede
         const fields=card.fields.filter(f=>prefs.view!=='favorites'||favorites.has(card.id+':'+f.key));if(!fields.length)continue;
         const article=document.createElement('article'),heading=document.createElement('div'),h=document.createElement('h3'),badge=document.createElement('span'),dl=document.createElement('dl');article.className='can-live-message'+(card.stale?' is-stale':'');heading.className='can-live-message-heading';h.textContent=tr(card.title);badge.textContent=tr(!card.observed?'Нет данных':card.stale?'Последние полученные данные':'Текущие данные');heading.append(h,badge);article.append(heading);
         for(const f of fields){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd'),star=document.createElement('button'),label=document.createElement('span'),key=card.id+':'+f.key;
-          row.className='can-live-field';star.type='button';star.className='favorite-toggle';star.textContent=favorites.has(key)?'★':'☆';star.setAttribute('aria-label',tr('В избранное')+': '+tr(f.name));star.onclick=()=>ByPreferences.toggleFavorite(key);label.textContent=tr(f.name);dt.append(star,label);dd.textContent=f.note?tr('Нет показания'):f.value+(f.unit?' '+tr(f.unit):'');row.append(dt,dd);dl.append(row);}
+          row.className='can-live-field';star.type='button';star.className='favorite-toggle';star.textContent=favorites.has(key)?'★':'☆';star.setAttribute('aria-label',tr('В избранное')+': '+tr(f.name));star.onclick=()=>ByPreferences.toggleFavorite(key);label.textContent=tr(f.name);dt.append(star,label);dd.textContent=f.note?tr('Нет показания'):f.value+(f.unit?' '+tr(f.unit):'');row.classList.toggle('is-text',dd.textContent.length>24);row.append(dt,dd);dl.append(row);}
         article.append(dl);grid.append(article);
       }
       text('canLiveCoverage',cards.filter(c=>c.observed).length+' / '+cards.length+' известных сообщений');
       text('canLiveFavoriteCount','Избрано показателей: '+favorites.size);get('canLiveAll').setAttribute('aria-pressed',String(prefs.view!=='favorites'));get('canLiveFavorites').setAttribute('aria-pressed',String(prefs.view==='favorites'));
       get('canLiveRaw').textContent=snapshot.frames.map(f=>f.id+'  '+(f.rtr?'RTR':f.data)).join('\n');
-      get('canFaultEvents').textContent=(snapshot.warning_journal?.events||[]).map(e=>e.last.id+'  '+e.last.data+'  ×'+e.count).join('\n')||tr('Нет данных');
+      const warnings=get('canFaultEvents');warnings.replaceChildren();
+      for(const e of [...(snapshot.warning_journal?.events||[])].reverse()){const line=document.createElement('p'),ref=BafangDecoder.warningReference(parseInt(e.first.data,16));line.textContent='CAN '+e.first.id+' · 0x'+e.first.data+' · '+tr([...ByI18n.catalog].find(([,value])=>value.en===ref?.v25)?.[0]||'Неизвестный код')+' · ×'+e.count+(e.next?' · '+tr(e.next.data==='00'?'После ошибки получен код 00':'Следующий код'):'');warnings.append(line);}
+      if(!warnings.children.length)warnings.textContent=tr('Ненулевые коды пока не получены. Это не проверка под нагрузкой.');
     }
   }
   async function mount(){
@@ -944,7 +1056,7 @@ CAN уже читается	CAN is already being read	CAN leses allerede
     get('offlineWifiForm').addEventListener('submit',async e=>{e.preventDefault();try{await runtime.saveWifi(get('offlineSsid').value,Number(get('offlineChannel').value));text('offlineWifiResult','Сохранено. Применится после перезапуска питания.');}catch(e){text('offlineWifiResult',e.message);}});
     try{
       const response=await fetch('/decoder_reference.json',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const schema=await response.json();
-      runtime=new OfflineReader(schema);
+      runtime=new OfflineReader(schema);ByOfflineRemote.mount(runtime,paint);
       addEventListener('pagehide',()=>{runtime.closed=true;runtime.release();});
       document.addEventListener('visibilitychange',()=>{if(document.hidden)runtime.release();});
       addEventListener('citybike-preferences',()=>{lastGrid=-Infinity;paint();});

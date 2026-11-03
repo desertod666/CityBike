@@ -14,6 +14,7 @@ typedef struct {
 } frame_t;
 
 void reader_status_json(char *buffer, size_t capacity);
+bool reader_can_running(void);
 bool reader_command(const char *command, char *error, size_t capacity);
 size_t reader_frames(uint64_t after, frame_t *out, size_t capacity, uint64_t *latest, uint64_t *oldest);
 size_t reader_frame_json(const frame_t *frame, char *buffer, size_t capacity);
