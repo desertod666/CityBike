@@ -1,5 +1,5 @@
 {
-  "version": "0.6.8",
+  "version": "0.6.9",
   "web_build": "20261030-stockreads1",
   "native_baseline": "0.6.8 native command behavior unchanged; portal stockreads1 adds fixed normal stock USB service reads, no native writes. Installed local068 source16d3dad0 retains portal1.",
   "files": {
@@ -9,7 +9,7 @@
     },
     "CMakeLists.txt": {
       "size": 173,
-      "sha256": "a40d923856d9956566675cc6e0067f0df1cd7d15991f558fcfdeb9ba9736c3fa"
+      "sha256": "89efccf48421ec5e4604b8d88aa7a81e0edc756dfb3c5b24f5bb64b2a0ec6d23"
     },
     "partitions.csv": {
       "size": 132,
@@ -200,8 +200,8 @@
       "sha256": "eb8bbe317a0aa91d7662d3c8e57482cbfd5143c5c74885c4f62826d353a45f95"
     },
     "scripts/test_firmware_native.py": {
-      "size": 4563,
-      "sha256": "0870d2dfde36e02252b9c00819de8957a5a2100127e4514d704e2c534d3cb16c"
+      "size": 5069,
+      "sha256": "c785f7f09508f1c416286a0662d2a5af76dc4cc66a181065b44d88d6a0dbd4c7"
     },
     "scripts/test_fixed_receive.c": {
       "size": 1170,
@@ -252,12 +252,12 @@
       "sha256": "a4906cb058abef6f8c5d83d8f5eb8484a26aeb013e6cd7342a0a1193dc3bf1d9"
     },
     "sdkconfig.defaults": {
-      "size": 1091,
-      "sha256": "026d371b89bef2831909ecc98ccf9e92ef9382b1e978ea0ffdcb16dd70ebe545"
+      "size": 1351,
+      "sha256": "8b9212c5879922ca1ba6fc746222b39a83739019bedb4a2760b99b1c73c4857b"
     },
     "sdkconfig.esp32c3": {
-      "size": 67338,
-      "sha256": "ce4315eb385727848828f1cfb0a8642fed84a82609cc659ebece82400d35a6c5"
+      "size": 67382,
+      "sha256": "e2b01184a63145c8233c911eec4431322b44d292cd23b8a7cebcae412dec3e83"
     },
     "src/CMakeLists.txt": {
       "size": 1699,
@@ -301,7 +301,7 @@
     },
     "src/main.c": {
       "size": 40158,
-      "sha256": "f247db55da959a04a4d04b27e83f9ca54f9c5cce1334d0033947c14ae7a25eda"
+      "sha256": "f073126de49fb33cd863465b51a46649460fc8c9545b3b6f6ccc274d55e3dc82"
     },
     "src/reader.h": {
       "size": 583,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 31088,
-      "sha256": "1378e8669eae8e5335fef8b71abf74b11ae609bffa522df80e731e52718330e3"
+      "size": 32694,
+      "sha256": "366b5b297bc8f234e6ea6bddc26bd4991e97d1d4e9d9066cecc35f3401d26f24"
     },
     "src/web_server.h": {
       "size": 421,
@@ -550,6 +550,18 @@
     "web/tuning.js": {
       "size": 7730,
       "sha256": "a44b286c161e681ce95ca569fddcfb922ac2a4a45186c55d5efb7c2e9dbec701"
+    },
+    "src/web_stream_payload.h": {
+      "size": 1033,
+      "sha256": "c814df87904f5dbebbba40d3813de3f3b8b335da5e18a384e505448b12b4e579"
+    },
+    "scripts/test_web_stream.c": {
+      "size": 2432,
+      "sha256": "3afffe150b8a197fa88de64c9008412b310495d43aaa9208c97ffa7f18c5d7cb"
+    },
+    "scripts/test_web_status.py": {
+      "size": 4295,
+      "sha256": "54f8402fffc6010e5e3069e6e7eefe2ecd0428c4cec484cf55505486b93bb971"
     }
   }
 }

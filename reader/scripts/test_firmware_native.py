@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -12,13 +13,15 @@ if not compiler:
     raise SystemExit("A host C compiler is required for offline firmware tests.")
 
 with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
-    for name in ("remote_policy", "ecc_observer", "command_protocol", "tx_trace", "tx_policy", "ctx_guard", "rx_readback", "firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace", "spard_identity_codec"):
+    for name in ("remote_policy", "ecc_observer", "command_protocol", "tx_trace", "tx_policy", "ctx_guard", "rx_readback", "firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace", "spard_identity_codec", "web_stream"):
         output = Path(temporary) / (name + (".exe" if os.name == "nt" else ""))
         args = [compiler, "-std=c11", "-Wall", "-Wextra", "-Werror"]
         if name == "ecc_observer":
             args += ["-I" + str(ROOT / "scripts/ecc-stubs")]
         if name == "ctx_guard":
             args += ["-I" + str(ROOT / "scripts/ctx-guard-stubs")]
+        if name == "web_stream":
+            args += ["-I" + str(ROOT / "scripts/firmware-stubs")]
         if name in ("rx_readback", "firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace"):
             args += ["-Wno-unused-function", "-Wno-unused-parameter", "-Wno-sign-compare", "-I" + str(ROOT / "scripts/firmware-stubs")]
         if name in ("firmware_lifecycle", "fixed_receive", "battery_query", "selftest", "quiet_query", "rmt_trace"):
@@ -29,6 +32,11 @@ with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
         for line in result.stdout.splitlines():
             if line.startswith("{"):
                 message = json.loads(line)
+                if name == "web_stream":
+                    assert len(message['frames']) == 64
+                    assert [f['seq'] for f in message['frames']] == list(range(1, 65))
+                    assert all(f['t_us'] == 2**63 - 1 for f in message['frames'])
+                    continue
                 if message["type"] == "stream_end":
                     assert message["final_seq"] == message["status"]["received"] == 3
                     assert message["status"]["can"] == "stopped"
@@ -67,4 +75,5 @@ with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
                         assert not hw["registers_read"] and not hw["config_checked"]
             elif line:
                 print(line)
+subprocess.run([sys.executable, str(ROOT / 'scripts/test_web_status.py')], check=True)
 print("PASS firmware native suite: all emitted sample JSON parses, STOP status and final_seq agree")
