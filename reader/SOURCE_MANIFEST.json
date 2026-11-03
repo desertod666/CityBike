@@ -1,5 +1,5 @@
 {
-  "version": "0.6.9",
+  "version": "0.6.10",
   "web_build": "20261030-stockreads1",
   "native_baseline": "0.6.8 native command behavior unchanged; portal stockreads1 adds fixed normal stock USB service reads, no native writes. Installed local068 source16d3dad0 retains portal1.",
   "files": {
@@ -8,16 +8,16 @@
       "sha256": "368f70317cb35715b5a90f44f60b8569078a053a70561876a7c5344d87adc9e2"
     },
     "CMakeLists.txt": {
-      "size": 173,
-      "sha256": "89efccf48421ec5e4604b8d88aa7a81e0edc756dfb3c5b24f5bb64b2a0ec6d23"
+      "size": 174,
+      "sha256": "815ec52eed48303e1c1f9ccccfad43ae5dad538b79c7c3566b2901e2bfd4244d"
     },
     "partitions.csv": {
       "size": 132,
       "sha256": "8555b094067798f52d3ee9c2435a974c19cf7306f96e325fc0b87d7f2709dbd1"
     },
     "platformio.ini": {
-      "size": 756,
-      "sha256": "1625d18a7fe899d3a66163a3bb503d7e5fb5652426c177ea41f78adcce04a03c"
+      "size": 603,
+      "sha256": "42cca9289ecdacbfcf352bc6726ccd149e24fb046130f3f09ddd5e8a1d50e70c"
     },
     "requirements-ci.txt": {
       "size": 36,
@@ -260,8 +260,8 @@
       "sha256": "cb706b8b405260cb8f0ad00cd983d36682987ccab10331f6e7375b5c6343460f"
     },
     "src/CMakeLists.txt": {
-      "size": 1114,
-      "sha256": "886c425f713cdb83871b383d22ec43fc1c255cd79334af30fd954a23d827b893"
+      "size": 954,
+      "sha256": "8c619d8af7073e7ce3547b8e45dd49ace8141709089516c87d7affe7c57f83f2"
     },
     "src/ESPRESSIF_HAL_LICENSE.txt": {
       "size": 11358,
@@ -300,8 +300,8 @@
       "sha256": "ba83c00cd3ecbaf9b353dd2b121b6e7fd8467c85b159b21b353ab44c08bd8b99"
     },
     "src/main.c": {
-      "size": 40158,
-      "sha256": "f073126de49fb33cd863465b51a46649460fc8c9545b3b6f6ccc274d55e3dc82"
+      "size": 40159,
+      "sha256": "bf0646765204ef8a1cdc7eac32bad0d575c5a2dc6fc39d6ffa714cbe7d594534"
     },
     "src/reader.h": {
       "size": 583,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 23371,
-      "sha256": "f5bc389a7daf1f5a70168cf04bc9a490f64957fc6ecee345f98f514725094a53"
+      "size": 22813,
+      "sha256": "d47a4f731e75db5d78e9daf472639f00d7deed5b185097e9d3f34a1e47898eb3"
     },
     "src/web_server.h": {
       "size": 421,
@@ -564,32 +564,36 @@
       "sha256": "03c6a7465dfc0eb1bc3bc99bb96fae620fc4c8e7b534dfac490bd5a58f848ed5"
     },
     "web/offline-index.html": {
-      "size": 4289,
-      "sha256": "a80bc2cf62ab97efb6c37c3242c0965f3849eb46d8480d58cab3f943cda7140f"
+      "size": 4926,
+      "sha256": "6f7d103733da2884dd09fde4a253e33c8a1525e104d82b31a6e3211c5989ea1e"
     },
     "web/offline.css": {
-      "size": 2047,
-      "sha256": "7ca907dc0447f1c347e9160f335dcb490ce269e33152a48ff6a5a14fae9c562a"
+      "size": 3216,
+      "sha256": "139b61d07231d252bd361a154a90ae76234ad38689c6d32b90f1bcad6f905837"
     },
     "web/offline.js": {
-      "size": 12578,
-      "sha256": "c8ccc803e6f46402458efb6f81c8a844849a5bf2b2f0135e0bfe6009207a8f9b"
+      "size": 12791,
+      "sha256": "202b7c4f967c5ed3c0b5f3fb7941d205e71289019ec6e7ad4a040c327bee71d3"
     },
     "web/offline-i18n.js": {
-      "size": 22220,
-      "sha256": "92afc480923dd1b46a665e2702544d59ca07206fd9c381bb33b260ad64d46dcb"
+      "size": 22359,
+      "sha256": "0f20100d490e1c36c2df13c185393afb8d44c62ef0dc39b89c075d17b89074f2"
     },
     "portal-translations.tsv": {
-      "size": 2119,
-      "sha256": "46c0cf2aad6fc7892562a888bbd197d19cd0a14732be85460d8beacd6f42d98f"
+      "size": 2258,
+      "sha256": "d968bcc6ee1fe396619e8e3035eae9bb1141ab52950c2fa145bb044c0cb80f49"
     },
     "scripts/test_offline_portal.cjs": {
       "size": 4699,
       "sha256": "edaca5e43af880093230a51674493409fe0398db60093b8ebfd64841cca1f778"
     },
     "scripts/test_offline_portal_browser.cjs": {
-      "size": 6516,
-      "sha256": "9f3cfe22a429779c90a125e3b45ca1727fea1f8c6b169b24a75e52f4e8589b9f"
+      "size": 8929,
+      "sha256": "b046935b305d84cba93135059b83b1c240f22120ba75fb9499040861c77a6419"
+    },
+    "web/offline-bundle.js": {
+      "size": 95905,
+      "sha256": "05dea77ad1727ea028bb330b926e1cab7eda59c238e2f3e7298ed4a670fcbd24"
     }
   }
 }

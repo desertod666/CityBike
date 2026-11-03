@@ -3,6 +3,8 @@ import argparse,hashlib,json,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 LOCAL_ASSETS={'offline-index.html','offline.css','offline.js'}
+SHARED_SOURCES=('preferences.js','decoder.js','decoder_reference.json','bafang-battery.js','can-live.js','spard-can.js','spard-information.js','kolumbus-logo.svg','icon.svg')
+BUNDLE_SOURCES=('offline-i18n.js','decoder.js','bafang-battery.js','can-live.js','spard-can.js','spard-information.js','offline.js')
 
 def offline_i18n(reader):
     source=(ROOT/'web/i18n.js').read_text()
@@ -22,12 +24,17 @@ def offline_i18n(reader):
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--check',action='store_true');args=parser.parse_args()
     reader=ROOT/'reader';assets=re.findall(r'^\s+web/([^\s]+)',(reader/'platformio.ini').read_text(),re.M)
-    for name in assets:
+    translations=offline_i18n(reader)
+    generated={'offline-i18n.js':translations}
+    generated['offline-bundle.js']=b'/* Generated local portal bundle. See scripts/sync_reader_web.py. */\n'+b'\n;\n'.join(
+        translations if name=='offline-i18n.js' else (reader/'web'/name).read_bytes() if name in LOCAL_ASSETS else (ROOT/'web'/name).read_bytes()
+        for name in BUNDLE_SOURCES)
+    for name in dict.fromkeys([*assets,*SHARED_SOURCES,'offline-i18n.js']):
         target=reader/'web'/name
         if name in LOCAL_ASSETS:
             assert target.is_file(),name
             continue
-        expected=offline_i18n(reader) if name=='offline-i18n.js' else (ROOT/'web'/name).read_bytes()
+        expected=generated[name] if name in generated else (ROOT/'web'/name).read_bytes()
         if args.check:
             if expected!=target.read_bytes():raise SystemExit('Portal differs: '+name+'; run python scripts/sync_reader_web.py')
         else:target.write_bytes(expected)

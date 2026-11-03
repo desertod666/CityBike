@@ -35,16 +35,9 @@ static int64_t control_until;
 #define PORTAL_ASSETS(X) \
     X("/", offline_index_html, "text/html; charset=utf-8") \
     X("/offline.css", offline_css, "text/css; charset=utf-8") \
-    X("/offline.js", offline_js, "application/javascript; charset=utf-8") \
-    X("/offline-i18n.js", offline_i18n_js, "application/javascript; charset=utf-8") \
+    X("/offline-bundle.js", offline_bundle_js, "application/javascript; charset=utf-8") \
     X("/preferences.js", preferences_js, "application/javascript; charset=utf-8") \
-    X("/decoder.js", decoder_js, "application/javascript; charset=utf-8") \
     X("/decoder_reference.json", decoder_reference_json, "application/json") \
-    X("/bafang-battery.js", bafang_battery_js, "application/javascript; charset=utf-8") \
-    X("/can-live.js", can_live_js, "application/javascript; charset=utf-8") \
-    X("/can-live.css", can_live_css, "text/css; charset=utf-8") \
-    X("/spard-can.js", spard_can_js, "application/javascript; charset=utf-8") \
-    X("/spard-information.js", spard_information_js, "application/javascript; charset=utf-8") \
     X("/kolumbus-logo.svg", kolumbus_logo_svg, "image/svg+xml") \
     X("/icon.svg", icon_svg, "image/svg+xml")
 #define DECLARE_ASSET(path, symbol, mime) \

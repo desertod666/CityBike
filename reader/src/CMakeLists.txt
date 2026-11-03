@@ -1,7 +1,7 @@
 idf_component_register(SRCS "main.c" "web_server.c" "error_probe.c" "rx_readback.c" "ble_remote.c" INCLUDE_DIRS "."
     REQUIRES driver hal esp_hw_support esp_driver_usb_serial_jtag esp_driver_gpio esp_driver_rmt esp_timer esp_system esp_app_format
     esp_wifi esp_event esp_netif esp_http_server nvs_flash json lwip bt
-    EMBED_FILES "../web/offline-index.html" "../web/offline.css" "../web/offline.js" "../web/offline-i18n.js" "../web/preferences.js" "../web/decoder.js" "../web/decoder_reference.json" "../web/bafang-battery.js" "../web/can-live.js" "../web/can-live.css" "../web/spard-can.js" "../web/spard-information.js" "../web/kolumbus-logo.svg" "../web/icon.svg")
+    EMBED_FILES "../web/offline-index.html" "../web/offline.css" "../web/offline-bundle.js" "../web/preferences.js" "../web/decoder_reference.json" "../web/kolumbus-logo.svg" "../web/icon.svg")
 
 target_link_options(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=twai_hal_get_events")
 

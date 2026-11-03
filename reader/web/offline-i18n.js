@@ -238,6 +238,8 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 Сначала остановите чтение CAN	Stop CAN reading first	Stopp CAN-avlesningen først
 Сохранено. Применится после перезапуска питания.	Saved. Applies after restarting the reader.	Lagret. Tas i bruk etter omstart av leseren.
 Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.
+Повторить загрузку	Retry loading	Prøv å laste på nytt
+Текущие данные	Live readings	Gjeldende måleverdier
 `.split('\n').filter(Boolean).map(line=>line.split(/\t|\\t/));
   const catalog=new Map();for(const [ru,en,nb]of rows){if(en&&nb)catalog.set(ru,{en,nb});}
   const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');

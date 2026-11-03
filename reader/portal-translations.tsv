@@ -20,3 +20,5 @@ CAN уже читается	CAN is already being read	CAN leses allerede
 Последние полученные данные	Last received readings	Sist mottatte måleverdier
 Сохранено. Применится после перезапуска питания.	Saved. Applies after restarting the reader.	Lagret. Tas i bruk etter omstart av leseren.
 Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.
+Повторить загрузку	Retry loading	Prøv å laste på nytt
+Текущие данные	Live readings	Gjeldende måleverdier

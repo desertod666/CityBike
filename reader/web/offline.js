@@ -113,9 +113,8 @@
       lastGrid=now();const snapshot=runtime.liveData.snapshot(d,!!connected),cards=ByCanLive.cards(snapshot,runtime.schema);
       const prefs=ByPreferences.snapshot(),favorites=new Set(prefs.favorites),grid=get('canLiveGrid');grid.replaceChildren();
       for(const card of cards){
-        if(!card.observed&&!card.fields.some(f=>favorites.has(card.id+':'+f.key)))continue;
         const fields=card.fields.filter(f=>prefs.view!=='favorites'||favorites.has(card.id+':'+f.key));if(!fields.length)continue;
-        const article=document.createElement('article'),h=document.createElement('h3'),dl=document.createElement('dl');article.className='can-live-message'+(card.stale?' is-stale':'');h.textContent=tr(card.title);article.append(h);
+        const article=document.createElement('article'),heading=document.createElement('div'),h=document.createElement('h3'),badge=document.createElement('span'),dl=document.createElement('dl');article.className='can-live-message'+(card.stale?' is-stale':'');heading.className='can-live-message-heading';h.textContent=tr(card.title);badge.textContent=tr(!card.observed?'Нет данных':card.stale?'Последние полученные данные':'Текущие данные');heading.append(h,badge);article.append(heading);
         for(const f of fields){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd'),star=document.createElement('button'),label=document.createElement('span'),key=card.id+':'+f.key;
           row.className='can-live-field';star.type='button';star.className='favorite-toggle';star.textContent=favorites.has(key)?'★':'☆';star.setAttribute('aria-label',tr('В избранное')+': '+tr(f.name));star.onclick=()=>ByPreferences.toggleFavorite(key);label.textContent=tr(f.name);dt.append(star,label);dd.textContent=f.note?tr('Нет показания'):f.value+(f.unit?' '+tr(f.unit):'');row.append(dt,dd);dl.append(row);}
         article.append(dl);grid.append(article);
