@@ -1,0 +1,28 @@
+'use strict';
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+(async()=>{
+ const saved=new Map();const c=vm.createContext({sessionStorage:{setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)},navigator:{},document:{body:{inert:false}},setInterval,clearInterval});vm.runInContext(fs.readFileSync('web/auto-update.js','utf8'),c);
+ let finishClose;const worker={},replies=[];
+ const r={ready:true,device:{can:'stopped'},transport:{connected:true,close:()=>new Promise(resolve=>finishClose=resolve)},writes:Promise.resolve()};
+ const u=new c.ByAutoUpdate.AutoUpdate(r,{serviceWorker:{}});u.registration={waiting:worker};
+ const event=type=>({source:worker,data:{type:'citybike-update-'+type,token:'A'},ports:[{postMessage:message=>replies.push(message)}]});
+ await u.message(event('prepare'));assert(r.updateHold);assert(c.document.body.inert);
+ const commit=u.message(event('commit'));await new Promise(setImmediate);assert.equal(typeof finishClose,'function');
+ await u.message(event('cancel'));assert(r.updateHold,'Worker timeout must not reopen controls while native port close is pending');assert(c.document.body.inert);assert.equal(u.hold,'A');
+ finishClose();await commit;assert(!r.updateHold);assert(!c.document.body.inert);assert.equal(u.hold,null);
+ c.BySpardProbe={last:{upload_status:'failed'},snapshot:()=>({cache_saved:false})};assert(u.busy(),'An uncached unuploaded capture must survive');
+ c.BySpardProbe.snapshot=()=>({cache_saved:true});assert(!u.busy());
+ c.ByBleRemote={busy:true};assert(u.busy(),'BLE connection or unsaved log blocks activation');c.ByBleRemote.busy=false;assert(!u.busy());
+ c.ByRemoteConsole={busy:true};assert(u.busy(),'Pending server command must settle before reload');
+ c.ByRemoteConsole.busy=false;
+ r.device={can:'running',boot:'1234ABCD',ap_mac:'02:00:00:00:00:01'};r.liveViewing=true;r.liveRemote=false;
+ let stopped=0;r.liveStop=async()=>{stopped++;r.device.can='stopped';r.liveViewing=false;};
+ await u.message(event('prepare'));assert.equal(stopped,1);assert(r.updateHold);assert(saved.has('citybike-update-live-resume'));assert.equal(replies.at(-1).ok,true);
+ await u.message(event('cancel'));assert(!r.updateHold);assert.equal(r.updateResume.boot,'1234ABCD');assert(!saved.size);
+ await u.message(event('prepare'));assert(saved.has('citybike-update-live-resume'),'Retry preserves pending resume before the next runtime tick');assert.equal(r.updateResume,null);await u.message(event('cancel'));
+ r.device.can='running';r.liveViewing=true;r.recorder={};await u.message(event('prepare'));assert.equal(stopped,1);assert.equal(replies.at(-1).ok,false);r.recorder=null;
+ c.ByEspRemote={busy:true};await u.message(event('prepare'));assert.equal(stopped,1);assert.equal(replies.at(-1).ok,false);c.ByEspRemote.busy=false;
+ let finishStop;r.liveStop=()=>new Promise(resolve=>finishStop=()=>{r.device.can='stopped';r.liveViewing=false;resolve();});
+ const prepare=u.message(event('prepare'));await new Promise(setImmediate);await u.message(event('cancel'));assert(r.updateHold,'Cancel waits for STOP to finish');finishStop();await prepare;assert(!r.updateHold);
+ console.log('PASS update hold: delayed USB close retains barrier after cancellation, unsaved capture retained, pending remote POST blocks activation');
+})().catch(e=>{console.error(e);process.exitCode=1;});

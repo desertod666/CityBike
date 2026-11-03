@@ -1,0 +1,2 @@
+platformio==6.1.18
+pyelftools==0.32

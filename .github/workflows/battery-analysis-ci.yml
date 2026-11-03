@@ -1,0 +1,30 @@
+name: Test offline battery conversation analysis
+on:
+  pull_request:
+    paths:
+      - pc/battery_conversations.py
+      - pc/test_battery_conversations.py
+      - .github/workflows/battery-analysis-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - pc/battery_conversations.py
+      - pc/test_battery_conversations.py
+      - .github/workflows/battery-analysis-ci.yml
+permissions:
+  contents: read
+jobs:
+  offline-analysis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.11'
+      - name: Verify pairing, scope boundaries, cell sets and read-only CLI
+        env:
+          PYTHONPATH: pc
+        run: python -m unittest pc/test_battery_conversations.py

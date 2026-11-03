@@ -1,0 +1,8 @@
+#pragma once
+#define GPIO_ENABLE_REG 0
+#define GPIO_OUT_REG 1
+#define GPIO_FUNC4_OUT_SEL_CFG_REG 2
+#define GPIO_FUNC4_OUT_SEL_M 255
+#define GPIO_FUNC4_OUT_SEL_S 0
+#define GPIO_FUNC4_OUT_INV_SEL_M (1U<<8)
+#define GPIO_FUNC4_OUT_INV_SEL_S 8

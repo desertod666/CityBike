@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Обновление ESP32 · BySykkel</title><script src="/preferences.js"></script><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/appearance.css"><script defer src="/i18n.js"></script><script defer src="/store.js"></script><script defer src="/transport.js"></script><script defer src="/monitor.js"></script><script defer src="/support.js"></script><script defer src="/tuning.js"></script><script defer src="/browser.js"></script><script defer src="/flash-core.js"></script><script defer src="/remote-flash.js"></script><script defer src="/auto-update.js"></script><script defer src="/flash-page.js"></script></head>
+<body class="browser flash-page"><main>
+<header class="topbar"><a class="button ghost" id="backLink" href="/">← Вернуться к диагностике</a><span class="chip">CHROME · USB</span><div class="view-controls"><button class="button ghost theme-toggle" type="button" data-theme-control aria-pressed="false" aria-label="Переключить дневной и ночной режим"><span class="theme-day" aria-hidden="true">☾</span><span class="theme-night" aria-hidden="true">☀</span></button><label><span>Язык</span><select data-language-control aria-label="Язык"><option value="en">English</option><option value="ru">Русский</option><option value="nb">Norsk bokmål</option></select></label></div></header>
+<section class="hero"><div><span class="eyebrow">BAFANGREADER · ESP32-C3</span><h1>Обновление ридера.<br>Прямо в браузере.</h1><p>Без EXE и установки программ. Chrome получает прошивку с нашего сервера и записывает её через USB в ESP32.</p></div></section>
+<section class="card"><div class="card-heading"><h2>Прошивка ридера</h2><span id="version" class="tag">Загрузка…</span></div>
+<p>Останови запись CAN и отсоедини CANH/CANL от велосипеда. Оставь ESP32 подключённой к USB. Закрой подключения к её COM-порту в других вкладках.</p>
+<label class="share-toggle"><input type="checkbox" id="detached"> CANH/CANL отсоединены от велосипеда</label>
+<p id="state" role="status" class="notice">Проверяем файлы прошивки…</p>
+<div class="button-group"><button class="button accent" id="selectPort" disabled>Выбрать ESP32 / COM</button><button class="button dark" id="install" disabled>Прошить ESP32</button></div>
+<p id="deviceInfo" class="subtle">Плата ещё не выбрана. Выбор устройства сам по себе не записывает прошивку.</p>
+<progress id="progress" max="100" value="0" aria-label="Ход прошивки"></progress>
+<p class="subtle">Записывается только ESP32-ридер. Настройки Bafang не меняются. Полное стирание памяти отключено; настройки ридера сохраняются.</p>
+<details><summary>Если загрузчик не подключается</summary><p>Закрой соединение с COM в остальных вкладках. Если автоматический вход не сработал: удерживай BOOT, нажми и отпусти RESET, затем отпусти BOOT и повтори выбор порта. После записи нажми RESET, если плата сама не перезапустилась.</p></details>
+<pre id="log" aria-label="Журнал обновления"></pre>
+</section></main></body></html>
