@@ -76,4 +76,5 @@ with tempfile.TemporaryDirectory(prefix="reader-native-") as temporary:
             elif line:
                 print(line)
 subprocess.run([sys.executable, str(ROOT / 'scripts/test_web_status.py')], check=True)
+subprocess.run(['node', str(ROOT / 'scripts/test_offline_portal.cjs')], check=True)
 print("PASS firmware native suite: all emitted sample JSON parses, STOP status and final_seq agree")

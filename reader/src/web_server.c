@@ -27,92 +27,37 @@
 #define REPO "desertod666/CityBike"
 #define DOWNLOAD "https://github.com/" REPO "/releases/latest/download/BafangReader-Windows-x64.zip"
 #define RELEASE "https://github.com/" REPO "/releases/latest"
-extern const char spard_can_js_start[] asm("_binary_spard_can_js_start");
-extern const char spard_can_js_end[] asm("_binary_spard_can_js_end");
-extern const char battery_query_js_start[] asm("_binary_battery_query_js_start");
-extern const char battery_query_js_end[] asm("_binary_battery_query_js_end");
-extern const char esp_battery_js_start[] asm("_binary_esp_battery_js_start");
-extern const char esp_battery_js_end[] asm("_binary_esp_battery_js_end");
-extern const char preferences_js_start[] asm("_binary_preferences_js_start");
-extern const char preferences_js_end[] asm("_binary_preferences_js_end");
-extern const char i18n_js_start[] asm("_binary_i18n_js_start");
-extern const char i18n_js_end[] asm("_binary_i18n_js_end");
-extern const char appearance_css_start[] asm("_binary_appearance_css_start");
-extern const char appearance_css_end[] asm("_binary_appearance_css_end");
-extern const char bafang_battery_js_start[] asm("_binary_bafang_battery_js_start");
-extern const char bafang_battery_js_end[] asm("_binary_bafang_battery_js_end");
-extern const char reader_selftest_js_start[] asm("_binary_reader_selftest_js_start");
-extern const char reader_selftest_js_end[] asm("_binary_reader_selftest_js_end");
 static reader_network_t net;
 static portMUX_TYPE net_lock = portMUX_INITIALIZER_UNLOCKED;
 static char control_owner[33];
 static int64_t control_until;
 
-extern const char tuning_start[] asm("_binary_tuning_js_start");
-extern const char tuning_end[] asm("_binary_tuning_js_end");
-extern const char monitor_start[] asm("_binary_monitor_js_start");
-extern const char monitor_end[] asm("_binary_monitor_js_end");
-extern const char metrics_start[] asm("_binary_metrics_js_start");
-extern const char metrics_end[] asm("_binary_metrics_js_end");
-extern const char flash_core_start[] asm("_binary_flash_core_js_start");
-extern const char flash_core_end[] asm("_binary_flash_core_js_end");
-extern const char remote_flash_start[] asm("_binary_remote_flash_js_start");
-extern const char remote_flash_end[] asm("_binary_remote_flash_js_end");
-extern const char support_start[] asm("_binary_support_js_start");
-extern const char support_end[] asm("_binary_support_js_end");
-extern const char index_start[] asm("_binary_index_html_start");
-extern const char index_end[] asm("_binary_index_html_end");
-extern const char can_live_js_start[] asm("_binary_can_live_js_start");
-extern const char can_live_js_end[] asm("_binary_can_live_js_end");
-extern const char can_live_css_start[] asm("_binary_can_live_css_start");
-extern const char can_live_css_end[] asm("_binary_can_live_css_end");
-extern const char css_start[] asm("_binary_style_css_start");
-extern const char css_end[] asm("_binary_style_css_end");
-extern const char app_start[] asm("_binary_app_js_start");
-extern const char app_end[] asm("_binary_app_js_end");
-extern const char decoder_start[] asm("_binary_decoder_js_start");
-extern const char decoder_end[] asm("_binary_decoder_js_end");
-extern const char reference_start[] asm("_binary_decoder_reference_json_start");
-extern const char reference_end[] asm("_binary_decoder_reference_json_end");
-extern const char profiles_start[] asm("_binary_capture_profiles_json_start");
-extern const char profiles_end[] asm("_binary_capture_profiles_json_end");
-extern const char asset_0_start[] asm("_binary_store_js_start");
-extern const char asset_0_end[] asm("_binary_store_js_end");
-extern const char asset_1_start[] asm("_binary_transport_js_start");
-extern const char asset_1_end[] asm("_binary_transport_js_end");
-extern const char asset_2_start[] asm("_binary_browser_js_start");
-extern const char asset_2_end[] asm("_binary_browser_js_end");
-extern const char asset_3_start[] asm("_binary_archive_worker_js_start");
-extern const char asset_3_end[] asm("_binary_archive_worker_js_end");
-extern const char asset_4_start[] asm("_binary_sw_js_start");
-extern const char asset_4_end[] asm("_binary_sw_js_end");
-extern const char asset_5_start[] asm("_binary_manifest_webmanifest_start");
-extern const char asset_5_end[] asm("_binary_manifest_webmanifest_end");
-extern const char asset_6_start[] asm("_binary_icon_svg_start");
-extern const char asset_6_end[] asm("_binary_icon_svg_end");
+#define PORTAL_ASSETS(X) \
+    X("/", offline_index_html, "text/html; charset=utf-8") \
+    X("/offline.css", offline_css, "text/css; charset=utf-8") \
+    X("/offline.js", offline_js, "application/javascript; charset=utf-8") \
+    X("/offline-i18n.js", offline_i18n_js, "application/javascript; charset=utf-8") \
+    X("/preferences.js", preferences_js, "application/javascript; charset=utf-8") \
+    X("/decoder.js", decoder_js, "application/javascript; charset=utf-8") \
+    X("/decoder_reference.json", decoder_reference_json, "application/json") \
+    X("/bafang-battery.js", bafang_battery_js, "application/javascript; charset=utf-8") \
+    X("/can-live.js", can_live_js, "application/javascript; charset=utf-8") \
+    X("/can-live.css", can_live_css, "text/css; charset=utf-8") \
+    X("/spard-can.js", spard_can_js, "application/javascript; charset=utf-8") \
+    X("/spard-information.js", spard_information_js, "application/javascript; charset=utf-8") \
+    X("/kolumbus-logo.svg", kolumbus_logo_svg, "image/svg+xml") \
+    X("/icon.svg", icon_svg, "image/svg+xml")
+#define DECLARE_ASSET(path, symbol, mime) \
+    extern const char symbol##_start[] asm("_binary_" #symbol "_start"); \
+    extern const char symbol##_end[] asm("_binary_" #symbol "_end");
+PORTAL_ASSETS(DECLARE_ASSET)
+#undef DECLARE_ASSET
 
-extern const char auto_update_start[] asm("_binary_auto_update_js_start");
-extern const char auto_update_end[] asm("_binary_auto_update_js_end");
-extern const char files_start[] asm("_binary_files_js_start");
-extern const char files_end[] asm("_binary_files_js_end");
-extern const char adapter_start[] asm("_binary_adapter_js_start");
-extern const char adapter_end[] asm("_binary_adapter_js_end");
-extern const char spard_probe_start[] asm("_binary_spard_probe_js_start");
-extern const char spard_probe_end[] asm("_binary_spard_probe_js_end");
-extern const char spard_service_start[] asm("_binary_spard_service_js_start");
-extern const char spard_service_end[] asm("_binary_spard_service_js_end");
-extern const char spard_information_start[] asm("_binary_spard_information_js_start");
-extern const char spard_information_end[] asm("_binary_spard_information_js_end");
-extern const char spard_battery_start[] asm("_binary_spard_battery_js_start");
-extern const char spard_battery_end[] asm("_binary_spard_battery_js_end");
+typedef struct {const char *path, *start, *end, *type;} portal_asset_t;
+#define ASSET_ENTRY(path, symbol, mime) {path, symbol##_start, symbol##_end, mime},
+static const portal_asset_t portal_assets[] = {PORTAL_ASSETS(ASSET_ENTRY)};
+#undef ASSET_ENTRY
 
-extern const char remote_console_js_start[] asm("_binary_remote_console_js_start");
-extern const char remote_console_js_end[] asm("_binary_remote_console_js_end");
-extern const char remote_console_css_start[] asm("_binary_remote_console_css_start");
-extern const char remote_console_css_end[] asm("_binary_remote_console_css_end");
-
-extern const char esp_remote_start[] asm("_binary_esp_remote_js_start");
-extern const char esp_remote_end[] asm("_binary_esp_remote_js_end");
 void web_network_snapshot(reader_network_t *out) {
     portENTER_CRITICAL(&net_lock); *out = net; portEXIT_CRITICAL(&net_lock);
 }
@@ -227,9 +172,9 @@ static esp_err_t health_handler(httpd_req_t *req) {
     char json[384];
     int used = snprintf(json, sizeof(json),
         "{\"product\":\"BafangReader\",\"version\":\"%s\",\"boot\":\"%s\","
-        "\"ip\":\"192.168.4.1\",\"ssid\":\"%s\",\"wifi_ready\":%s,\"wifi_clients\":%d,"
+        "\"ip\":\"192.168.4.1\",\"ssid\":\"%s\",\"ap_mac\":\"%s\",\"wifi_ready\":%s,\"wifi_clients\":%d,"
         "\"heap_free\":%u,\"heap_minimum\":%u,\"heap_largest\":%u}",
-        esp_app_get_description()->version, reader_boot(), n.ssid, n.ready ? "true" : "false", n.clients,
+        esp_app_get_description()->version, reader_boot(), n.ssid, n.mac, n.ready ? "true" : "false", n.clients,
         (unsigned)esp_get_free_heap_size(), (unsigned)esp_get_minimum_free_heap_size(),
         (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
     if (used < 0 || (size_t)used >= sizeof(json)) return ESP_FAIL;
@@ -387,49 +332,15 @@ static esp_err_t mark_handler(httpd_req_t *req) {
 extern const char kolumbus_logo_start[] asm("_binary_kolumbus_logo_svg_start");
 extern const char kolumbus_logo_end[] asm("_binary_kolumbus_logo_svg_end");
 static esp_err_t asset_handler(httpd_req_t *req) {
-    const char *start = index_start, *end = index_end, *type = "text/html; charset=utf-8";
-    if (!strcmp(req->uri, "/esp-remote.js")) {start=esp_remote_start;end=esp_remote_end;type="application/javascript";}
-    if (!strcmp(req->uri, "/spard-can.js")) { start = spard_can_js_start; end = spard_can_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/battery-query.js")) { start = battery_query_js_start; end = battery_query_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/esp-battery.js")) { start = esp_battery_js_start; end = esp_battery_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/preferences.js")) { start = preferences_js_start; end = preferences_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/i18n.js")) { start = i18n_js_start; end = i18n_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/appearance.css")) { start = appearance_css_start; end = appearance_css_end; type = "text/css"; }
-    if (!strcmp(req->uri, "/bafang-battery.js")) { start = bafang_battery_js_start; end = bafang_battery_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/reader-selftest.js")) { start = reader_selftest_js_start; end = reader_selftest_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/can-live.js")) { start = can_live_js_start; end = can_live_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/can-live.css")) { start = can_live_css_start; end = can_live_css_end; type = "text/css; charset=utf-8"; }
-    if (!strcmp(req->uri, "/style.css")) { start = css_start; end = css_end; type = "text/css; charset=utf-8"; }
-    else if (!strcmp(req->uri, "/app.js")) { start = app_start; end = app_end; type = "application/javascript; charset=utf-8"; }
-    else if (!strcmp(req->uri, "/decoder.js")) { start = decoder_start; end = decoder_end; type = "application/javascript; charset=utf-8"; }
-    else if (!strcmp(req->uri, "/decoder_reference.json")) { start = reference_start; end = reference_end; type = "application/json"; }
-    else if (!strcmp(req->uri, "/capture_profiles.json")) { start = profiles_start; end = profiles_end; type = "application/json"; }
-    if (!strcmp(req->uri, "/store.js")) { start = asset_0_start; end = asset_0_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/transport.js")) { start = asset_1_start; end = asset_1_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/monitor.js")) { start = monitor_start; end = monitor_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/tuning.js")) { start = tuning_start; end = tuning_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/metrics.js")) { start = metrics_start; end = metrics_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/flash-core.js")) { start = flash_core_start; end = flash_core_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/remote-flash.js")) { start = remote_flash_start; end = remote_flash_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/support.js")) { start = support_start; end = support_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/browser.js")) { start = asset_2_start; end = asset_2_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/archive-worker.js")) { start = asset_3_start; end = asset_3_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/sw.js")) { start = asset_4_start; end = asset_4_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/manifest.webmanifest")) { start = asset_5_start; end = asset_5_end; type = "application/manifest+json"; }
-    if (!strcmp(req->uri, "/kolumbus-logo.svg")) { start = kolumbus_logo_start; end = kolumbus_logo_end; type = "image/svg+xml"; }
-    if (!strcmp(req->uri, "/icon.svg")) { start = asset_6_start; end = asset_6_end; type = "image/svg+xml"; }
-    if (!strcmp(req->uri, "/auto-update.js")) { start = auto_update_start; end = auto_update_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/files.js")) { start = files_start; end = files_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/adapter.js")) { start = adapter_start; end = adapter_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/spard-probe.js")) { start = spard_probe_start; end = spard_probe_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/spard-service.js")) { start = spard_service_start; end = spard_service_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/spard-information.js")) { start = spard_information_start; end = spard_information_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/spard-battery.js")) { start = spard_battery_start; end = spard_battery_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/remote-console.js")) { start = remote_console_js_start; end = remote_console_js_end; type = "application/javascript"; }
-    if (!strcmp(req->uri, "/remote-console.css")) { start = remote_console_css_start; end = remote_console_css_end; type = "text/css"; }
-    httpd_resp_set_type(req, type); httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
-    httpd_resp_set_hdr(req, "X-Content-Type-Options", "nosniff");
-    return httpd_resp_send(req, start, end - start);
+    for (size_t i = 0; i < sizeof(portal_assets)/sizeof(portal_assets[0]); i++) {
+        const portal_asset_t *asset = &portal_assets[i];
+        if (strcmp(req->uri, asset->path)) continue;
+        httpd_resp_set_type(req, asset->type);
+        httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+        httpd_resp_set_hdr(req, "X-Content-Type-Options", "nosniff");
+        return httpd_resp_send(req, asset->start, asset->end - asset->start);
+    }
+    return httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "asset not found");
 }
 
 static esp_err_t not_found(httpd_req_t *req, httpd_err_code_t error) {
@@ -492,9 +403,8 @@ esp_err_t web_start(void) {
     http.max_uri_handlers = 52; http.max_open_sockets = 5; http.lru_purge_enable = true;
     http.recv_wait_timeout = 2; http.send_wait_timeout = 2;
     httpd_handle_t server = NULL; r = httpd_start(&server, &http); if (r != ESP_OK) return r;
-    const char *paths[] = { "/esp-remote.js", "/reader-selftest.js", "/preferences.js", "/i18n.js", "/appearance.css", "/bafang-battery.js","/spard-can.js","/battery-query.js","/esp-battery.js","/can-live.js","/can-live.css","/remote-console.js","/remote-console.css","/auto-update.js","/files.js","/adapter.js","/spard-probe.js","/spard-information.js","/spard-service.js","/spard-battery.js","/", "/style.css", "/app.js", "/decoder.js", "/decoder_reference.json", "/capture_profiles.json","/store.js","/transport.js","/monitor.js","/tuning.js","/metrics.js","/support.js","/flash-core.js","/remote-flash.js","/browser.js","/archive-worker.js","/sw.js","/manifest.webmanifest","/icon.svg", "/kolumbus-logo.svg"};
-    for (int i = 0; i < sizeof(paths)/sizeof(paths[0]); i++) {
-        httpd_uri_t uri = {.uri = paths[i], .method = HTTP_GET, .handler = asset_handler};
+    for (size_t i = 0; i < sizeof(portal_assets)/sizeof(portal_assets[0]); i++) {
+        httpd_uri_t uri = {.uri = portal_assets[i].path, .method = HTTP_GET, .handler = asset_handler};
         ESP_ERROR_CHECK(httpd_register_uri_handler(server, &uri));
     }
     httpd_uri_t endpoints[] = {

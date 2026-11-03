@@ -1,0 +1,22 @@
+Ридер ESP32	ESP32 reader	ESP32-leser
+Версия	Version	Versjon
+Свободная память	Free memory	Ledig minne
+Адрес	Address	Adresse
+Подключено к ридеру	Connected to reader	Koblet til leseren
+Нет связи с ридером	No connection to reader	Ingen forbindelse til leseren
+ESP32 · напрямую по Wi-Fi	ESP32 · direct Wi-Fi connection	ESP32 · direkte Wi-Fi-forbindelse
+Последние CAN-кадры	Latest CAN frames	Siste CAN-meldinger
+Пропуски просмотра:	Preview gaps:	Hull i visningen:
+Настройки Wi-Fi	Wi-Fi settings	Wi-Fi-innstillinger
+Автономная панель · без интернета	Local dashboard · no internet needed	Lokalt panel · uten internett
+Состояние ридера	Reader status	Leserstatus
+Неверный ответ ридера	Invalid reader response	Ugyldig svar fra leseren
+Операция уже выполняется	An operation is already running	En operasjon pågår allerede
+CAN уже читается	CAN is already being read	CAN leses allerede
+Чтение запущено другим подключением	Reading was started by another connection	Avlesningen ble startet av en annen forbindelse
+Недоступная операция	Operation unavailable	Operasjonen er ikke tilgjengelig
+Проверьте имя сети и канал	Check the network name and channel	Kontroller nettverksnavn og kanal
+Сначала остановите чтение CAN	Stop CAN reading first	Stopp CAN-avlesningen først
+Последние полученные данные	Last received readings	Sist mottatte måleverdier
+Сохранено. Применится после перезапуска питания.	Saved. Applies after restarting the reader.	Lagret. Tas i bruk etter omstart av leseren.
+Изменения применятся после перезапуска питания. CAN должен быть остановлен.	Changes apply after restarting the reader. CAN must be stopped.	Endringer tas i bruk etter omstart av leseren. CAN må være stoppet.

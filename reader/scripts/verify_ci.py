@@ -9,9 +9,23 @@ def sha(data):return hashlib.sha256(data).hexdigest()
 def main():
  p=argparse.ArgumentParser();p.add_argument('--source-only',action='store_true');args=p.parse_args()
  manifest=json.loads((ROOT/'SOURCE_MANIFEST.json').read_text())
+ audit=ROOT/'.source-verified.json'
  for name,meta in manifest['files'].items():
+  # ESP-IDF rewrites this generated configuration during CMake. Its seed is
+  # verified before compilation; all other inputs remain immutable afterwards.
+  if name=='sdkconfig.esp32c3' and not args.source_only:continue
   path=ROOT/name;assert path.is_file() and sha(path.read_bytes())==meta['sha256'],name
- if args.source_only:print('PASS source manifest:',len(manifest['files']),'files');return
+ if args.source_only:
+  audit.write_text(json.dumps({'manifest_sha256':sha((ROOT/'SOURCE_MANIFEST.json').read_bytes()),'sdkconfig_seed_sha256':manifest['files']['sdkconfig.esp32c3']['sha256']}))
+  print('PASS source manifest:',len(manifest['files']),'files');return
+ before=json.loads(audit.read_text());assert before['manifest_sha256']==sha((ROOT/'SOURCE_MANIFEST.json').read_bytes()) and before['sdkconfig_seed_sha256']==manifest['files']['sdkconfig.esp32c3']['sha256']
+ config=(ROOT/'sdkconfig.esp32c3').read_text();effective={}
+ for line in (ROOT/'sdkconfig.defaults').read_text().splitlines():
+  if not line.startswith('CONFIG_') or '=' not in line:continue
+  name,value=line.split('=',1);actual=re.search(r'^'+re.escape(name)+r'=(.*)$',config,re.M)
+  expected_disabled=value=='n'
+  assert (not actual or actual[1]=='n') if expected_disabled else (actual and actual[1]==value),name
+  effective[name]=value
  from elftools.elf.elffile import ELFFile
  build=ROOT/'.pio/build/esp32c3';artifact=ROOT/'ci-artifacts';artifact.mkdir(exist_ok=True)
  version=re.search(r'#define VERSION "([^"]+)"',(ROOT/'src/main.c').read_text())[1]
@@ -29,7 +43,7 @@ def main():
  files={}
  for name in ['firmware.bin','bootloader.bin','partitions.bin']:
   shutil.copy2(build/name,artifact/name);data=(artifact/name).read_bytes();files[name]={'size':len(data),'sha256':sha(data)}
- proof={'version':version,'commit':os.environ.get('GITHUB_SHA'),'runner_environment':os.environ.get('RUNNER_ENVIRONMENT'),'source_manifest_sha256':sha((ROOT/'SOURCE_MANIFEST.json').read_bytes()),'files':files,'embedded_assets':embedded,'observed_HAL_only':True,'device_access':False,'server_deployment':False}
+ proof={'version':version,'commit':os.environ.get('GITHUB_SHA'),'runner_environment':os.environ.get('RUNNER_ENVIRONMENT'),'source_manifest_sha256':sha((ROOT/'SOURCE_MANIFEST.json').read_bytes()),'sdkconfig_effective_sha256':sha((ROOT/'sdkconfig.esp32c3').read_bytes()),'sdkconfig_effective':effective,'files':files,'embedded_assets':embedded,'observed_HAL_only':True,'device_access':False,'server_deployment':False}
  (artifact/'build-proof.json').write_text(json.dumps(proof,indent=2)+'\n')
  print('PASS firmware',version,len(app),'bytes;',len(embedded),'actual ELF portal assets match')
 if __name__=='__main__':main()

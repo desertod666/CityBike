@@ -11,6 +11,7 @@ def main():
     subprocess.run([sys.executable,'scripts/sync_reader_web.py','--check'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'reader/scripts/verify_ci.py','--source-only'],cwd=ROOT,check=True)
     if args.browser:
+        subprocess.run(['node','reader/scripts/test_offline_portal_browser.cjs'],cwd=ROOT,check=True)
         for name in ('auto_update','spard_service'):
             subprocess.run(['node',f'scripts/test_{name}_browser.cjs'],cwd=ROOT,check=True)
 if __name__=='__main__':main()

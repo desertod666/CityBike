@@ -16,8 +16,8 @@
       "sha256": "8555b094067798f52d3ee9c2435a974c19cf7306f96e325fc0b87d7f2709dbd1"
     },
     "platformio.ini": {
-      "size": 1317,
-      "sha256": "472754bdef4272b0094412db4296bcb5ef6b7cfd76d3a8d5bc30fcb3c2e08034"
+      "size": 756,
+      "sha256": "1625d18a7fe899d3a66163a3bb503d7e5fb5652426c177ea41f78adcce04a03c"
     },
     "requirements-ci.txt": {
       "size": 36,
@@ -200,8 +200,8 @@
       "sha256": "eb8bbe317a0aa91d7662d3c8e57482cbfd5143c5c74885c4f62826d353a45f95"
     },
     "scripts/test_firmware_native.py": {
-      "size": 5069,
-      "sha256": "c785f7f09508f1c416286a0662d2a5af76dc4cc66a181065b44d88d6a0dbd4c7"
+      "size": 5153,
+      "sha256": "621dabd9f3c44a73f3b21426416873f27449bc3f1332d69b095d78232d10051f"
     },
     "scripts/test_fixed_receive.c": {
       "size": 1170,
@@ -248,8 +248,8 @@
       "sha256": "93359197bf97762f32f5d71c8b3269ebf2091057241398d28c1bbbf88d5e6c87"
     },
     "scripts/verify_ci.py": {
-      "size": 2676,
-      "sha256": "a4906cb058abef6f8c5d83d8f5eb8484a26aeb013e6cd7342a0a1193dc3bf1d9"
+      "size": 3859,
+      "sha256": "8305050deeee17778b9834af327a54ce266d1f649e52889106b7d319fd19cd51"
     },
     "sdkconfig.defaults": {
       "size": 1407,
@@ -260,8 +260,8 @@
       "sha256": "04772a3d82afc13042e5ca3d11e17c55b700c8b95a83b9b5de5b88a6acf100b7"
     },
     "src/CMakeLists.txt": {
-      "size": 1699,
-      "sha256": "d4d33d31d546b9281e6cc446f6372e80b51d901141c968a273c80b97ea107073"
+      "size": 1114,
+      "sha256": "886c425f713cdb83871b383d22ec43fc1c255cd79334af30fd954a23d827b893"
     },
     "src/ESPRESSIF_HAL_LICENSE.txt": {
       "size": 11358,
@@ -360,8 +360,8 @@
       "sha256": "14a9a39e93a3c25692612284dd40e3db144f1c56f427b26b4824afbd033bff74"
     },
     "src/web_server.c": {
-      "size": 32848,
-      "sha256": "b4e9c4700dbbf1f933bbcb47bd4bbea09837166cfa6e0c72161b3fae852a61df"
+      "size": 23371,
+      "sha256": "f5bc389a7daf1f5a70168cf04bc9a490f64957fc6ecee345f98f514725094a53"
     },
     "src/web_server.h": {
       "size": 421,
@@ -562,6 +562,34 @@
     "scripts/test_web_status.py": {
       "size": 4358,
       "sha256": "03c6a7465dfc0eb1bc3bc99bb96fae620fc4c8e7b534dfac490bd5a58f848ed5"
+    },
+    "web/offline-index.html": {
+      "size": 4289,
+      "sha256": "a80bc2cf62ab97efb6c37c3242c0965f3849eb46d8480d58cab3f943cda7140f"
+    },
+    "web/offline.css": {
+      "size": 2047,
+      "sha256": "7ca907dc0447f1c347e9160f335dcb490ce269e33152a48ff6a5a14fae9c562a"
+    },
+    "web/offline.js": {
+      "size": 12578,
+      "sha256": "c8ccc803e6f46402458efb6f81c8a844849a5bf2b2f0135e0bfe6009207a8f9b"
+    },
+    "web/offline-i18n.js": {
+      "size": 22220,
+      "sha256": "92afc480923dd1b46a665e2702544d59ca07206fd9c381bb33b260ad64d46dcb"
+    },
+    "portal-translations.tsv": {
+      "size": 2119,
+      "sha256": "46c0cf2aad6fc7892562a888bbd197d19cd0a14732be85460d8beacd6f42d98f"
+    },
+    "scripts/test_offline_portal.cjs": {
+      "size": 4699,
+      "sha256": "edaca5e43af880093230a51674493409fe0398db60093b8ebfd64841cca1f778"
+    },
+    "scripts/test_offline_portal_browser.cjs": {
+      "size": 6516,
+      "sha256": "9f3cfe22a429779c90a125e3b45ca1727fea1f8c6b169b24a75e52f4e8589b9f"
     }
   }
 }
