@@ -253,11 +253,11 @@
     },
     "sdkconfig.defaults": {
       "size": 1407,
-      "sha256": "e9b5d4857a6bee741a6fa3b456e5bab4955553815204f5affb3023d8a03232e1"
+      "sha256": "f9666c17b1563f4a764b76894c9e4515357a35f084bf1927fec5af0c565a4cb8"
     },
     "sdkconfig.esp32c3": {
       "size": 67382,
-      "sha256": "04772a3d82afc13042e5ca3d11e17c55b700c8b95a83b9b5de5b88a6acf100b7"
+      "sha256": "cb706b8b405260cb8f0ad00cd983d36682987ccab10331f6e7375b5c6343460f"
     },
     "src/CMakeLists.txt": {
       "size": 1114,
